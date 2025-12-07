@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Daresoft.Core.Models
 {
-    public class ChangePasswordModel
+    public class UpdatePasswordModel
     {
         public string UserName { get; set; }
         public string CurrentPassword { get; set; }

@@ -9,6 +9,6 @@ namespace Daresoft.Core.Services
     {
         Task<int> ValidatePasswordAsync(int userId, string password);
         Task<int> ChangePasswordAsync(int userId, string newPassword);
-        Task<int> SignInRegistration(int idUsuario);
+        Task<int> SignInRegistration(int idUsuario, string userName);
     }
 }

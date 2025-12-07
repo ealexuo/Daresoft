@@ -65,7 +65,7 @@ namespace Daresoft.Core.Services
             return 1;
         }
 
-        public async Task<int> SignInRegistration(int userId)
+        public async Task<int> SignInRegistration(int userId, string username)
         {
             //DateTime fechaRegistro = UtilidadesServicio.FechaActualUtc;
             //return await _authenticationData.RegistrarLogeo(idEntidad, idUsuario, fechaRegistro);
