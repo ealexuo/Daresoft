@@ -42,7 +42,7 @@ namespace WebApi.Controllers
 
                 if (user != null)
                 {
-                    checkPasswordResult = await _authenticationService.ValidatePasswordAsync(user.Id, signin.Password);
+                    checkPasswordResult = await _authenticationService.ValidatePasswordAsync(user, signin.Password);
                 }
 
                 if (user == null || checkPasswordResult == PasswordValidationTypes.Invalid)

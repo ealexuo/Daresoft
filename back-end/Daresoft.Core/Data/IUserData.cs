@@ -7,11 +7,11 @@ namespace Daresoft.Core.Data
 {
     public interface IUserData
     {
-        Task<UserModel> GetByUserNameAsync(string userName);        
-        Task<UserModel> GetByIdAsync(int userId);
-        Task<List<UserModel>> GetAllAsync(int offset, int fetch, string searchString);
-        Task<int> CreateAsync(UserModel user, string password, DateTime createdDate, int createdByUserId);
-        Task<int> EditAsync(UserModel user, DateTime createdDate);
+        Task<UserProfileModel> GetByUserNameAsync(string userName);        
+        Task<UserProfileModel> GetByIdAsync(int userId);
+        Task<List<UserProfileModel>> GetAllAsync(int offset, int fetch, string searchString);
+        Task<int> CreateAsync(UserProfileModel user, string password, DateTime createdDate, int createdByUserId);
+        Task<int> EditAsync(UserProfileModel user, DateTime createdDate);
         Task<bool> DeleteAsync(int idEntidad, int idUsuario);
     }
 }

@@ -28,28 +28,17 @@ namespace Daresoft.Core.Services
             //_inhabilitacionServicio = inhabilitacionServicio;
         }
 
-        public async Task<UserModel> GetByUserNameAsync(string userName)
+        public async Task<UserProfileModel> GetByUserNameAsync(string userName)
         {
-            //string correoElectronico = "";
-            //string identificacionPersonal = "";
-
-            //Regex regexCorreo = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
-            //Match match = regexCorreo.Match(nombreUsuario);
-
-            //if (match.Success)
-            //    correoElectronico = nombreUsuario;
-            //else
-            //    identificacionPersonal = nombreUsuario;
-
             return await _userData.GetByUserNameAsync(userName);
         }
 
-        public async Task<UserModel> GetByIdAsync(int userId)
+        public async Task<UserProfileModel> GetByIdAsync(int userId)
         {
             return await _userData.GetByIdAsync(userId);
         }
 
-        public async Task<int> CreateAsync(UserModel usuario, int createdByUserId)
+        public async Task<int> CreateAsync(UserProfileModel usuario, int createdByUserId)
         {
             //var usuarioExistente = await _datos.ObtenerPorNombreUsuarioAsync(usuario.NoIdentificacionPersonal, usuario.CorreoElectronico);
 
@@ -75,13 +64,13 @@ namespace Daresoft.Core.Services
             return 1;
         }
 
-        public async Task<int> UpdateAsync(UserModel usuario)
+        public async Task<int> UpdateAsync(UserProfileModel usuario)
         {
             // return await _datos.EditarUsuarioAsync(usuario, UtilidadesServicio.FechaActualUtc);
             return 1;
         }
 
-        public async Task<List<UserModel>> GetAllAsync(int offset, int fetch, string searchString)
+        public async Task<List<UserProfileModel>> GetAllAsync(int offset, int fetch, string searchString)
         {
             //var listaUsuarios = await _datos.ObtenerUsuariosAsync(pagina, cantidad, buscarTexto);
 
@@ -101,7 +90,7 @@ namespace Daresoft.Core.Services
             return false;
         }
 
-        public async Task<UserModel> ObtenerUsuarioAsync(int userid)
+        public async Task<UserProfileModel> ObtenerUsuarioAsync(int userid)
         {
             //return await _datos.ObtenerUsuarioAsync(idUsuario);
             return null;

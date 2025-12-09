@@ -4,45 +4,38 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Daresoft.Core.Data;
+using Daresoft.Core.Models;
 using Daresoft.Core.Types;
 
 namespace Daresoft.Core.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly IAuthenticationData _authenticationData;
         private readonly IUserData _userData;
         private readonly IEncryptPasswordService _encryptPasswordService;        
 
-        public AuthenticationService(IAuthenticationData authenticationData, IUserData userData, IEncryptPasswordService encryptPasswordService)
+        public AuthenticationService(IUserData userData, IEncryptPasswordService encryptPasswordService)
         {
-            _authenticationData = authenticationData;
             _userData = userData;
             _encryptPasswordService = encryptPasswordService;
         }
 
-        public async Task<int> ValidatePasswordAsync(int userId, string password)
-        {
-            //var password = await _authenticationData.GetPasswordAsync(userId);
+        public async Task<int> ValidatePasswordAsync(UserProfileModel user, string signInPassword)
+        {                           
+            var isValidPassword = _encryptPasswordService.VerifyHashedPassword(user.PasswordHash, signInPassword);
 
-            //if (datosPassword == null)
-            //    return PasswordValidationType.Invalid;
-
-            //var esPasswordValido = _encryptPasswordService.VerifyHashedPassword(datosPassword.Password, password);
-
-            //if (esPasswordValido && (datosPassword.RequiereCambioPassword))
-            //{
-            //    return ValidaPasswordTipos.ValidoRequiereCambio;
-            //}
-            //else if (esPasswordValido)
-            //{
-            //    return ValidaPasswordTipos.Valido;
-            //}
-            //else
-            //{
-            //    return ValidaPasswordTipos.Invalido;
-            //}
-            return 1;
+            if (isValidPassword && (user.IsPasswordChangeRequired))
+            {
+                return PasswordValidationTypes.ValidRequiereChange;
+            }
+            else if (isValidPassword)
+            {
+                return PasswordValidationTypes.Valid;
+            }
+            else
+            {
+                return PasswordValidationTypes.Invalid;
+            }
         }
 
         public async Task<int> ChangePasswordAsync(int idUsuario, string passwordNuevo)

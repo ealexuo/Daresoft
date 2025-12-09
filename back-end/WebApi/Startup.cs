@@ -18,6 +18,9 @@ using Qfile.Core.Servicios;
 using Qfile.Core.Datos;
 using Qfile.Datos;
 using Exceptionless;
+using Daresoft.Core.Services;
+using Daresoft.Core.Data;
+using Daresoft.Data;
 
 namespace WebApi
 {
@@ -36,7 +39,7 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.Scan(scan => scan
-              .FromAssembliesOf(typeof(ConnectionProviderSQLServer), typeof(UsuarioServicio))
+              .FromAssembliesOf(typeof(Daresoft.Data.ConnectionProviderSQLServer), typeof(UsuarioServicio))
               .AddClasses()
               .AsImplementedInterfaces());
 
@@ -48,9 +51,17 @@ namespace WebApi
             services.AddTransient<IUsuarioServicio, UsuarioServicio>();
             services.AddTransient<ICorreoElectronicoServicio, CorreoElectronicoGmailServicio>();
 
+            services.AddTransient<IAuthenticationService, AuthenticationService>(); // daresoft
+            services.AddTransient<IEncryptPasswordService, EncryptPasswordService>(); // daresoft
+            services.AddTransient<IUserService, UserService>(); // daresoft
+
+
             // datos
             services.AddTransient<ITestDatos, TestDatos>();
             services.AddTransient<IUsuarioDatos, UsuarioDatos>();
+
+            services.AddTransient<IUserData, UserData>(); // daresoft
+
 
             // appSettings
             //services.Configure<ApplicationSettingsModelo>(Configuration.GetSection("ApplicationSettings"));

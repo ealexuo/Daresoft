@@ -1,6 +1,6 @@
 import axiosService from "../axios/axiosService";
 
-const BASE_PATH = "api/Autenticacion/";
+const BASE_PATH = "api/Authentication/";
 
 export const authenticationService = {
 
@@ -10,11 +10,9 @@ export const authenticationService = {
 
   signIn: async(userName: string, password: string): Promise<any> => {    
       const data = {
-        idUsuario: 0,
-        nombreUsuario: userName,
-        password: password,
-        requiereCambioPassword: false
+        userName,
+        password
       }
-      return await axiosService.post<any>(BASE_PATH + 'Login', data);
+      return await axiosService.post<any>(BASE_PATH + 'signin', data);
   }
 };
