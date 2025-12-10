@@ -22,9 +22,9 @@ namespace WebApi.Controllers
     {
         private readonly ApplicationSettingsModel _appSetings;
         private readonly IAuthenticationService _authenticationService;
-        private readonly IUserService _userService;
+        private readonly IUsersService _userService;
 
-        public AuthenticationController(IOptions<ApplicationSettingsModel> appSettings, IAuthenticationService authenticationService, IUserService userService)
+        public AuthenticationController(IOptions<ApplicationSettingsModel> appSettings, IAuthenticationService authenticationService, IUsersService userService)
         {
             _appSetings = appSettings.Value;
             _authenticationService = authenticationService;

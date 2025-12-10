@@ -8,21 +8,21 @@ using System.Threading.Tasks;
 
 namespace Daresoft.Core.Services
 {
-    public class UserService : IUserService
+    public class UsersService : IUsersService
     {
-        private readonly IUserData _userData;
+        private readonly IUsersData _usersData;
         private readonly IEncryptPasswordService _encryptPasswordService;
         //private readonly ICorreoElectronicoServicio _correoElectronicoServicio;
         //private readonly IInhabilitacionServicio _inhabilitacionServicio;
 
-        public UserService(
-            IUserData userData,
+        public UsersService(
+            IUsersData usersData,
             IEncryptPasswordService encryptPasswordService
             //ICorreoElectronicoServicio correoElectronicoServicio,
             //IInhabilitacionServicio inhabilitacionServicio
             )
         {
-            _userData = userData;
+            _usersData = usersData;
             _encryptPasswordService = encryptPasswordService;
             //_correoElectronicoServicio = correoElectronicoServicio;
             //_inhabilitacionServicio = inhabilitacionServicio;
@@ -30,12 +30,12 @@ namespace Daresoft.Core.Services
 
         public async Task<UserProfileModel> GetByUserNameAsync(string userName)
         {
-            return await _userData.GetByUserNameAsync(userName);
+            return await _usersData.GetByUserNameAsync(userName);
         }
 
         public async Task<UserProfileModel> GetByIdAsync(int userId)
         {
-            return await _userData.GetByIdAsync(userId);
+            return await _usersData.GetByIdAsync(userId);
         }
 
         public async Task<int> CreateAsync(UserProfileModel usuario, int createdByUserId)
@@ -70,18 +70,9 @@ namespace Daresoft.Core.Services
             return 1;
         }
 
-        public async Task<List<UserProfileModel>> GetAllAsync(int offset, int fetch, string searchString)
+        public async Task<List<UsersListModel>> GetAllAsync(int offset, int fetch, string searchText)
         {
-            //var listaUsuarios = await _datos.ObtenerUsuariosAsync(pagina, cantidad, buscarTexto);
-
-            //foreach(var usuario in listaUsuarios)
-            //{
-            //    usuario.FechasInhabilitacion = await _inhabilitacionServicio.ObtenerFechasInhabilitacionUsuarioAsync(usuario.IdUsuario);
-            //}
-
-            //return listaUsuarios;
-
-            return null;
+            return await _usersData.GetAllAsync(offset, fetch, searchText);            
         }
 
         public async Task<bool> DeleteAsync(int userId)

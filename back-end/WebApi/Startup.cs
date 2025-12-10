@@ -53,14 +53,14 @@ namespace WebApi
 
             services.AddTransient<IAuthenticationService, AuthenticationService>(); // daresoft
             services.AddTransient<IEncryptPasswordService, EncryptPasswordService>(); // daresoft
-            services.AddTransient<IUserService, UserService>(); // daresoft
+            services.AddTransient<IUsersService, UsersService>(); // daresoft
 
 
             // datos
             services.AddTransient<ITestDatos, TestDatos>();
             services.AddTransient<IUsuarioDatos, UsuarioDatos>();
 
-            services.AddTransient<IUserData, UserData>(); // daresoft
+            services.AddTransient<IUsersData, UsersData>(); // daresoft
 
 
             // appSettings

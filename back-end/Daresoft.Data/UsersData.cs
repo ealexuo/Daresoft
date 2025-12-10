@@ -10,11 +10,11 @@ using System.Data;
 
 namespace Daresoft.Data
 {
-    public class UserData : IUserData
+    public class UsersData : IUsersData
     {
         private readonly IConnectionProvider connectionProvider;
 
-        public UserData(IConnectionProvider connectionProvider)
+        public UsersData(IConnectionProvider connectionProvider)
         {
             this.connectionProvider = connectionProvider;
         }        
@@ -115,9 +115,45 @@ namespace Daresoft.Data
             throw new NotImplementedException();
         }
 
-        public Task<List<UserProfileModel>> GetAllAsync(int offset, int fetch, string searchString)
+        public async Task<List<UsersListModel>> GetAllAsync(int offset, int fetch, string searchText)
         {
-            throw new NotImplementedException();
+            SqlMapper.AddTypeMap(typeof(bool), DbType.Byte);
+
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string sqlQuery = @"
+                SELECT 
+	                usrp.Id
+	                ,usrp.UserName
+	                ,co.Name
+	                ,co.MiddleName
+	                ,co.LastName	
+	                ,co.OtherName
+	                ,usrp.IsInactive
+	                ,usrp.IsDeleted
+                    ,COUNT(*) OVER () TotalCount
+                FROM UserProfile usrp
+                JOIN Contact co on usrp.ContactId = co.Id
+                WHERE @SearchText = '*'
+                    OR usrp.UserName LIKE '%' + @SearchText + '%'
+                    OR CONCAT(co.Name,' ' ,co.MiddleName , ' ' , co.LastName, ' ' , co.OtherName) LIKE '%' + @SearchText + '%'
+                    OR co.WorkEmail LIKE '%'+ @SearchText +'%'                    
+                ORDER BY UPPER(usrp.UserName) 
+                OFFSET (@Offset-1)*@Fetch ROWS
+                FETCH NEXT @Fetch ROWS ONLY";
+
+                if (String.IsNullOrEmpty(searchText))
+                    searchText = "*";
+
+                var result = await connection.QueryAsync<UsersListModel>(sqlQuery, new
+                {
+                    Offest = offset,
+                    Fetch = fetch,
+                    SearchText = searchText
+                });
+
+                return result.ToList();
+            }
         }
 
         public async Task<UserProfileModel> GetByIdAsync(int userId)

@@ -11,10 +11,10 @@ namespace Daresoft.Core.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly IUserData _userData;
+        private readonly IUsersData _userData;
         private readonly IEncryptPasswordService _encryptPasswordService;        
 
-        public AuthenticationService(IUserData userData, IEncryptPasswordService encryptPasswordService)
+        public AuthenticationService(IUsersData userData, IEncryptPasswordService encryptPasswordService)
         {
             _userData = userData;
             _encryptPasswordService = encryptPasswordService;
