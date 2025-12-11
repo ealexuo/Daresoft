@@ -360,7 +360,7 @@ export default function Users() {
               columns={columns}
               rows={rows}
               addActionRoute={"/settings/users/add-user"}
-              addACtionToolTip="Nuevo Usuario"
+              addActionText="Nuevo Usuario"
               currentPage={currentPage}
               rowsPerPage={rowsPerPage}
               totalRows={totalRows}

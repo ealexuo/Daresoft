@@ -227,7 +227,7 @@ export default function Origins() {
               columns={columns}
               rows={rows}
               addActionRoute={"/settings/origins/add-origin"}
-              addACtionToolTip="Nuevo Origen"
+              addActionToolTip="Nuevo Origen"
               currentPage={currentPage}
               rowsPerPage={rowsPerPage}
               totalRows={totalRows}

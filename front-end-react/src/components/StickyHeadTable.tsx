@@ -16,6 +16,7 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Checkbox from '@mui/material/Checkbox';
 import { useNavigate } from 'react-router-dom';
+import { alpha, Button, InputBase, styled } from '@mui/material';
 
 export type ItemActionType = {
   name: string;
@@ -40,7 +41,8 @@ type TableProps<T> = {
   columns: TableColumnType[],
   rows: TableRowsType<T>,
   addActionRoute?: string,
-  addACtionToolTip?: string,  
+  addActionToolTip?: string,  
+  addActionText?: string,
   totalRows: number,
   currentPage: number,
   rowsPerPage: number,
@@ -61,6 +63,47 @@ type TableProps<T> = {
 
 function DebounceTextField({ handleDebounce, debounceTimeout }: any) {
 
+  const Search = styled('div')(({ theme }) => ({
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: alpha(theme.palette.common.black, 0.01),
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.common.black, 0.05),
+    },
+    marginRight: theme.spacing(2),
+    paddingLeft: 0,
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: theme.spacing(0),
+      width: 'auto',
+    },
+  }));
+
+  const SearchIconWrapper = styled('div')(({ theme }) => ({
+    color: 'gray',
+    padding: theme.spacing(0, 2),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }));
+
+  const StyledInputBase = styled(InputBase)(({ theme }) => ({
+    color: 'inherit',
+    '& .MuiInputBase-input': {
+      padding: theme.spacing(1, 1, 1, 0),
+      // vertical padding + font size from searchIcon
+      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+      transition: theme.transitions.create('width'),
+      width: '100%',
+      [theme.breakpoints.up('md')]: {
+        width: '20ch',
+      },
+    },
+  }));
+
   const timerRef = React.useRef<ReturnType<typeof setTimeout>>();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,16 +114,16 @@ function DebounceTextField({ handleDebounce, debounceTimeout }: any) {
   };
 
   return (
-    <Box sx={{ display: "flex", alignItems: "flex-end", width: '100%' }}>
-      <TextField
-        id="input-with-sx"
-        label="Search"
-        variant="standard"
-        sx={{ width: 300 }}
+    <Search>
+      <SearchIconWrapper>
+        <SearchIcon />
+      </SearchIconWrapper>
+      <StyledInputBase
+        placeholder="Buscar…"
+        inputProps={{ 'aria-label': 'buscar' }}
         onChange={handleChange}
       />
-      <SearchIcon sx={{ color: "action.active", mr: 1, my: 0.5 }} />
-    </Box>
+    </Search>
   );
 }
 
@@ -92,7 +135,8 @@ export function StickyHeadTable({
   columns,
   rows,
   addActionRoute,
-  addACtionToolTip,
+  addActionToolTip,
+  addActionText,
   currentPage,
   rowsPerPage,
   totalRows,
@@ -110,34 +154,21 @@ export function StickyHeadTable({
   const navigate = useNavigate();
 
   return (
-    <>      
-      <Toolbar style={{ paddingLeft: "0px" }}>
+    <>
+      <Toolbar style={{ paddingLeft: "0px", justifyContent: hideSearch ? "flex-end" : "space-between" }}> 
         {
-          hideSearch ? (
-            <Box sx={{ 
-              display: "flex", 
-              alignItems: "flex-end", 
-              width: '100%' 
-            }}>              
-            </Box>
-          ) : (
+          hideSearch ? (<></>) : 
+          (
             <DebounceTextField
               handleDebounce={onSearchTextChange}
               debounceTimeout={1000}
             >
             </DebounceTextField>
-          )          
-        }
-        
-        {!addActionRoute ? (
-          <></>
-        ) : (
-          <Tooltip title={addACtionToolTip ? addACtionToolTip : ''}>
-            <Fab size="small" color="primary" aria-label="add">
-              <AddIcon onClick={() => {onAddActionClick(null)}} />
-            </Fab>
-          </Tooltip>
-        )}
+          )
+        }        
+        <Button disableElevation onClick={() => { onAddActionClick(null); }}>
+          <AddIcon fontSize="small" /> {addActionText ? addActionText : 'Add New'}	
+        </Button>
       </Toolbar>
       <TableContainer sx={{ maxHeight: 440 }}>
         <Table stickyHeader size="small" aria-label="sticky table">

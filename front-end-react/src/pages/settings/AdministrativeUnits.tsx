@@ -270,7 +270,7 @@ export default function AdministrativeUnits() {
               columns={columns}
               rows={rows}
               addActionRoute={"/settings/administrariveUnits/add-administrativeUnit"}
-              addACtionToolTip="Nueva Unidad Administrativa"
+              addActionToolTip="Nueva Unidad Administrativa"
               currentPage={currentPage}
               rowsPerPage={rowsPerPage}
               totalRows={totalRows}
