@@ -17,6 +17,7 @@ import moment from 'moment';
 import AlertDialog from '../../components/AlertDialog';
 import ProcessPermissionDialog from '../../dialogs/ProcessPermissionDialog';
 import { User } from '../../types/User';
+import { Tooltip } from '@mui/material';
 
 const columnsInit: TableColumnType[] = [
   { 
@@ -312,12 +313,16 @@ export default function Users() {
   [
     { 
       name: 'edit',
-      icon: <EditIcon />,
+      icon: <Tooltip title="Editar Usuario" arrow placement="top-start">
+              <EditIcon />
+            </Tooltip>,
       callBack: handleSelectedUserEdit, 
     },    
     { 
       name: 'delete',
-      icon: <DeleteIcon />,
+      icon: <Tooltip title="Eliminar Usuario" arrow placement="top-start">
+              <DeleteIcon />
+            </Tooltip>,
       callBack: handleOpenUserDeleteDialog, 
     }
   ]; 
