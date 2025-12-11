@@ -20,11 +20,6 @@ import { User } from '../../types/User';
 
 const columnsInit: TableColumnType[] = [
   { 
-    id: "Id", 
-    label: 'Id', 
-    minWidth: 5,
-  },
-  { 
     id: "UserName", 
     label: 'Nombre de Usuario', 
     minWidth: 50 
@@ -135,7 +130,6 @@ export default function Users() {
 
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
-
   /** Fetch Data Section */
 
   const fetchUsers = useCallback(async (offset: number, fetch: number, searchText: string) => {
@@ -152,7 +146,6 @@ export default function Users() {
 
         response.data.usersList.forEach((item: any) => {
           rowsTemp.push([
-            item.id,
             item.userName,
             item.name,
             item.middleName,
@@ -321,17 +314,7 @@ export default function Users() {
       name: 'edit',
       icon: <EditIcon />,
       callBack: handleSelectedUserEdit, 
-    },
-    { 
-      name: 'disable',
-      icon: <CalendarMonthIcon />,
-      callBack: handleOpenUserDisableDialog, 
-    },
-    { 
-      name: 'roles',
-      icon: <BadgeIcon />,
-      callBack: handleOpenProcessPermissionDialog, 
-    },
+    },    
     { 
       name: 'delete',
       icon: <DeleteIcon />,
@@ -384,30 +367,6 @@ export default function Users() {
           selectedUser = {selectedUser}
           administrativeUnitsList = {null}
           onClose = {handleCloseUserAddEditDialogFromAction}
-        />        
-      </Dialog>
-
-      <Dialog
-        open={openUserDisableDialog}
-        onClose={handleCloseUserDisableDialog}
-        maxWidth={"md"}
-      >
-        <UserDisableDialog 
-          mode = {selectedUser && selectedUser.idUsuario > -1 ? 'edit' : 'add'}
-          selectedUser = {selectedUser}          
-          onClose = {handleCloseUserDisableDialogFromAction}
-        />        
-      </Dialog>
-
-      <Dialog
-        open={openProcessPermissionDialog}
-        onClose={handleCloseProcessPermissionDialog}
-        maxWidth={"md"}
-      >
-        <ProcessPermissionDialog 
-          selectedUser = {selectedUser}
-          processPermissionList = {null}
-          onClose = {handleCloseProcessPermissionDialogFromAction}
         />        
       </Dialog>
 

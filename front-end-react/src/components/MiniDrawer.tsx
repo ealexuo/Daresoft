@@ -107,18 +107,19 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 function Copyright(props: any) {
   return (
     <>
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        {brandName}
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'. '}
-      {'Powered by Daresoft Solutions.'}
-    </Typography>
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-            
-    </Typography>
+      <Typography variant="body2" color="text.secondary" align="center" {...props}>
+        {/* {'Copyright © '}
+        <Link color="inherit" href="https://mui.com/">
+          {brandName}
+        </Link>{' '} */}
+        {'Created by '}
+        <Link color="inherit" href="https://mui.com/">
+          {'Daresoft'}
+        </Link>
+        {' Solutions. '} 
+        {new Date().getFullYear()}
+        {'. '}
+      </Typography>
     </>
     
   );
@@ -335,14 +336,18 @@ export default function MiniDrawer() {
           flexGrow: 1,
           height: "100vh",
           overflow: "auto",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <DrawerHeader/>
         {/* <Stack sx={{ width: "100%" }} spacing={2}>
-            <Alert severity="info">You are currently seeing the development version.</Alert>
+        <Alert severity="info">You are currently seeing the development version.</Alert>
         </Stack> */}
-        <Outlet />
-        <Copyright sx={{ pt: 4 }} />
+        <Box sx={{ flex: 1 }}>
+          <Outlet />
+        </Box>
+        <Copyright sx={{ pt: 4, pb: 2 }} />
       </Box>
     </Box>
   );

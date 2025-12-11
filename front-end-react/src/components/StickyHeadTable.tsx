@@ -234,6 +234,7 @@ export function StickyHeadTable({
             page={currentPage}
             onPageChange={onPageChange}
             onRowsPerPageChange={onRowsPerPageChange}
+            labelRowsPerPage="Filas por página"
           />
         )
       }
