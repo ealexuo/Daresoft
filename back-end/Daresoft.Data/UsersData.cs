@@ -129,7 +129,8 @@ namespace Daresoft.Data
 	                ,co.MiddleName
 	                ,co.LastName	
 	                ,co.OtherName
-	                ,usrp.IsInactive
+                    ,co.WorkEmail
+	                ,usrp.IsActive
 	                ,usrp.IsDeleted
                     ,COUNT(*) OVER () TotalCount
                 FROM UserProfile usrp
@@ -147,7 +148,7 @@ namespace Daresoft.Data
 
                 var result = await connection.QueryAsync<UsersListModel>(sqlQuery, new
                 {
-                    Offest = offset,
+                    Offset = offset,
                     Fetch = fetch,
                     SearchText = searchText
                 });

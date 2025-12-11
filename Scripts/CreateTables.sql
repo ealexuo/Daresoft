@@ -49,9 +49,9 @@ CREATE TABLE Contact(
 	Id INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Contact PRIMARY KEY CLUSTERED,
 	Salutation nvarchar(50) NULL,
 	Name nvarchar(100) NOT NULL,
-	MiddleName nvarchar(100) NULL,
+	MiddleName nvarchar(100) NOT NULL,
 	LastName nvarchar(100) NOT NULL,
-	OtherName nvarchar(100) NULL,
+	OtherName nvarchar(100) NOT NULL,
 	Title nvarchar(50) NULL,
 	HomeAddressLine1 nvarchar(100) NULL,
 	HomeAddressLine2 nvarchar(100) NULL,
@@ -112,7 +112,7 @@ CREATE TABLE UserProfile (
     Color NVARCHAR(7) NULL,
     ProfilePicture NVARCHAR(MAX) NULL,
     ProfilePictureContentType NVARCHAR(10) NULL,
-    IsInactive BIT NOT NULL,
+    IsActive BIT NOT NULL,
 	IsPasswordChangeRequired BIT NOT NULL,
 	IsDeleted BIT NOT NULL,
 	CreatedDate DATETIME NOT NULL,
@@ -334,17 +334,17 @@ INSERT INTO ContactType (Name) VALUES
 /* Insert sample contacts */
 INSERT INTO Contact (Salutation, Name, MiddleName, LastName, OtherName, Title, HomeAddressLine1, HomeAddressLine2, HomeCity, HomeState, HomePostalCode, CountryId, WorkAddressLine1, WorkAddressLine2, WorkCity, WorkState, WorkPostalCode, WorkCountry, WorkEmail, HomeEmail, HomePhone, WorkPhone, WorkPhoneExt, MobilePhone, CompanyId, ContactTypeId, Notes, PreferredAddress, CompanyName, Website, PrimaryContactId, IsSupplier, IsDeleted, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
 VALUES 
-('Mr.', 'John', 'Michael', 'Smith', NULL, 'Manager', '123 Oak Street', 'Apt 4B', 'New York', 'NY', '10001', 1, '456 Business Ave', 'Suite 200', 'New York', 'NY', '10002', 'USA', 'john.smith@company.com', 'john@home.com', '555-1234', '555-5678', '101', '555-9999', 1, 1, 'Senior manager', 1, 'ABC Corporation', 'www.abc.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('Ms.', 'Sarah', 'Elizabeth', 'Johnson', NULL, 'Director', '789 Pine Road', '', 'Boston', 'MA', '02101', 1, '321 Corporate Blvd', 'Floor 5', 'Boston', 'MA', '02102', 'USA', 'sarah.johnson@company.com', 'sarah@home.com', '617-2222', '617-3333', '205', '617-4444', 2, 1, 'Department director', 1, 'XYZ Solutions', 'www.xyz.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('Dr.', 'Robert', 'James', 'Williams', NULL, 'Consultant', '321 Elm Avenue', 'Unit 10', 'Chicago', 'IL', '60601', 1, '654 Industrial Way', 'Building A', 'Chicago', 'IL', '60602', 'USA', 'robert.williams@company.com', 'robert@home.com', '312-5555', '312-6666', '310', '312-7777', 1, 2, 'External consultant', 2, 'Tech Innovations', 'www.tech.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('Mrs.', 'Jennifer', 'Anne', 'Brown', NULL, 'Analyst', '555 Maple Lane', '', 'Seattle', 'WA', '98101', 1, '987 Tech Park', 'Suite 300', 'Seattle', 'WA', '98102', 'USA', 'jennifer.brown@company.com', 'jennifer@home.com', '206-8888', '206-9999', '415', '206-1111', 2, 1, 'Data analyst', 1, 'Data Systems Inc', 'www.datasys.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('Mr.', 'David', 'Christopher', 'Lee', NULL, 'Supervisor', '777 Cedar Court', 'Apt 201', 'Denver', 'CO', '80201', 1, '147 Business Park', 'Tower 2', 'Denver', 'CO', '80202', 'USA', 'david.lee@company.com', 'david@home.com', '303-2222', '303-3333', '520', '303-4444', 1, 1, 'Team supervisor', 1, 'Global Services', 'www.global.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1);
+('Mr.', 'John', 'Michael', 'Smith', '', 'Manager', '123 Oak Street', 'Apt 4B', 'New York', 'NY', '10001', 1, '456 Business Ave', 'Suite 200', 'New York', 'NY', '10002', 'USA', 'john.smith@company.com', 'john@home.com', '555-1234', '555-5678', '101', '555-9999', 1, 1, 'Senior manager', 1, 'ABC Corporation', 'www.abc.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('Ms.', 'Sarah', 'Elizabeth', 'Johnson', '', 'Director', '789 Pine Road', '', 'Boston', 'MA', '02101', 1, '321 Corporate Blvd', 'Floor 5', 'Boston', 'MA', '02102', 'USA', 'sarah.johnson@company.com', 'sarah@home.com', '617-2222', '617-3333', '205', '617-4444', 2, 1, 'Department director', 1, 'XYZ Solutions', 'www.xyz.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('Dr.', 'Robert', 'James', 'Williams', '', 'Consultant', '321 Elm Avenue', 'Unit 10', 'Chicago', 'IL', '60601', 1, '654 Industrial Way', 'Building A', 'Chicago', 'IL', '60602', 'USA', 'robert.williams@company.com', 'robert@home.com', '312-5555', '312-6666', '310', '312-7777', 1, 2, 'External consultant', 2, 'Tech Innovations', 'www.tech.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('Mrs.', 'Jennifer', 'Anne', 'Brown', '', 'Analyst', '555 Maple Lane', '', 'Seattle', 'WA', '98101', 1, '987 Tech Park', 'Suite 300', 'Seattle', 'WA', '98102', 'USA', 'jennifer.brown@company.com', 'jennifer@home.com', '206-8888', '206-9999', '415', '206-1111', 2, 1, 'Data analyst', 1, 'Data Systems Inc', 'www.datasys.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('Mr.', 'David', 'Christopher', 'Lee', '', 'Supervisor', '777 Cedar Court', 'Apt 201', 'Denver', 'CO', '80201', 1, '147 Business Park', 'Tower 2', 'Denver', 'CO', '80202', 'USA', 'david.lee@company.com', 'david@home.com', '303-2222', '303-3333', '520', '303-4444', 1, 1, 'Team supervisor', 1, 'Global Services', 'www.global.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1);
 
 /* Insert corresponding user profiles */
-INSERT INTO UserProfile (UserName, PasswordHash, ContactId, Color, ProfilePicture, ProfilePictureContentType, IsInactive, IsPasswordChangeRequired, IsDeleted, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
+INSERT INTO UserProfile (UserName, PasswordHash, ContactId, Color, ProfilePicture, ProfilePictureContentType, IsActive, IsPasswordChangeRequired, IsDeleted, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
 VALUES 
-('jsmith', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 1, '#0078D4', NULL, NULL, 0, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('sjohnson', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 2, '#107C10', NULL, NULL, 0, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('rwilliams', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 3, '#DA3B01', NULL, NULL, 0, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('jbrown', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 4, '#EF6950', NULL, NULL, 0, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('dlee', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 5, '#6B69D6', NULL, NULL, 0, 0, 0, GETDATE(), GETDATE(), 1, 1);
+('jsmith', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 1, '#0078D4', NULL, NULL, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('sjohnson', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 2, '#107C10', NULL, NULL, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('rwilliams', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 3, '#DA3B01', NULL, NULL, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('jbrown', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 4, '#EF6950', NULL, NULL, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('dlee', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 5, '#6B69D6', NULL, NULL, 1, 0, 0, GETDATE(), GETDATE(), 1, 1);

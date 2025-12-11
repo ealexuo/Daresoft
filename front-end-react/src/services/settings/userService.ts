@@ -1,14 +1,14 @@
 import axiosService from "../axios/axiosService";
 
-const BASE_PATH = "api/Usuario/";
+const BASE_PATH = "api/Users/";
 
 export const userService = {
   getAll: async (offset: number, fetch: number, searchText: string): Promise<any> => {    
     return await axiosService.get<any>(BASE_PATH, {
       params: {
-        Pagina: offset.toString(),
-        Cantidad: fetch.toString(),
-        BuscarTexto: searchText,
+        Offset: offset.toString(),
+        Fetch: fetch.toString(),
+        SearchText: searchText,
       },
     });
   },
@@ -23,5 +23,5 @@ export const userService = {
   },
   delete: async (entityId: number, userId: number): Promise<any> => {
     return await axiosService.delete(BASE_PATH + entityId + '/' + userId);
-  }  
+  }
 };

@@ -12,6 +12,7 @@ namespace Daresoft.Core.Models
         public string MiddleName { get; set; }
         public string LastName { get; set; }
         public string OtherName { get; set; }
+        public string WorkEmail { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
         public int TotalCount { get; set; }

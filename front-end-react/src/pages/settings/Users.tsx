@@ -16,70 +16,103 @@ import UserDisableDialog from '../../dialogs/UserDisableDialog';
 import moment from 'moment';
 import AlertDialog from '../../components/AlertDialog';
 import ProcessPermissionDialog from '../../dialogs/ProcessPermissionDialog';
+import { User } from '../../types/User';
 
 const columnsInit: TableColumnType[] = [
   { 
-    id: "userId", 
+    id: "Id", 
     label: 'Id', 
     minWidth: 5,
   },
   { 
-    id: "personalId", 
-    label: 'No Identifación Personal', 
+    id: "UserName", 
+    label: 'Nombre de Usuario', 
     minWidth: 50 
   },
   { 
-    id: "name", 
+    id: "Name", 
     label: "Nombre", 
     minWidth: 100 
   },
+  { 
+    id: "MiddleName", 
+    label: "Segundo Nombre", 
+    minWidth: 100 
+  },
+  { 
+    id: "LastName", 
+    label: "Apellido", 
+    minWidth: 100 
+  },
+  { 
+    id: "OtherName", 
+    label: "Segundo Apellido", 
+    minWidth: 100 
+  },
   {
-    id: "email",
+    id: "WorkEmail",
     label: "Correo Electrónico",
     minWidth: 100,    
   },
-  // {
-  //   id: "administrativeUnit",
-  //   label: "Unidad Administrativa",
-  //   minWidth: 100,    
-  // },
   {
-    id: "isActive",
-    label: "Estado",
+    id: "IsActive",
+    label: "Activo",
     minWidth: 100,    
-  },
-  // {
-  //   id: "disableDates",
-  //   label: "Fechas Inhabilitación",
-  //   minWidth: 100,    
-  // },
+  },  
   {
-    id: "actions",
+    id: "Actions",
     label: "Acciones",
     minWidth: 100,    
   }
 ];
 
-const emptyUserObject = {
-  idUsuario: -1,
-  idEntidad: 0,
-  idIdioma: 0,
-  genero: 0,
-  titulo: '',
-  noIdentificacionPersonal: '',
-  correoElectronico: '',
-  primerNombre: '',
-  segundoNombre: '',
-  otrosNombres: '',
-  primerApellido: '',
-  segundoApellido: '',
-  apellidoCasada: '',
-  unidadAdministrativa: '',
-  cargo: '',
-  extension: '',
-  telefono: '',
-  activo: false,  
-}
+const emptyUserObject: User = {
+  Id: -1,
+  UserName: '',
+  Name: '',
+  MiddleName: '',
+  LastName: '',
+  OtherName: '',
+  WorkEmail: '',
+  IsActive: true
+};
+
+// const emptyContactObject = {
+//   id: -1,
+//   salutation: undefined,
+//   name: '',
+//   middleName: '',
+//   lastName: '',
+//   otherName: '',
+//   title: undefined,
+//   homeAddressLine1: '',
+//   homeAddressLine2: '',
+//   homeCity: '',
+//   homeState: '',
+//   homePostalCode: '',
+//   countryId: -1,
+//   workAddressLine1: '',
+//   workAddressLine2: '',
+//   workCity: '',
+//   workState: '',
+//   workPostalCode: '',
+//   workCountry: '',
+//   workEmail: '',
+//   homeEmail: '',
+//   homePhone: '',
+//   workPhone: '',
+//   workPhoneExt: '',
+//   mobilePhone: '',
+//   companyId: -1,
+//   contactTypeId: -1,
+//   notes: '',
+//   preferredAddress: -1,
+//   companyName: '',
+//   website: '',
+//   primaryContactId: -1,
+//   isSupplier: false,
+//   isDeleted: false
+// };
 
 export default function Users() {
 
@@ -101,37 +134,38 @@ export default function Users() {
   const [openUserDeleteDialog, setOpenUserDeleteDialog] = useState<boolean>(false);
 
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [administrativeUnitslist, setAdministrativeUnitslist] = useState<any>(null);
-  const [processPermissionList, setProcessPermissionList] = useState<any>(null);
+
 
   /** Fetch Data Section */
 
-  const fetchUsers = useCallback(async (initialPage: number, usersPerPage: number, searchString: string) => {
+  const fetchUsers = useCallback(async (offset: number, fetch: number, searchText: string) => {
     try {
       setLoading(true);
       
       const rowsTemp: any[] = [];
-      const response = await userService.getAll(initialPage + 1, usersPerPage, searchString);
+      const response = await userService.getAll(offset + 1, fetch, searchText);
 
       if(response.statusText === 'OK') {
-        if(response.data.cantidadTotal){
-          setTotalRows(response.data.cantidadTotal);
+        if(response.data.totalCount){
+          setTotalRows(response.data.totalCount);
         }
 
-        response.data.listaUsuarios.forEach((item: any) => {
+        response.data.usersList.forEach((item: any) => {
           rowsTemp.push([
-            item.idUsuario,
-            item.noIdentificacionPersonal,
-            item.nombre,
-            item.correoElectronico,
-            //item.nombreUnidadAdministrativa,
-            item.estado,
-            //item.fechasInhabilitacion === null ? '' : moment(item.fechasInhabilitacion.fechaInicio).format('L') + ' -> ' + moment(item.fechasInhabilitacion.fechaFin).format('L') 
+            item.id,
+            item.userName,
+            item.name,
+            item.middleName,
+            item.lastName,
+            item.otherName,
+            item.workEmail,
+            item.isActive,
           ]);
         });
-
+        
         setRows(rowsTemp);
-        setLoading(false);  
+        setLoading(false);
+
       }
       else {
         enqueueSnackbar('Ocurrió un error al obtener la lista de usuarios.', { variant: 'error' });
@@ -161,27 +195,6 @@ export default function Users() {
     return null;
   };   
 
-  const fetchProcessPermissions = async (userId: number) =>{
-    
-    setLoading(true);
-
-    try {
-      const response = await processPermissionService.get(userId);
-      if(response.statusText === 'OK') {
-        setLoading(false);        
-        setProcessPermissionList(response.data);
-      }
-      else {
-        enqueueSnackbar('Error al obtener la lista de permisos.', { variant: 'error' });
-      }      
-    }
-    catch{
-      enqueueSnackbar('Error al obtener la lista de permisos.', { variant: 'error' });
-      setLoading(false);
-    }
-    
-  };
-
   const deleteSelectedUser = async (entityId: number, userId: number) => {
 
     setLoading(true);
@@ -201,49 +214,6 @@ export default function Users() {
     }
 
   }
-  
-  const fetchAdministrativeUnits = useCallback(async () =>{ 
-
-    try {
-      const response = await administrativeUnitsService.getAll();
-      if(response.statusText === 'OK') {
-        setLoading(false);        
-        const administrativeUnits = response.data;
-
-        setAdministrativeUnitslist(administrativeUnits.map((ua: any) => {
-          return { 
-            id: ua.idUnidadAdministrativa, label: ua.nombre
-          }
-        }));
-      }
-      else {
-        enqueueSnackbar('Ocurrió un Error al obtener las unidades administrativas.', { variant: 'error' });
-      }        
-    }
-    catch(error: any){
-      enqueueSnackbar('Ocurrió un Error al obtener las unidades administrativas. Detalles: ' + error.message, { variant: 'error' });
-      setLoading(false);
-    }
-    
-    return null;    
-  }, [enqueueSnackbar]); 
-
-  const fetchAdministrativeUnit = async (administrativeUnitId: number) =>{ 
-
-    try {
-      const response = await administrativeUnitsService.get(administrativeUnitId);
-      if(response.statusText === 'OK') {
-        setLoading(false);        
-        return response.data;
-      }
-      enqueueSnackbar('Error al obtener unidad administrativa.', { variant: 'error' });
-    }
-    catch{
-      enqueueSnackbar('Error al obtener unidad administrativa.', { variant: 'error' });
-    }
-    
-    return null;    
-  }; 
 
   /** Handle Functions Section */
 
@@ -279,9 +249,6 @@ export default function Users() {
 
   const handleSelectedUserEdit = async (user: any) => {
     const userData = await fetchUser(user && user[0] ? user[0] : 0);
-    const administrativeUnit = await fetchAdministrativeUnit(userData.idUnidadAdministrativa);
-
-    userData.unidadAdministrativa = administrativeUnit.nombre;
         
     setSelectedUser(userData);
     setOpenUserAddEditDialog(true);
@@ -309,7 +276,6 @@ export default function Users() {
   // Process Permission dialog
   const handleOpenProcessPermissionDialog = async (user: any) => {
     const userData = await fetchUser(user && user[0] ? user[0] : 0);
-    await fetchProcessPermissions(userData.idUsuario);
 
     setSelectedUser(userData);
     setOpenProcessPermissionDialog(true);
@@ -379,9 +345,8 @@ export default function Users() {
 
     setColumns(columnsInit);
     fetchUsers(currentPage, rowsPerPage, searchText);
-    fetchAdministrativeUnits(); 
 
-  }, [currentPage, rowsPerPage, searchText, fetchUsers, fetchAdministrativeUnits]);
+  }, [currentPage, rowsPerPage, searchText, fetchUsers]);
 
   /** Return Section */
   return (
@@ -417,7 +382,7 @@ export default function Users() {
         <UserAddEditDialog 
           mode = {selectedUser && selectedUser.idUsuario > -1 ? 'edit' : 'add'}
           selectedUser = {selectedUser}
-          administrativeUnitsList = {administrativeUnitslist}
+          administrativeUnitsList = {null}
           onClose = {handleCloseUserAddEditDialogFromAction}
         />        
       </Dialog>
@@ -441,7 +406,7 @@ export default function Users() {
       >
         <ProcessPermissionDialog 
           selectedUser = {selectedUser}
-          processPermissionList = {processPermissionList}
+          processPermissionList = {null}
           onClose = {handleCloseProcessPermissionDialogFromAction}
         />        
       </Dialog>

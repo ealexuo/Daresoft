@@ -110,7 +110,7 @@ export function StickyHeadTable({
   const navigate = useNavigate();
 
   return (
-    <>
+    <>      
       <Toolbar style={{ paddingLeft: "0px" }}>
         {
           hideSearch ? (
@@ -154,37 +154,43 @@ export function StickyHeadTable({
               ))}
             </TableRow>
           </TableHead>
-          <TableBody>
-            {rows.map((row, index) => {
-              return (
-                <TableRow hover role="checkbox" key={index}>
-                  {row.map((item, index) => {
-                    return (
-                      ( typeof item === "object" 
-                        ? ''
-                        : (<TableCell align={columns[index].align} key={index}>
-                        {typeof item === "boolean" 
-                        ? ( <Checkbox checked={item} disabled={true} />) 
-                        : ( validaHexa(item) 
-                          ? (<div style={{ width: "8mm", height: "8mm", backgroundColor: item }}></div>)
-                          : ( typeof item === "object" 
-                              ? ''
-                              : item)
-                        )}
-                      </TableCell>))                      
-                    );
-                  })}
-                  <TableCell>
-                  {
-                    itemActionList?.map((action: ItemActionType, index) => {
-                      return(<IconButton key={index} onClick={() =>{ action.callBack(row) }}> {action.icon} </IconButton>)                      
-                    })
-                  }
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
+          { 
+            rows.length === 0 ? 
+            (<div>No data available</div>) : 
+            (
+              <TableBody>
+                {rows.map((row, index) => {
+                  return (
+                    <TableRow hover role="checkbox" key={index}>
+                      {row.map((item, index) => {
+                        return (
+                          ( typeof item === "object" 
+                            ? ''
+                            : (<TableCell align={columns[index].align} key={index}>
+                            {typeof item === "boolean" 
+                            ? ( <Checkbox checked={item} disabled={true} />) 
+                            : ( validaHexa(item) 
+                              ? (<div style={{ width: "8mm", height: "8mm", backgroundColor: item }}></div>)
+                              : ( typeof item === "object" 
+                                  ? ''
+                                  : item)
+                            )}
+                          </TableCell>))                      
+                        );
+                      })}
+                      <TableCell>
+                      {
+                        itemActionList?.map((action: ItemActionType, index) => {
+                          return(<IconButton key={index} onClick={() =>{ action.callBack(row) }}> {action.icon} </IconButton>)                      
+                        })
+                      }
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            ) 
+          }          
         </Table>
       </TableContainer>
       {
