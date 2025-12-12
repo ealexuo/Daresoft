@@ -258,7 +258,7 @@ export default function MiniDrawer() {
           </IconButton>
         </DrawerHeader>
         <Divider />
-        <List component="nav">
+        <List component="nav" dense={true}>
 
           <ListItemButton 
             onClick={() => handleMenuItemClick(menuItems.Dashboard)} 
@@ -317,16 +317,18 @@ export default function MiniDrawer() {
         </List>
 
         <span style={{ position: 'absolute', bottom: 0, width: '100%' }}>
-          <Divider sx={{ bgcolor: theme.palette.primary.contrastText, opacity: 0.2 }} />
+          <List dense={true}>
+            <Divider sx={{ bgcolor: theme.palette.primary.contrastText, opacity: 0.2 }} />
             <ListItemButton 
               onClick={() => handleMenuItemClick(menuItems.SignOut)}
               selected={selectedItem === menuItems.SignOut}
             >
-            <ListItemIcon>
-              <PowerSettingsNewIcon />
-            </ListItemIcon>
-            <ListItemText primary={t("navbar.signout")} />
-          </ListItemButton>
+              <ListItemIcon>
+                <PowerSettingsNewIcon sx={{color: theme.palette.secondary.main}}/>
+              </ListItemIcon>
+              <ListItemText primary={t("navbar.signout")} />
+            </ListItemButton>
+          </List>          
         </span>    
         
       </Drawer>
@@ -338,6 +340,7 @@ export default function MiniDrawer() {
           overflow: "auto",
           display: "flex",
           flexDirection: "column",
+          backgroundColor: '#f6f7f880'
         }}
       >
         <DrawerHeader/>

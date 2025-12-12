@@ -2,7 +2,10 @@ import { createTheme } from "@mui/material";
 
 const defaultTheme = createTheme({
   palette: {
-    mode: 'light'    
+    mode: 'light',
+    primary: {
+      main: '#3D6599',
+    },    
   },
   components: {
     MuiDialogActions: {
@@ -19,7 +22,14 @@ const defaultTheme = createTheme({
           fontSize: '16px'
         },
       },
-    }
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none'
+        },
+      },
+    },
   }
 });
 

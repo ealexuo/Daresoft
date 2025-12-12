@@ -9,7 +9,7 @@ interface Props {
 
 export default function Page({title, children}:PropsWithChildren<Props>) {
   return (
-    <div>
+    <div style={{ backgroundColor: '#f6f7f880'}}>
       <CustomizedBreadcrumbs />
       <Typography
         variant='h5'
@@ -19,7 +19,7 @@ export default function Page({title, children}:PropsWithChildren<Props>) {
       >
         {title}
       </Typography>
-      <Paper sx={{ width: '100%', overflow: 'hidden', padding: 3}}>
+      <Paper sx={{ width: '99%', overflow: 'hidden', padding: 3, margin: 1 }}>
         {children}
       </Paper>
     </div>

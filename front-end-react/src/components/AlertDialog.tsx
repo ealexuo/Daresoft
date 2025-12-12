@@ -30,7 +30,7 @@ export default function AlertDialog({color, title, message, loading, loadingMess
         <DialogActions>
             <Button 
                 onClick={() => onClose(false)}
-                variant="outlined"
+                variant="text"
                 color={color ? color : 'primary'}
             >
                 Cancelar
