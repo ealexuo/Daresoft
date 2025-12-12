@@ -54,6 +54,7 @@ namespace WebApi
             services.AddTransient<IAuthenticationService, AuthenticationService>(); // daresoft
             services.AddTransient<IEncryptPasswordService, EncryptPasswordService>(); // daresoft
             services.AddTransient<IUsersService, UsersService>(); // daresoft
+            services.AddTransient<IContactsService, ContactsService>(); // daresoft
 
 
             // datos
@@ -61,6 +62,7 @@ namespace WebApi
             services.AddTransient<IUsuarioDatos, UsuarioDatos>();
 
             services.AddTransient<IUsersData, UsersData>(); // daresoft
+            services.AddTransient<IContactsData, ContactsData>(); // daresoft
 
 
             // appSettings

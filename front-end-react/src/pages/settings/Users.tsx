@@ -18,8 +18,15 @@ import AlertDialog from '../../components/AlertDialog';
 import ProcessPermissionDialog from '../../dialogs/ProcessPermissionDialog';
 import { User } from '../../types/User';
 import { Tooltip } from '@mui/material';
+import { contactsService } from '../../services/settings/contactsService';
 
 const columnsInit: TableColumnType[] = [
+  {
+    id: "Id", 
+    label: "Id", 
+    minWidth: 50,
+    hidden: true
+  },
   { 
     id: "UserName", 
     label: 'Nombre de Usuario', 
@@ -63,14 +70,15 @@ const columnsInit: TableColumnType[] = [
 ];
 
 const emptyUserObject: User = {
-  Id: -1,
-  UserName: '',
-  Name: '',
-  MiddleName: '',
-  LastName: '',
-  OtherName: '',
-  WorkEmail: '',
-  IsActive: true
+  id: -1,
+  userName: '',
+  contactId: -1,
+  name: '',
+  middleName: '',
+  lastName: '',
+  otherName: '',
+  workEmail: '',
+  isActive: true
 };
 
 // const emptyContactObject = {
@@ -130,8 +138,31 @@ export default function Users() {
   const [openUserDeleteDialog, setOpenUserDeleteDialog] = useState<boolean>(false);
 
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [usersList, setUsersList] = useState<User[]>([]);
+
+  const [contact, setContact] = useState<any>(null);
 
   /** Fetch Data Section */
+  const fetchContact = async (contactId: number) =>{
+      
+      setLoading(true);
+
+      try {
+        const response = await contactsService.get(contactId);
+        if(response.statusText === 'OK') {
+          setContact(response.data);
+          return response.data;
+        }        
+      }
+      catch{
+        enqueueSnackbar('Error al obtener datos de contacto.', { variant: 'error' });
+      }
+      finally{
+        setLoading(false);
+      }      
+      
+  };   
+  
 
   const fetchUsers = useCallback(async (offset: number, fetch: number, searchText: string) => {
     try {
@@ -147,6 +178,7 @@ export default function Users() {
 
         response.data.usersList.forEach((item: any) => {
           rowsTemp.push([
+            item.id,
             item.userName,
             item.name,
             item.middleName,
@@ -157,6 +189,7 @@ export default function Users() {
           ]);
         });
         
+        setUsersList(response.data.usersList);
         setRows(rowsTemp);
         setLoading(false);
 
@@ -241,11 +274,14 @@ export default function Users() {
     setOpenUserAddEditDialog(false);
   }
 
-  const handleSelectedUserEdit = async (user: any) => {
-    const userData = await fetchUser(user && user[0] ? user[0] : 0);
-        
-    setSelectedUser(userData);
-    setOpenUserAddEditDialog(true);
+  const handleSelectedUserEdit = async (user: any) => {    
+    const userTemp = usersList.find(u => u.id === (user && user[0] ? user[0] : 0));
+    
+    if(userTemp) {
+      await fetchContact(userTemp.contactId);
+      setSelectedUser(userTemp);
+      setOpenUserAddEditDialog(true);
+    }    
   }
 
   // User Disable dialog
@@ -368,9 +404,10 @@ export default function Users() {
         maxWidth={"lg"}        
       >
         <UserAddEditDialog 
-          mode = {selectedUser && selectedUser.idUsuario > -1 ? 'edit' : 'add'}
-          selectedUser = {selectedUser}
-          administrativeUnitsList = {null}
+          mode = {selectedUser && selectedUser.id > -1 ? 'edit' : 'add'}
+          type = 'user'
+          selectedItem = {selectedUser}
+          contact = {contact}
           onClose = {handleCloseUserAddEditDialogFromAction}
         />        
       </Dialog>

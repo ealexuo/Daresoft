@@ -33,6 +33,7 @@ export type TableColumnType = {
   minWidth?: number;
   align?: 'left' | 'center' | 'right';
   format?: (value: number) => string;
+  hidden?: boolean;
 }
 
 export type TableRowsType<T> = T[][];
@@ -175,13 +176,15 @@ export function StickyHeadTable({
           <TableHead>
             <TableRow>
               {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  <b>{column.label}</b>
-                </TableCell>
+                column.hidden ? (<></>) : (
+                  <TableCell
+                    key={column.id}
+                    align={column.align}
+                    style={{ minWidth: column.minWidth }}
+                  >
+                    <b>{column.label}</b>
+                  </TableCell>
+                )
               ))}
             </TableRow>
           </TableHead>
@@ -195,7 +198,8 @@ export function StickyHeadTable({
                     <TableRow hover role="checkbox" key={index}>
                       {row.map((item, index) => {
                         return (
-                          ( typeof item === "object" 
+                          ( columns[index].hidden ? (<></>) :
+                            typeof item === "object" 
                             ? ''
                             : (<TableCell align={columns[index].align} key={index}>
                             {typeof item === "boolean" 

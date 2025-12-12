@@ -125,6 +125,7 @@ namespace Daresoft.Data
                 SELECT 
 	                usrp.Id
 	                ,usrp.UserName
+                    ,usrp.ContactId
 	                ,co.Name
 	                ,co.MiddleName
 	                ,co.LastName	

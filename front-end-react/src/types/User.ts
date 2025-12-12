@@ -1,11 +1,12 @@
 
 export type User = {
-    Id: number;
-    UserName: string;
-    Name: string;
-    MiddleName: string;
-    LastName: string;
-    OtherName: string;
-    WorkEmail: string;
-    IsActive: boolean;
+    id: number;
+    userName: string;
+    contactId: number;
+    name: string;
+    middleName: string;
+    lastName: string;
+    otherName: string;
+    workEmail: string;
+    isActive: boolean;
 };
