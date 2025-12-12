@@ -9,8 +9,8 @@ namespace Daresoft.Core.Services
         Task<UserProfileModel> GetByUserNameAsync(string userName);
         Task<UserProfileModel> GetByIdAsync(int userId);
         Task<int> CreateAsync(UserProfileModel user, int currentUserId);
-        Task<int> UpdateAsync(UserProfileModel user);
-        Task<List<UsersListModel>> GetAllAsync(int offset, int fetch, string searchText);
+        Task<UserProfileModel> UpdateAsync(UserProfileModel user, int currentUserId);
+        Task<List<UserProfileModel>> GetAllAsync(int offset, int fetch, string searchText);
         Task<bool> DeleteAsync(int userId);  
     }
 }

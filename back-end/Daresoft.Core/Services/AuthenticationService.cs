@@ -12,19 +12,21 @@ namespace Daresoft.Core.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IUsersData _userData;
-        private readonly IEncryptPasswordService _encryptPasswordService;        
+        private readonly IEncryptPasswordService _encryptPasswordService; 
+        private readonly IAuthenticationData _authenticationData;
 
-        public AuthenticationService(IUsersData userData, IEncryptPasswordService encryptPasswordService)
+        public AuthenticationService(IUsersData userData, IEncryptPasswordService encryptPasswordService, IAuthenticationData authenticationData)
         {
             _userData = userData;
             _encryptPasswordService = encryptPasswordService;
+            _authenticationData = authenticationData;
         }
 
-        public async Task<int> ValidatePasswordAsync(UserProfileModel user, string signInPassword)
-        {                           
-            var isValidPassword = _encryptPasswordService.VerifyHashedPassword(user.PasswordHash, signInPassword);
+        public async Task<int> ValidatePasswordAsync(SignInModel userAuth, string signInPassword)
+        {
+            var isValidPassword = _encryptPasswordService.VerifyHashedPassword(userAuth.Password, signInPassword);
 
-            if (isValidPassword && (user.IsPasswordChangeRequired))
+            if (isValidPassword && (userAuth.IsPasswordChangeRequired))
             {
                 return PasswordValidationTypes.ValidRequiereChange;
             }
@@ -63,6 +65,11 @@ namespace Daresoft.Core.Services
             //DateTime fechaRegistro = UtilidadesServicio.FechaActualUtc;
             //return await _authenticationData.RegistrarLogeo(idEntidad, idUsuario, fechaRegistro);
             return 1;
+        }
+
+        public async Task<SignInModel> GetByUserName(string userName)
+        {
+            return await _authenticationData.GetByUserName(userName);
         }
     }
 }

@@ -7,18 +7,21 @@ namespace Daresoft.Core.Models
     {
         public int Id { get; set; }
         public string UserName { get; set; } = string.Empty;
-        public string PasswordHash { get; set; } = string.Empty;
         public int ContactId { get; set; }
+        public string Name { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+        public string OtherName { get; set; }
+        public string WorkEmail { get; set; }
+        public string WorkPhone { get; set; }
+        public string WorkPhoneExt { get; set; }
+        public string MobilePhone { get; set; }
         public string? Color { get; set; }
         public string? ProfilePicture { get; set; }
         public string? ProfilePictureContentType { get; set; }
         public bool IsDeleted { get; set; }
-        public bool? IsInactive { get; set; }
+        public bool? IsActive { get; set; }
         public bool IsPasswordChangeRequired { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public int CreatedByUserId { get; set; }
-        public int UpdatedByUserId { get; set; }
-        public ContactModel? Contact { get; set; }
+        public int TotalCount { get; set; }
     }
 }

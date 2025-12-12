@@ -34,139 +34,73 @@ import { useSnackbar } from 'notistack';
 // Services and Types
 import { contactsService } from '../services/settings/contactsService';
 import { Contact } from '../types/Contact';
+import { User } from '../types/User';
+import { ColorPicker } from 'primereact/colorpicker';
+import { usersService } from '../services/settings/usersService';
 
 type DialogProps = {
   mode: 'add' | 'edit',
-  type: 'user' | 'supplier' | 'contact',
-  selectedItem: any,
-  contact: Contact | undefined,
+  selectedUser: User,
   onClose: (refreshUsersList: boolean) => void
 }
 
-export default function UserAddEditDialog({ mode, type, selectedItem, contact, onClose }: DialogProps) {
+export default function UserAddEditDialog({ mode, selectedUser, onClose }: DialogProps) {
   
   const [loading, setLoading] = useState<boolean>(false);
   const [t] = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
 
-  // Empty contact object
-  const emptyContactObject: Contact = {
-    id: 0,
-    salutation: '',
-    name: '',
-    middleName: '',
-    lastName: '',
-    otherName: '',
-    title: '',
-    homeAddressLine1: '',
-    homeAddressLine2: '',
-    homeCity: '',
-    homeState: '',
-    homePostalCode: '',
-    countryId: 0,
-    workAddressLine1: '',
-    workAddressLine2: '',
-    workCity: '',
-    workState: '',
-    workPostalCode: '',
-    workCountry: '',
-    workEmail: '',
-    homeEmail: '',
-    homePhone: '',
-    workPhone: '',    
-    workPhoneExt: '',
-    mobilePhone: '',
-    companyId: 0,
-    contactTypeId: 0,
-    notes: '',
-    preferredAddress: 0,
-    companyName: '',
-    website: '',
-    //primaryContactId: 0,
-    isSupplier: false,
-    isDeleted: false,
-  };
-
   // Form Schema definition
-  const formSchema = z.object({
-
-      // User fields
-      userId: z.number().int().optional(),
+  const formSchema = z.object({      
+      id: z.number().int(),      
       userName: z.string().min(1, t("errorMessages.requieredField")),
-      isActive: z.boolean(),
-
-      // Contact fields
-      id: z.number().int(), // contact id
-      salutation: z.string().optional(),
-      name: z.string().optional(),
-      middleName: z.string().optional(),
-      lastName: z.string().optional(),
-      otherName: z.string().optional(),
-      title: z.string().optional(),
-
-      homeAddressLine1: z.string().optional(),
-      homeAddressLine2: z.string().optional(),
-      homeCity: z.string().optional(),
-      homeState: z.string().optional(),
-      homePostalCode: z.string().optional(),
-
-      countryId: z.number().int().optional(), // int?, optional nullable
-
-      workAddressLine1: z.string().optional(),
-      workAddressLine2: z.string().optional(),
-      workCity: z.string().optional(),
-      workState: z.string().optional(),
-      workPostalCode: z.string().optional(),
-      workCountry: z.string().optional(),
-
-      workEmail: z.string().optional(),
-      homeEmail: z.string().optional(),
-
-      homePhone: z.string().optional(),
-      workPhone: z.string().optional(),
-      workPhoneExt: z.string().optional(),
-      mobilePhone: z.string().optional(),
-
-      companyId: z.number().int().optional(), // int?, optional nullable
-      contactTypeId: z.number().int().optional(), // required int
-
-      notes: z.string().optional(),
-      preferredAddress: z.number().int().optional(), // int?, optional nullable
-      companyName: z.string().optional(),
-      website: z.string().optional(),
-      //primaryContactId: z.number().int().optional(), // int?, optional nullable
-
-      isSupplier: z.boolean(),
+      contactId: z.number().int(),
+      name: z.string().min(1, t("errorMessages.requieredField")),
+      middleName: z.string(),
+      lastName: z.string().min(1, t("errorMessages.requieredField")),
+      otherName: z.string(),
+      workEmail: z.string().email(t("errorMessages.invalidEmail")).min(1, t("errorMessages.requieredField")),
+      workPhone: z.string(),      
+      workPhoneExt: z.string(),
+      mobilePhone: z.string(),
+      color: z.string(),
+      profilePicture: z.string().nullable(),
+      profilePictureContentType: z.string().nullable(),
       isDeleted: z.boolean(),
+      isActive: z.boolean(),
+      isPasswordChangeRequired: z.boolean()     
   });
 
   // Form Schema Type
-  type ContactFormType = z.infer<typeof formSchema>;
-
+  type UserFormType = z.infer<typeof formSchema>;
 
   // Form Hook
-  const { register, handleSubmit, formState: {errors, isSubmitting} } = useForm<ContactFormType>({
-      defaultValues: {
-        userId: selectedItem?.id || 0,
-        userName: selectedItem?.userName || '',
-        isActive: selectedItem?.isActive || true,        
-        ...contact
-      },     
+  const { register, handleSubmit, watch, formState: {errors, isSubmitting} } = useForm<UserFormType>({
+      defaultValues: selectedUser,
       resolver: zodResolver(formSchema),
   });
     
+  // Watch the color schema property to be shown in the textfield
+  //const selectedColor = watch('color', selectedUser?.color);
     
-  const onSubmit: SubmitHandler<ContactFormType> = async (formData) => {
+  const onSubmit: SubmitHandler<UserFormType> = async (formData) => {
+
+    const userToSave: User = { ...formData };
+
     try {
       setLoading(true);
 
-      console.log("Form Data to submit: ", formData);
-
-      // const userToSave = {
-      //   ...data,
-      //   id: selectedUser?.id || 0,
-      //   contactId: selectedUser?.contactId || 0
-      // };
+      try {        
+        if (mode === 'add') {
+          // await contactsService.createUser(formData); 
+          // enqueueSnackbar('Usuario creado exitosamente.', { variant: 'success' });
+        } else {
+          await usersService.edit(userToSave); 
+          enqueueSnackbar('Usuario actualizado exitosamente.', { variant: 'success' });
+        }
+      } catch (error) {
+        throw error;
+      }
 
       onClose(true);
     } catch (error) {
@@ -187,40 +121,64 @@ export default function UserAddEditDialog({ mode, type, selectedItem, contact, o
         <DialogContentText>Add or Edit User Profile</DialogContentText>
 
         <Box sx={{ my: 3 }}>
+          <Typography variant="subtitle1">
+            Información de usuario
+          </Typography>
+          <Paper
+            variant="outlined"
+            sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
+          >
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  {...register('userName')}
+                  label="Nombre de usuario"
+                  fullWidth
+                  size="small"
+                  disabled={mode === 'edit'}
+                  defaultValue={selectedUser?.userName || ''}
+                  error={!!errors.userName}
+                  helperText={errors.userName?.message as string | undefined}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Checkbox {...register('isActive')} defaultChecked={selectedUser?.isActive} />}
+                  label="Activo"
+                />
+              </Grid>
+              {/* <Grid item xs={12} sm={6}>
+                <TextField
+                  {...register('profilePicture')}
+                  label="Foto de Perfil"
+                  fullWidth
+                  size="small"
+                />
+              </Grid>    */}             
+              {/* <Grid item xs={12} sm={6}>
+                  <TextField
+                      required
+                      label="Color"
+                      fullWidth
+                      variant="standard"                                        
+                      value={selectedColor?.startsWith('#') ? selectedColor : '#' + selectedColor}
+                      InputProps={{
+                          readOnly: true,                                        
+                      }}                                        
+                  />
 
-          { 
-            type === 'user' ? (
-              <div>
-                <Typography variant="subtitle1">
-                  Información de usuario
-                </Typography>
-                <Paper
-                  variant="outlined"
-                  sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
-                >
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        {...register('userName')}
-                        label="Nombre de usuario"
-                        fullWidth
-                        size="small"
-                        defaultValue={selectedItem?.userName || ''}
-                        error={!!errors.userName}
-                        helperText={errors.userName?.message as string | undefined}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormControlLabel
-                        control={<Checkbox {...register('isActive')} defaultChecked={selectedItem?.isActive} />}
-                        label="Activo"
-                      />
-                    </Grid>
-                  </Grid>
-                </Paper>
-              </div>
-            ) : (<></>)
-          }           
+                  <ColorPicker
+                      inputId="cp-hex"
+                      format="hex"
+                      defaultValue={selectedUser?.color}
+                      className="mb-3"
+                      inputStyle={{ position: 'absolute', width: '20px' }}
+                      appendTo="self"
+                      {...register("color")}
+                  />
+              </Grid> */}              
+            </Grid>
+          </Paper>
           
           <Typography variant="subtitle1">
             Información de contacto
@@ -231,22 +189,15 @@ export default function UserAddEditDialog({ mode, type, selectedItem, contact, o
             sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
           >
             <Grid container spacing={3}>
-              
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('salutation')}
-                  label="Salutation"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
 
               <Grid item xs={12} sm={6}>
                 <TextField
                   {...register('name')}
-                  label="Nombre"
+                  label="* Nombre"
                   fullWidth
                   size="small"
+                  error={!!errors.name}
+                  helperText={errors.name?.message as string | undefined}
                 />
               </Grid>
 
@@ -262,9 +213,11 @@ export default function UserAddEditDialog({ mode, type, selectedItem, contact, o
               <Grid item xs={12} sm={6}>
                 <TextField
                   {...register('lastName')}
-                  label="Apellido"
+                  label="* Apellido"
                   fullWidth
                   size="small"
+                  error={!!errors.lastName}
+                  helperText={errors.lastName?.message as string | undefined}
                 />
               </Grid>
 
@@ -272,141 +225,6 @@ export default function UserAddEditDialog({ mode, type, selectedItem, contact, o
                 <TextField
                   {...register('otherName')}
                   label="Segundo Apellido"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('title')}
-                  label="Título"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('homeAddressLine1')}
-                  label="Dirección Personal Línea 1"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('homeAddressLine2')}
-                  label="Dirección Personal Línea 2"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('homePostalCode')}
-                  label="Código Postal Personal"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('countryId')}
-                  label="País"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('workAddressLine1')}
-                  label="Dirección Laboral Línea 1"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('workAddressLine2')}
-                  label="Dirección Laboral Línea 2"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('workCity')}
-                  label="Ciudad Laboral"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('workPostalCode')}
-                  label="Código Postal Laboral"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('workCountry')}
-                  label="País Laboral"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('workEmail')}
-                  label="Correo Laboral"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('homeEmail')}
-                  label="Correo Personal"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('homePhone')}
-                  label="Teléfono Personal"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('workPhone')}
-                  label="Teléfono Laboral"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('workPhoneExt')}
-                  label="Extensión Teléfono Laboral"
                   fullWidth
                   size="small"
                 />
@@ -423,8 +241,19 @@ export default function UserAddEditDialog({ mode, type, selectedItem, contact, o
 
               <Grid item xs={12} sm={6}>
                 <TextField
-                  {...register('companyId')}
-                  label="Id Empresa"
+                  {...register('workEmail')}
+                  label="* Correo Laboral"
+                  fullWidth
+                  size="small"
+                  error={!!errors.workEmail}
+                  helperText={errors.workEmail?.message as string | undefined}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  {...register('workPhone')}
+                  label="Teléfono Laboral"
                   fullWidth
                   size="small"
                 />
@@ -432,78 +261,8 @@ export default function UserAddEditDialog({ mode, type, selectedItem, contact, o
 
               <Grid item xs={12} sm={6}>
                 <TextField
-                  {...register('contactTypeId')}
-                  label="Título"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('notes')}
-                  label="Notas"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('preferredAddress')}
-                  label="Dirección Preferida"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('companyName')}
-                  label="Empresa"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('title')}
-                  label="Título"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('website')}
-                  label="Sitio Web"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('title')}
-                  label="Título"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>             
-
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={<Checkbox {...register('isSupplier')} defaultChecked={contact?.isSupplier} />}
-                  label="Es Proveedor"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('isDeleted')}
-                  label="¿Eliminado?"
+                  {...register('workPhoneExt')}
+                  label="Extensión Teléfono Laboral"
                   fullWidth
                   size="small"
                 />

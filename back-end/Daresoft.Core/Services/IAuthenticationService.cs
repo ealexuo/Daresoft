@@ -8,9 +8,10 @@ using System.Threading.Tasks;
 namespace Daresoft.Core.Services
 {
     public interface IAuthenticationService
-    {
-        Task<int> ValidatePasswordAsync(UserProfileModel user, string signInPassword);
+    {        
+        Task<int> ValidatePasswordAsync(SignInModel userAuth, string signInPassword);
         Task<int> ChangePasswordAsync(int userId, string newPassword);
         Task<int> SignInRegistration(int idUsuario, string userName);
+        Task<SignInModel> GetByUserName(string userName);
     }
 }

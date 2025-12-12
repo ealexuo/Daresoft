@@ -64,13 +64,12 @@ namespace Daresoft.Core.Services
             return 1;
         }
 
-        public async Task<int> UpdateAsync(UserProfileModel usuario)
+        public async Task<UserProfileModel> UpdateAsync(UserProfileModel user, int currentUserId)
         {
-            // return await _datos.EditarUsuarioAsync(usuario, UtilidadesServicio.FechaActualUtc);
-            return 1;
+            return await _usersData.UpdateAsync(user, currentUserId);
         }
 
-        public async Task<List<UsersListModel>> GetAllAsync(int offset, int fetch, string searchText)
+        public async Task<List<UserProfileModel>> GetAllAsync(int offset, int fetch, string searchText)
         {
             return await _usersData.GetAllAsync(offset, fetch, searchText);            
         }

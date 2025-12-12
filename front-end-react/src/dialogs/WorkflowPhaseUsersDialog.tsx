@@ -34,7 +34,7 @@ import { useSnackbar } from 'notistack';
 import { Fase } from '../types/Fase';
 import { Proceso } from '../types/Proceso';
 import { administrativeUnitsService } from '../services/settings/administrativeUnitsService';
-import { userService } from '../services/settings/userService';
+//import { userService } from '../services/settings/usersService';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { workflowPhaseService } from '../services/settings/workflowPhaseService';
@@ -183,17 +183,17 @@ export default function WorkflowPhaseUsersDialog({selectedPhase, selectedWorkflo
         setLoading(true);
 
         try {
-            const response = await userService.getAll(initialPage + 1, usersPerPage, searchString);
-            if(response.statusText === 'OK') {
-                setUsersList(response.data.listaUsuarios.map((u: any) => {
-                    return { 
-                        id: u.idUsuario, label: u.nombre
-                    }
-                }).sort((a: any, b: any) => a.label.localeCompare(b.label)));
-            }
-            else {
-                enqueueSnackbar('Ocurrió un error al obtener los usuarios.', { variant: 'error' });
-            }        
+            // const response = await userService.getAll(initialPage + 1, usersPerPage, searchString);
+            // if(response.statusText === 'OK') {
+            //     setUsersList(response.data.listaUsuarios.map((u: any) => {
+            //         return { 
+            //             id: u.idUsuario, label: u.nombre
+            //         }
+            //     }).sort((a: any, b: any) => a.label.localeCompare(b.label)));
+            // }
+            // else {
+            //     enqueueSnackbar('Ocurrió un error al obtener los usuarios.', { variant: 'error' });
+            // }        
         }
         catch(error: any){
             enqueueSnackbar('Ocurrió un error al obtener los usuarios. Detalles: ' + error.message, { variant: 'error' });

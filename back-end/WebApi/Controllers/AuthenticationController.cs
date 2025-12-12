@@ -38,21 +38,21 @@ namespace WebApi.Controllers
             try
             {
                 int checkPasswordResult = PasswordValidationTypes.Invalid;
-                var user = await _userService.GetByUserNameAsync(signin.UserName);
+                var userAuth = await _authenticationService.GetByUserName(signin.UserName);
 
-                if (user != null)
+                if (userAuth != null)
                 {
-                    checkPasswordResult = await _authenticationService.ValidatePasswordAsync(user, signin.Password);
+                    checkPasswordResult = await _authenticationService.ValidatePasswordAsync(userAuth, signin.Password);
                 }
 
-                if (user == null || checkPasswordResult == PasswordValidationTypes.Invalid)
+                if (userAuth == null || checkPasswordResult == PasswordValidationTypes.Invalid)
                     return StatusCode(400);
 
                 if (checkPasswordResult == PasswordValidationTypes.Valid)
                 {
                     var tokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = new ClaimsIdentity(new Claim[] { new Claim("UserId", user.Id.ToString(), null) }),
+                        Subject = new ClaimsIdentity(new Claim[] { new Claim("UserId", userAuth.UserId.ToString(), null) }),
                         Expires = DateTime.UtcNow.AddDays(1),
                         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSetings.JWT_Secret)), SecurityAlgorithms.HmacSha256Signature),
                     };
@@ -60,7 +60,7 @@ namespace WebApi.Controllers
                     var securityToken = tokenHandler.CreateToken(tokenDescriptor);
                     var token = tokenHandler.WriteToken(securityToken);
 
-                    await _authenticationService.SignInRegistration(user.Id, user.UserName);
+                    await _authenticationService.SignInRegistration(userAuth.UserId, userAuth.UserName);
 
                     return Ok(new { token });
                 }

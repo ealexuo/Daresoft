@@ -7,6 +7,14 @@ export type User = {
     middleName: string;
     lastName: string;
     otherName: string;
-    workEmail: string;
-    isActive: boolean;
+    workEmail: string;    
+    workPhone: string;
+    workPhoneExt: string;
+    mobilePhone: string;
+    color: string;
+    profilePicture: string | null;
+    profilePictureContentType: string | null;
+    isDeleted: boolean;
+    isActive: boolean; //
+    isPasswordChangeRequired: boolean;
 };

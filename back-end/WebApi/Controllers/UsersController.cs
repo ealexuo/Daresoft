@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Daresoft.Core.Models;
+using Daresoft.Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Daresoft.Core.Services;
+using Qfile.Core.Modelos;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WebApi.Models;
 
@@ -35,6 +38,31 @@ namespace WebApi.Controllers
                     usersList = usersList,
                     totalCount = usersList.Count > 0 ? usersList[0].TotalCount : 0
                 });
+            }
+            catch (Exception ex)
+            {
+                //ex.ToExceptionless().Submit();
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] UserProfileModel user)
+        {
+            try
+            {
+                //var identity = HttpContext.User.Identity as ClaimsIdentity;
+                //int currentUserId = 0;
+
+                //if (identity != null)
+                //{
+                //    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
+                //}
+
+                //var updatedUser = await _usersService.UpdateAsync(user, currentUserId);
+
+                return Ok();                
             }
             catch (Exception ex)
             {

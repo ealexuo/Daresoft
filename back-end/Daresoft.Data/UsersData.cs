@@ -110,12 +110,12 @@ namespace Daresoft.Data
             throw new NotImplementedException();
         }
 
-        public Task<int> EditAsync(UserProfileModel user, DateTime createdDate)
+        public Task<UserProfileModel> UpdateAsync(UserProfileModel user, int currentUserId)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<List<UsersListModel>> GetAllAsync(int offset, int fetch, string searchText)
+        public async Task<List<UserProfileModel>> GetAllAsync(int offset, int fetch, string searchText)
         {
             SqlMapper.AddTypeMap(typeof(bool), DbType.Byte);
 
@@ -123,7 +123,7 @@ namespace Daresoft.Data
             {
                 string sqlQuery = @"
                 SELECT 
-	                usrp.Id
+	                 usrp.Id
 	                ,usrp.UserName
                     ,usrp.ContactId
 	                ,co.Name
@@ -131,8 +131,16 @@ namespace Daresoft.Data
 	                ,co.LastName	
 	                ,co.OtherName
                     ,co.WorkEmail
+                    ,co.WorkPhone
+                    ,co.WorkPhoneExt
+                    ,co.MobilePhone
 	                ,usrp.IsActive
 	                ,usrp.IsDeleted
+	                ,usrp.Color
+                    ,usrp.ProfilePicture
+                    ,usrp.ProfilePictureContentType
+                    ,usrp.IsActive
+                    ,usrp.IsPasswordChangeRequired
                     ,COUNT(*) OVER () TotalCount
                 FROM UserProfile usrp
                 JOIN Contact co on usrp.ContactId = co.Id
@@ -147,7 +155,7 @@ namespace Daresoft.Data
                 if (String.IsNullOrEmpty(searchText))
                     searchText = "*";
 
-                var result = await connection.QueryAsync<UsersListModel>(sqlQuery, new
+                var result = await connection.QueryAsync<UserProfileModel>(sqlQuery, new
                 {
                     Offset = offset,
                     Fetch = fetch,

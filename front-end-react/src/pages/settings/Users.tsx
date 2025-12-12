@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import {TableColumnType, StickyHeadTable, ItemActionListType} from '../../components/StickyHeadTable'
 import Page from '../../components/Page'
-import { userService } from '../../services/settings/userService';
+import { usersService } from '../../services/settings/usersService';
 import { administrativeUnitsService } from '../../services/settings/administrativeUnitsService';
 import { processPermissionService } from '../../services/settings/processPermissionService';
 import Loader from '../../components/Loader';
@@ -69,54 +69,26 @@ const columnsInit: TableColumnType[] = [
   }
 ];
 
+// Empty user object
 const emptyUserObject: User = {
-  id: -1,
+  id: 0,
   userName: '',
-  contactId: -1,
+  contactId: 0,
   name: '',
   middleName: '',
   lastName: '',
   otherName: '',
   workEmail: '',
-  isActive: true
+  workPhone: '',
+  workPhoneExt: '',
+  mobilePhone: '',
+  color: '',
+  profilePicture: '',
+  profilePictureContentType: '',
+  isDeleted: false,
+  isActive: true,
+  isPasswordChangeRequired: false
 };
-
-// const emptyContactObject = {
-//   id: -1,
-//   salutation: undefined,
-//   name: '',
-//   middleName: '',
-//   lastName: '',
-//   otherName: '',
-//   title: undefined,
-//   homeAddressLine1: '',
-//   homeAddressLine2: '',
-//   homeCity: '',
-//   homeState: '',
-//   homePostalCode: '',
-//   countryId: -1,
-//   workAddressLine1: '',
-//   workAddressLine2: '',
-//   workCity: '',
-//   workState: '',
-//   workPostalCode: '',
-//   workCountry: '',
-//   workEmail: '',
-//   homeEmail: '',
-//   homePhone: '',
-//   workPhone: '',
-//   workPhoneExt: '',
-//   mobilePhone: '',
-//   companyId: -1,
-//   contactTypeId: -1,
-//   notes: '',
-//   preferredAddress: -1,
-//   companyName: '',
-//   website: '',
-//   primaryContactId: -1,
-//   isSupplier: false,
-//   isDeleted: false
-// };
 
 export default function Users() {
 
@@ -169,7 +141,7 @@ export default function Users() {
       setLoading(true);
       
       const rowsTemp: any[] = [];
-      const response = await userService.getAll(offset + 1, fetch, searchText);
+      const response = await usersService.getAll(offset + 1, fetch, searchText);
 
       if(response.statusText === 'OK') {
         if(response.data.totalCount){
@@ -207,7 +179,7 @@ export default function Users() {
   const fetchUser = async (userId: number) =>{
     
     try {
-      const response = await userService.get(userId);
+      const response = await usersService.get(userId);
       if(response.statusText === 'OK') {
         setLoading(false);        
         return response.data;
@@ -224,21 +196,21 @@ export default function Users() {
 
   const deleteSelectedUser = async (entityId: number, userId: number) => {
 
-    setLoading(true);
+    // setLoading(true);
 
-    try {
-      const response = await userService.delete(entityId, userId); 
+    // try {
+    //   const response = await usersService.delete(entityId, userId); 
 
-      if (response.statusText === "OK") {
-        setLoading(false);
-        enqueueSnackbar('Usuario eliminado.', { variant: "success" });
-      } else {
-        enqueueSnackbar('Ocurrió un Error al eliminar al usuario.', { variant: "error" });
-      }
-    } catch (error: any) {
-      enqueueSnackbar('Ocurrió un Error al eliminar al usuario.. Detalles: ' + error.message, { variant: "error" });
-      setLoading(false);
-    }
+    //   if (response.statusText === "OK") {
+    //     setLoading(false);
+    //     enqueueSnackbar('Usuario eliminado.', { variant: "success" });
+    //   } else {
+    //     enqueueSnackbar('Ocurrió un Error al eliminar al usuario.', { variant: "error" });
+    //   }
+    // } catch (error: any) {
+    //   enqueueSnackbar('Ocurrió un Error al eliminar al usuario.. Detalles: ' + error.message, { variant: "error" });
+    //   setLoading(false);
+    // }
 
   }
 
@@ -401,13 +373,11 @@ export default function Users() {
       <Dialog
         open={openUserAddEditDialog}
         onClose={handleCloseUserAddEditDialog}
-        maxWidth={"lg"}        
+        maxWidth={"md"}        
       >
         <UserAddEditDialog 
           mode = {selectedUser && selectedUser.id > -1 ? 'edit' : 'add'}
-          type = 'user'
-          selectedItem = {selectedUser}
-          contact = {contact}
+          selectedUser = {selectedUser}
           onClose = {handleCloseUserAddEditDialogFromAction}
         />        
       </Dialog>
