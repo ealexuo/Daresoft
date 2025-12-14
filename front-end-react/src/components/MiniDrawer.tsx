@@ -28,6 +28,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { Collapse } from '@mui/material';
 import { FolderShared } from '@mui/icons-material';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const drawerWidth = 240;
 
@@ -322,9 +323,10 @@ export default function MiniDrawer() {
             <ListItemButton 
               onClick={() => handleMenuItemClick(menuItems.SignOut)}
               selected={selectedItem === menuItems.SignOut}
+              sx={{backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText}}
             >
               <ListItemIcon>
-                <PowerSettingsNewIcon sx={{color: theme.palette.secondary.main}}/>
+                <LogoutIcon sx={{backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText}}/>
               </ListItemIcon>
               <ListItemText primary={t("navbar.signout")} />
             </ListItemButton>
