@@ -323,10 +323,10 @@ export default function MiniDrawer() {
             <ListItemButton 
               onClick={() => handleMenuItemClick(menuItems.SignOut)}
               selected={selectedItem === menuItems.SignOut}
-              sx={{backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText}}
+              sx={{color: theme.palette.primary.main}}
             >
               <ListItemIcon>
-                <LogoutIcon sx={{backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText}}/>
+                <LogoutIcon sx={{color: theme.palette.primary.main}}/>
               </ListItemIcon>
               <ListItemText primary={t("navbar.signout")} />
             </ListItemButton>
