@@ -12,15 +12,10 @@ import {
   Paper,
   Grid,
   TextField,
-  FormGroup,
   FormControlLabel,
-  Checkbox,
-  Autocomplete, 
-  FormLabel, 
-  MenuItem, 
-  Select
+  Checkbox
 } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 // React Form Dependencies
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -32,8 +27,6 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
 
 // Services and Types
-import { contactsService } from '../services/settings/contactsService';
-import { Contact } from '../types/Contact';
 import { User } from '../types/User';
 import { ColorPicker } from 'primereact/colorpicker';
 import { usersService } from '../services/settings/usersService';
@@ -49,6 +42,12 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
   const [loading, setLoading] = useState<boolean>(false);
   const [t] = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
+
+  // Hack to populate the passowrd property when edit a existing user
+  if(mode === 'edit') {
+    selectedUser.password = 'password'; 
+    selectedUser.passwordConfirm = 'password';
+  }
 
   // Form Schema definition
   const formSchema = z.object({      
@@ -68,7 +67,9 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
       profilePictureContentType: z.string().nullable(),
       isDeleted: z.boolean(),
       isActive: z.boolean(),
-      isPasswordChangeRequired: z.boolean()     
+      isPasswordChangeRequired: z.boolean(),
+      password: z.string().min(1, t("errorMessages.requieredField")),
+      passwordConfirm: z.string().min(1, t("errorMessages.requieredField"))
   });
 
   // Form Schema Type
@@ -92,11 +93,13 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
 
       try {        
         if (mode === 'add') {
-          // await contactsService.createUser(formData); 
-          // enqueueSnackbar('Usuario creado exitosamente.', { variant: 'success' });
+          await usersService.add(userToSave); 
+          enqueueSnackbar('Usuario creado.', { variant: 'success' });
         } else {
+          userToSave.password = '';
+          userToSave.passwordConfirm = '';
           await usersService.edit(userToSave); 
-          enqueueSnackbar('Usuario actualizado exitosamente.', { variant: 'success' });
+          enqueueSnackbar('Usuario actualizado.', { variant: 'success' });
         }
       } catch (error) {
         throw error;
@@ -147,36 +150,36 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
                   label="Activo"
                 />
               </Grid>
-              {/* <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('profilePicture')}
-                  label="Foto de Perfil"
-                  fullWidth
-                  size="small"
-                />
-              </Grid>    */}             
-              {/* <Grid item xs={12} sm={6}>
-                  <TextField
-                      required
-                      label="Color"
-                      fullWidth
-                      variant="standard"                                        
-                      value={selectedColor?.startsWith('#') ? selectedColor : '#' + selectedColor}
-                      InputProps={{
-                          readOnly: true,                                        
-                      }}                                        
-                  />
-
-                  <ColorPicker
-                      inputId="cp-hex"
-                      format="hex"
-                      defaultValue={selectedUser?.color}
-                      className="mb-3"
-                      inputStyle={{ position: 'absolute', width: '20px' }}
-                      appendTo="self"
-                      {...register("color")}
-                  />
-              </Grid> */}              
+              {
+                mode === 'add' ? (
+                  <>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        {...register('password')}
+                        type='password'
+                        label="* Password"
+                        fullWidth
+                        size="small"
+                        defaultValue={selectedUser?.password || ''}
+                        error={!!errors.password}
+                        helperText={errors.password?.message as string | undefined}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        {...register('passwordConfirm')}
+                        type='password'
+                        label="* Confirmar Password"
+                        fullWidth
+                        size="small"
+                        defaultValue={selectedUser?.passwordConfirm || ''}
+                        error={!!errors.passwordConfirm}
+                        helperText={errors.passwordConfirm?.message as string | undefined}
+                      />
+                    </Grid>
+                  </>                  
+                ):(<></>)
+              }    
             </Grid>
           </Paper>
           

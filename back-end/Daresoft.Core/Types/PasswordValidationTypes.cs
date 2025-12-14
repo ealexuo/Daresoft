@@ -4,11 +4,10 @@ using System.Text;
 
 namespace Daresoft.Core.Types
 {
-    public struct PasswordValidationTypes
+    public struct ContactTypes
     {
-        public const short Valid = 1;
-        public const short ValidRequiereChange = 2;
-        public const short Invalid = 3;
+        public const short Person = 1;
+        public const short Business = 2;        
     }
 
 }

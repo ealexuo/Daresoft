@@ -22,6 +22,7 @@ namespace Daresoft.Core.Models
         public bool IsDeleted { get; set; }
         public bool? IsActive { get; set; }
         public bool IsPasswordChangeRequired { get; set; }
+        public string Password {  get; set; }
         public int TotalCount { get; set; }
     }
 }

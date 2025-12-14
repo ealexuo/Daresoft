@@ -32,7 +32,7 @@ namespace Daresoft.Data
             {
                 string sqlQuery = @"                    
                     SELECT 
-                         Id
+                         Id As UserId
                         ,UserName
                         ,PasswordHash AS Password    
                         ,IsPasswordChangeRequired

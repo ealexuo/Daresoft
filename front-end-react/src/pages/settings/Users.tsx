@@ -2,23 +2,15 @@ import React, { useCallback, useEffect, useState } from 'react'
 import {TableColumnType, StickyHeadTable, ItemActionListType} from '../../components/StickyHeadTable'
 import Page from '../../components/Page'
 import { usersService } from '../../services/settings/usersService';
-import { administrativeUnitsService } from '../../services/settings/administrativeUnitsService';
-import { processPermissionService } from '../../services/settings/processPermissionService';
 import Loader from '../../components/Loader';
 import UserAddEditDialog from '../../dialogs/UserAddEditDialog';
 import EditIcon from '@mui/icons-material/Edit';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import BadgeIcon from '@mui/icons-material/Badge'
 import DeleteIcon from '@mui/icons-material/Delete'
 import Dialog from '@mui/material/Dialog';
 import { useSnackbar } from 'notistack';
-import UserDisableDialog from '../../dialogs/UserDisableDialog';
-import moment from 'moment';
 import AlertDialog from '../../components/AlertDialog';
-import ProcessPermissionDialog from '../../dialogs/ProcessPermissionDialog';
 import { User } from '../../types/User';
 import { Tooltip } from '@mui/material';
-import { contactsService } from '../../services/settings/contactsService';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -71,9 +63,9 @@ const columnsInit: TableColumnType[] = [
 
 // Empty user object
 const emptyUserObject: User = {
-  id: 0,
+  id: -1,
   userName: '',
-  contactId: 0,
+  contactId: -1,
   name: '',
   middleName: '',
   lastName: '',
@@ -87,7 +79,9 @@ const emptyUserObject: User = {
   profilePictureContentType: '',
   isDeleted: false,
   isActive: true,
-  isPasswordChangeRequired: false
+  isPasswordChangeRequired: false,
+  password: '',
+  passwordConfirm: '',
 };
 
 export default function Users() {
@@ -104,38 +98,12 @@ export default function Users() {
   const [currentPage, setCurrentPage] = useState<number>(0);
 
   const [openUserAddEditDialog, setOpenUserAddEditDialog] = useState<boolean>(false);
-  const [openUserDisableDialog, setOpenUserDisableDialog] = useState<boolean>(false);
-  const [openProcessPermissionDialog, setOpenProcessPermissionDialog] = useState<boolean>(false);
-  
   const [openUserDeleteDialog, setOpenUserDeleteDialog] = useState<boolean>(false);
 
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [usersList, setUsersList] = useState<User[]>([]);
-
-  const [contact, setContact] = useState<any>(null);
-
-  /** Fetch Data Section */
-  const fetchContact = async (contactId: number) =>{
-      
-      setLoading(true);
-
-      try {
-        const response = await contactsService.get(contactId);
-        if(response.statusText === 'OK') {
-          setContact(response.data);
-          return response.data;
-        }        
-      }
-      catch{
-        enqueueSnackbar('Error al obtener datos de contacto.', { variant: 'error' });
-      }
-      finally{
-        setLoading(false);
-      }      
-      
-  };   
   
-
+  /** Fetch Data Section */
   const fetchUsers = useCallback(async (offset: number, fetch: number, searchText: string) => {
     try {
       setLoading(true);
@@ -176,44 +144,6 @@ export default function Users() {
     }
   }, [enqueueSnackbar]);
 
-  const fetchUser = async (userId: number) =>{
-    
-    try {
-      const response = await usersService.get(userId);
-      if(response.statusText === 'OK') {
-        setLoading(false);        
-        return response.data;
-      }
-      enqueueSnackbar('Error al obtener usuario.', { variant: 'error' });
-    }
-    catch{
-      enqueueSnackbar('Error al obtener usuario.', { variant: 'error' });
-      setLoading(false);
-    }
-    
-    return null;
-  };   
-
-  const deleteSelectedUser = async (entityId: number, userId: number) => {
-
-    // setLoading(true);
-
-    // try {
-    //   const response = await usersService.delete(entityId, userId); 
-
-    //   if (response.statusText === "OK") {
-    //     setLoading(false);
-    //     enqueueSnackbar('Usuario eliminado.', { variant: "success" });
-    //   } else {
-    //     enqueueSnackbar('Ocurrió un Error al eliminar al usuario.', { variant: "error" });
-    //   }
-    // } catch (error: any) {
-    //   enqueueSnackbar('Ocurrió un Error al eliminar al usuario.. Detalles: ' + error.message, { variant: "error" });
-    //   setLoading(false);
-    // }
-
-  }
-
   /** Handle Functions Section */
 
   const handlePageChange = (event: unknown, newPage: number) => {
@@ -250,56 +180,16 @@ export default function Users() {
     const userTemp = usersList.find(u => u.id === (user && user[0] ? user[0] : 0));
     
     if(userTemp) {
-      await fetchContact(userTemp.contactId);
       setSelectedUser(userTemp);
       setOpenUserAddEditDialog(true);
     }    
   }
 
-  // User Disable dialog
-  const handleOpenUserDisableDialog = async (user: any) => {
-    const userData = await fetchUser(user && user[0] ? user[0] : 0);
-      
-    setSelectedUser(userData);
-    setOpenUserDisableDialog(true);
-  }
-
-  const handleCloseUserDisableDialog = () => {
-    setOpenUserDisableDialog(false);
-  }
-
-  const handleCloseUserDisableDialogFromAction = (refreshUsersList: boolean = false) => {
-    if(refreshUsersList) {
-      fetchUsers(currentPage, rowsPerPage, searchText);
-    }
-    setOpenUserDisableDialog(false);
-  }
-  
-  // Process Permission dialog
-  const handleOpenProcessPermissionDialog = async (user: any) => {
-    const userData = await fetchUser(user && user[0] ? user[0] : 0);
-
-    setSelectedUser(userData);
-    setOpenProcessPermissionDialog(true);
-  }
-
-  const handleCloseProcessPermissionDialog = () => {
-    setOpenProcessPermissionDialog(false);
-  }
-
-  const handleCloseProcessPermissionDialogFromAction = (actionResult: boolean = false) => {
-    if(actionResult) {
-      fetchUsers(currentPage, rowsPerPage, searchText);
-    }
-    setOpenProcessPermissionDialog(false);
-  }
-    
-
   // User Delete Alert dialog
   const handleOpenUserDeleteDialog = async (user: any) => {
-    const userData = await fetchUser(user && user[0] ? user[0] : 0);
+    const userTemp = usersList.find(u => u.id === (user && user[0] ? user[0] : 0));
       
-    setSelectedUser(userData);
+    setSelectedUser(userTemp);
     setOpenUserDeleteDialog(true);
   }
 
@@ -308,13 +198,28 @@ export default function Users() {
   }
 
   const handleCloseUserDeleteDialogFromAction = async (actionResult: boolean = false) => {
-    if(actionResult) {
-      await deleteSelectedUser(selectedUser.idEntidad, selectedUser.idUsuario);
-      await fetchUsers(currentPage, rowsPerPage, searchText);
+    if(actionResult) { 
+
+      setLoading(true);
+
+      try {
+        const response = await usersService.delete(selectedUser.id); 
+
+        if (response.statusText === "OK") {
+          setLoading(false);
+          fetchUsers(currentPage, rowsPerPage, searchText);
+          enqueueSnackbar('Usuario eliminado.', { variant: "success" });
+        } else {
+          enqueueSnackbar('Ocurrió un error al eliminar al usuario.', { variant: "error" });
+        }
+      } catch (error: any) {
+        enqueueSnackbar('Ocurrió un Error al eliminar al usuario. Detalles: ' + error.message, { variant: "error" });
+        setLoading(false);
+      }
+
     }
     setOpenUserDeleteDialog(false);
   } 
-
 
   /** Defined Objects Section */
   const actionList: ItemActionListType =

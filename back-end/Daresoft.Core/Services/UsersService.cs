@@ -38,30 +38,17 @@ namespace Daresoft.Core.Services
             return await _usersData.GetByIdAsync(userId);
         }
 
-        public async Task<int> CreateAsync(UserProfileModel usuario, int createdByUserId)
-        {
-            //var usuarioExistente = await _datos.ObtenerPorNombreUsuarioAsync(usuario.NoIdentificacionPersonal, usuario.CorreoElectronico);
+        public async Task<UserProfileModel> CreateAsync(UserProfileModel user, int currentUserId)
+        {            
+            var existingUser = await _usersData.GetByUserNameAsync(user.UserName);
 
-            //if (usuarioExistente == null)
-            //{
-            //    string passwordTemporal = UtilidadesServicio.GenerarCadenaAleatoria();
-            //    int resultado = await _datos.CrearUsuarioAsync(usuario, _encryptServicio.HashPassword(passwordTemporal), UtilidadesServicio.FechaActualUtc, idUsuarioRegistro);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Exists");
+            }
 
-            //    if (resultado != 0)
-            //    {
-            //        await _correoElectronicoServicio.Enviar(
-            //            usuario.CorreoElectronico,
-            //            "QFile - Su Password Temporal",
-            //            "<p>Su nombre de usuario es: " + usuario.NoIdentificacionPersonal + ". Su contraseña temporal es: " + passwordTemporal + "</p> <a href=\"" + UtilidadesServicio.UrlQfile + "\">Click Aqui</a>"
-            //        );
-            //    }
-
-            //    return resultado;
-            //}
-            //else 
-            //    return -1;
-
-            return 1;
+            user.Password = _encryptPasswordService.HashPassword(user.Password);
+            return await _usersData.CreateAsync(user, currentUserId);            
         }
 
         public async Task<UserProfileModel> UpdateAsync(UserProfileModel user, int currentUserId)
@@ -74,10 +61,9 @@ namespace Daresoft.Core.Services
             return await _usersData.GetAllAsync(offset, fetch, searchText);            
         }
 
-        public async Task<bool> DeleteAsync(int userId)
+        public async Task<bool> DeleteAsync(int userId, int currentUserId)
         {
-            //return await _datos.EliminarUsuarioAsync(idEntidad, idUsuario);
-            return false;
+            return await _usersData.DeleteAsync(userId, currentUserId);
         }
 
         public async Task<UserProfileModel> ObtenerUsuarioAsync(int userid)

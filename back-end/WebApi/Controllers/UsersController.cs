@@ -52,17 +52,72 @@ namespace WebApi.Controllers
         {
             try
             {
-                //var identity = HttpContext.User.Identity as ClaimsIdentity;
-                //int currentUserId = 0;
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                int currentUserId = 0;
 
-                //if (identity != null)
-                //{
-                //    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
-                //}
+                if (identity != null)
+                {
+                    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
+                }
 
-                //var updatedUser = await _usersService.UpdateAsync(user, currentUserId);
+                var updatedUser = await _usersService.UpdateAsync(user, currentUserId);
 
-                return Ok();                
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                //ex.ToExceptionless().Submit();
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] UserProfileModel user)
+        {
+            try
+            {
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                int currentUserId = 0;
+
+                if (identity != null)
+                {
+                    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
+                }
+
+                var updatedUser = await _usersService.CreateAsync(user, currentUserId);
+
+                return Ok();
+            }
+            catch(InvalidOperationException ex)
+            {
+                //ex.ToExceptionless().Submit();
+                return StatusCode(409, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                //ex.ToExceptionless().Submit();
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> Delete(int userId)
+        {
+            try
+            {
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                int currentUserId = 0;
+
+                if (identity != null)
+                {
+                    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
+                }
+
+                var result = await _usersService.DeleteAsync(userId, currentUserId);
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

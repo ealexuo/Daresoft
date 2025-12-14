@@ -13,16 +13,16 @@ export const usersService = {
       },
     });
   },
-  // add: async (user: any): Promise<any> => {
-  //   return await axiosService.post(BASE_PATH, user);
-  // },
+  add: async (user: User): Promise<any> => {
+    return await axiosService.post(BASE_PATH, user);
+  },
   edit: async (user: User): Promise<any> => {
     return await axiosService.put(BASE_PATH, user);
   },
   get: async (userId: number): Promise<any> => {
     return await axiosService.get(BASE_PATH + userId);
   },
-  // delete: async (entityId: number, userId: number): Promise<any> => {
-  //   return await axiosService.delete(BASE_PATH + entityId + '/' + userId);
-  // }
+  delete: async (userId: number): Promise<any> => {
+    return await axiosService.delete(BASE_PATH + userId);
+  }
 };

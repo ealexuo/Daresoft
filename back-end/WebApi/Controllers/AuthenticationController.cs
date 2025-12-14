@@ -52,7 +52,10 @@ namespace WebApi.Controllers
                 {
                     var tokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = new ClaimsIdentity(new Claim[] { new Claim("UserId", userAuth.UserId.ToString(), null) }),
+                        Subject = new ClaimsIdentity(new Claim[] { 
+                            new Claim("UserId", userAuth.UserId.ToString(), null),
+                            new Claim("IdUsuario", userAuth.UserName.ToString(), null)                    
+                        }),
                         Expires = DateTime.UtcNow.AddDays(1),
                         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSetings.JWT_Secret)), SecurityAlgorithms.HmacSha256Signature),
                     };

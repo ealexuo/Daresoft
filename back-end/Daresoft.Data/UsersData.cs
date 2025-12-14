@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 using System.Data;
+using System.Xml.Linq;
+using System.Drawing;
+using Daresoft.Core.Types;
 //using Org.BouncyCastle.Asn1.X509;
 
 namespace Daresoft.Data
@@ -19,100 +22,216 @@ namespace Daresoft.Data
             this.connectionProvider = connectionProvider;
         }        
 
-        public async Task<int> CreateAsync(UserProfileModel user, string password, DateTime createdDate, int createdByUserId)
+        public async Task<UserProfileModel> CreateAsync(UserProfileModel user, int currentUserId)
         {
-            //using (var connection = await connectionProvider.OpenAsync())
-            //{
-            //    string insertarUsuarioSQL = @"                
-            //    INSERT INTO Usuario
-            //    (
-            //        Id, IdEntidad, NoIdentificacionPersonal, CorreoElectronico, PrimerNombre, SegundoNombre, OtrosNombres, PrimerApellido, SegundoApellido, 
-            //        ApellidoCasada, Titulo, Cargo, Extension, Telefono, Activo, Genero, Password, IdEstado, IdUnidadAdministrativa, RequiereCambioPassword, 
-            //        FechaRegistro, UsuarioRegistro, IdIdioma
-            //    )
-            //    VALUES(
-            //        (SELECT ISNULL(MAX(Id), 0) FROM Usuario) + 1, @IdEntidad, @NoIdentificacionPersonal, @CorreoElectronico, @PrimerNombre, @SegundoNombre, @OtrosNombres, @PrimerApellido, @SegundoApellido,
-            //        @ApellidoCasada, @Titulo, @Cargo, @Extension, @Telefono, @Activo, @Genero, @Password, @IdEstado, @IdUnidadAdministrativa, @RequiereCambioPassword,
-            //        @FechaRegistro, @UsuarioRegistro, @IdIdioma
-            //    )";
+            int userProfileId = 0;
 
-            //    string obtenerIdUsuarioSQL = @"
-            //    SELECT Id 
-            //    FROM Usuario 
-            //    WHERE NoIdentificacionPersonal = @NoIdentificacionPersonal";
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string insertContactDataSql = @"            
+                INSERT INTO Contact
+                (
+                    Name
+                    ,MiddleName
+                    ,LastName
+                    ,OtherName
+                    ,ContactTypeId
+                    ,WorkEmail
+                    ,WorkPhone
+                    ,WorkPhoneExt
+                    ,MobilePhone
+                    ,IsSupplier
+                    ,IsDeleted
+                    ,CreatedDate
+                    ,CreatedByUserId
+                    ,LastModifiedDate
+                    ,UpdatedByUserId
+                )
+                OUTPUT INSERTED.Id
+                VALUES(
+                    @Name
+                    ,@MiddleName
+                    ,@LastName
+                    ,@OtherName
+                    ,@ContactType
+                    ,@WorkEmail
+                    ,@WorkPhone
+                    ,@WorkPhoneExt
+                    ,@MobilePhone
+                    ,@IsSupplier
+                    ,@IsDeleted
+                    ,GETUTCDATE()
+                    ,@CreatedByUserId
+                    ,GETUTCDATE()
+                    ,@UpdatedByUserId
+                )";
 
-            //    string asignarRolesSQL = @"
-            //    INSERT INTO RolUsuario (IdUsuario, IdEntidad, IdRol, FechaRegistro)
-            //    VALUES(@IdUsuario, @IdEntidad, @IdRol, @FechaRegistro)";
+                string insertUserProfileDataSql = @"
+                INSERT INTO UserProfile
+                (
+                    UserName
+                    ,PasswordHash
+                    ,ContactId
+                    ,IsActive
+                    ,IsDeleted
+                    ,Color
+                    ,ProfilePicture
+                    ,IsPasswordChangeRequired
+                    ,CreatedDate
+                    ,CreatedByUserId
+                    ,LastModifiedDate
+                    ,UpdatedByUserId
+                )
+                OUTPUT INSERTED.Id
+                VALUES(
+                    @UserName
+                    ,@PasswordHash
+                    ,@ContactId
+                    ,@IsActive
+                    ,@IsDeleted
+                    ,@Color
+                    ,@ProfilePicture
+                    ,@IsPasswordChangeRequired
+                    ,GETUTCDATE()
+                    ,@CreatedByUserId
+                    ,GETUTCDATE()
+                    ,@UpdatedByUserId
+                )";
 
-            //    using (var trx = connection.BeginTransaction())
-            //    {
-            //        // Obtener información del usuario registro
-            //        var usuarioRegistro = await ObtenerPorIdAsync(idUsuarioRegistro);
+                using (var trx = connection.BeginTransaction())
+                {
+                    // Insert contact data
+                    int contactId = connection.QuerySingle<int>(insertContactDataSql, new
+                    {
+                        user.Name,
+                        user.MiddleName,
+                        user.LastName,
+                        user.OtherName,
+                        user.WorkEmail,
+                        user.WorkPhone,
+                        user.WorkPhoneExt,
+                        user.MobilePhone,
+                        user.IsDeleted,
+                        ContactType = ContactTypes.Person,
+                        IsSupplier = false,                        
+                        CreatedByUserId = currentUserId,
+                        UpdatedByUserId = currentUserId
+                    }, trx);
 
-            //        // Guardar usuario
-            //        await connection.ExecuteAsync(insertarUsuarioSQL, new
-            //        {
-            //            usuarioRegistro.IdEntidad,
-            //            usuario.NoIdentificacionPersonal,
-            //            usuario.CorreoElectronico,
-            //            usuario.PrimerNombre,
-            //            usuario.SegundoNombre,
-            //            usuario.OtrosNombres,
-            //            usuario.PrimerApellido,
-            //            usuario.SegundoApellido,
-            //            usuario.ApellidoCasada,
-            //            usuario.Titulo,
-            //            usuario.Cargo,
-            //            usuario.Extension,
-            //            usuario.Telefono,
-            //            Activo = 0,
-            //            usuario.Genero,
-            //            Password = password,
-            //            IdEstado = 1,
-            //            //FechaFinInhabilitacion = DBNull.Value,
-            //            usuario.IdUnidadAdministrativa,
-            //            RequiereCambioPassword = 1,
-            //            FechaRegistro = fechaRegistro,
-            //            UsuarioRegistro = idUsuarioRegistro,
-            //            usuarioRegistro.IdIdioma
-            //        }, trx);
+                    // Insert users data
+                    userProfileId = connection.QuerySingle<int>(insertUserProfileDataSql, new
+                    {
+                        user.UserName,                        
+                        ContactId = contactId,
+                        user.IsActive,
+                        user.IsDeleted,
+                        user.Color,
+                        user.ProfilePicture,
+                        user.IsPasswordChangeRequired,
+                        PasswordHash = user.Password,
+                        CreatedByUserId = currentUserId,
+                        UpdatedByUserId = currentUserId
+                    }, trx);
 
-            //        // Obtener Id del usuario
-            //        usuario.IdUsuario = await connection.QuerySingleAsync<int>(obtenerIdUsuarioSQL, new
-            //        {
-            //            usuario.NoIdentificacionPersonal
-            //        }, trx);
+                    trx.Commit();
+                }                   
+            }
 
-            //        // Asignar Roles
-            //        foreach (int idRol in usuario.ListaRoles)
-            //        {
-            //            await connection.ExecuteAsync(asignarRolesSQL, new
-            //            {
-            //                IdRol = idRol,
-            //                usuarioRegistro.IdEntidad,
-            //                usuario.IdUsuario,
-            //                FechaRegistro = fechaRegistro
-            //            }, trx);
-            //        }
-
-            //        trx.Commit();
-            //    }
-
-            //    return usuario.IdUsuario;
-            //}
-
-            return 1;
+            return await GetByIdAsync(userProfileId);
         }
 
-        public Task<bool> DeleteAsync(int idEntidad, int idUsuario)
+        public async Task<bool> DeleteAsync(int userId, int cuerrentUserId)
         {
-            throw new NotImplementedException();
+            int result = 0;
+            
+            //Hard delete
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string getContactIdSql = @"SELECT ContactId FROM UserProfile WHERE Id = @UserId";
+                string hardDeleteUserProfileSql = @"DELETE UserProfile WHERE Id = @UserId";
+                string hardDeleteContactSql = @"DELETE Contact WHERE Id = @ContactId";
+
+                using (var trx = connection.BeginTransaction())
+                {
+                    var ContactId = await connection.QuerySingleAsync<int>(getContactIdSql, new { UserId = userId }, trx);
+                    
+                    result = await connection.ExecuteAsync(hardDeleteUserProfileSql, new { UserId = userId }, trx);
+                    result = await connection.ExecuteAsync(hardDeleteContactSql, new { ContactId }, trx);
+
+                    trx.Commit();
+                }
+            }
+
+            return result == 1;
         }
 
-        public Task<UserProfileModel> UpdateAsync(UserProfileModel user, int currentUserId)
+        public async Task<UserProfileModel> UpdateAsync(UserProfileModel user, int currentUserId)
         {
-            throw new NotImplementedException();
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string updateContactDataSql = @"
+                UPDATE Contact
+                SET 
+	                Name = @Name
+	                ,MiddleName = @MiddleName
+	                ,LastName = @LastName
+	                ,OtherName = @OtherName
+                    ,WorkEmail = @WorkEmail
+                    ,WorkPhone = @WorkPhone
+                    ,WorkPhoneExt = @WorkPhoneExt
+                    ,MobilePhone = @MobilePhone
+                    ,LastModifiedDate = GETUTCDATE()
+                    ,UpdatedByUserId = @CurrentUserId
+                WHERE Id = @ContactId";
+
+                string updateUserProfileData = @"
+                UPDATE UserProfile
+                SET                         
+	                IsActive = @IsActive
+	                ,IsDeleted = @IsDeleted
+	                ,Color = @Color
+                    ,ProfilePicture = @ProfilePicture
+                    ,ProfilePictureContentType = @ProfilePictureContentType                        
+                    ,IsPasswordChangeRequired = @IsPasswordChangeRequired
+                    ,LastModifiedDate = GETUTCDATE()
+                    ,UpdatedByUserId = @CurrentUserId
+                WHERE Id = @Id";
+               
+                using (var trx = connection.BeginTransaction())
+                {
+                    // Update contact data
+                    await connection.ExecuteAsync(updateContactDataSql, new
+                    {
+                        user.ContactId,
+                        user.Name,
+                        user.MiddleName,
+                        user.LastName,
+                        user.OtherName,
+                        user.WorkEmail,
+                        user.WorkPhone,
+                        user.WorkPhoneExt,
+                        user.MobilePhone,
+                        CurrentUserId = currentUserId
+                    }, trx);
+
+                    // Update user data
+                    await connection.ExecuteAsync(updateUserProfileData, new
+                    {
+                        user.Id,
+                        user.IsActive,
+                        user.IsDeleted,
+                        user.Color,
+                        user.ProfilePicture,
+                        user.ProfilePictureContentType,
+                        user.IsPasswordChangeRequired,
+                        CurrentUserId = currentUserId
+                    }, trx);
+
+                    trx.Commit();
+                }                
+            }
+
+            return await GetByIdAsync(user.Id);            
         }
 
         public async Task<List<UserProfileModel>> GetAllAsync(int offset, int fetch, string searchText)
@@ -139,7 +258,6 @@ namespace Daresoft.Data
 	                ,usrp.Color
                     ,usrp.ProfilePicture
                     ,usrp.ProfilePictureContentType
-                    ,usrp.IsActive
                     ,usrp.IsPasswordChangeRequired
                     ,COUNT(*) OVER () TotalCount
                 FROM UserProfile usrp
@@ -171,25 +289,30 @@ namespace Daresoft.Data
             using (var connection = await connectionProvider.OpenAsync())
             {
                 string sqlQuery = @"                    
-                    SELECT 
-	                    [Id]
-                        ,[UserName]
-                        ,[PasswordHash]
-                        ,[ContactId]
-                        ,[Color]
-                        ,[ProfilePicture]
-                        ,[ProfilePictureContentType]
-                        ,[IsInactive]
-                        ,[IsPasswordChangeRequired]
-                        ,[IsDeleted]
-                        ,[CreatedDate]
-                        ,[LastModifiedDate]
-                        ,[CreatedByUserId]
-                        ,[UpdatedByUserId]
-                    FROM [UserProfile]
-                    WHERE [UserName] = @userId
-                ";
-                var result = await connection.QueryAsync<UserProfileModel>(sqlQuery, new { userId });
+                SELECT 
+	                    usrp.Id
+	                ,usrp.UserName
+                    ,usrp.ContactId
+	                ,co.Name
+	                ,co.MiddleName
+	                ,co.LastName	
+	                ,co.OtherName
+                    ,co.WorkEmail
+                    ,co.WorkPhone
+                    ,co.WorkPhoneExt
+                    ,co.MobilePhone
+	                ,usrp.IsActive
+	                ,usrp.IsDeleted
+	                ,usrp.Color
+                    ,usrp.ProfilePicture
+                    ,usrp.ProfilePictureContentType
+                    ,usrp.IsPasswordChangeRequired
+                    ,1 AS TotalCount
+                FROM UserProfile usrp
+                JOIN Contact co on usrp.ContactId = co.Id
+                WHERE usrp.Id = @Id";
+
+                var result = await connection.QueryAsync<UserProfileModel>(sqlQuery, new { Id = userId });
                 return result.FirstOrDefault();
             }
         }
@@ -199,247 +322,32 @@ namespace Daresoft.Data
             using (var connection = await connectionProvider.OpenAsync())
             {
                 string sqlQuery = @"                    
-                    SELECT 
-                        [Id]
-                        ,[UserName]
-                        ,[PasswordHash]
-                        ,[ContactId]
-                        ,[Color]
-                        ,[ProfilePicture]
-                        ,[ProfilePictureContentType]
-                        ,[IsInactive]
-                        ,[IsPasswordChangeRequired]
-                        ,[IsDeleted]
-                        ,[CreatedDate]
-                        ,[LastModifiedDate]
-                        ,[CreatedByUserId]
-                        ,[UpdatedByUserId]
-                    FROM [UserProfile]
-                    WHERE [UserName] = @userName
-                ";
-                var result = await connection.QueryAsync<UserProfileModel>(sqlQuery, new { userName });
+                SELECT 
+	                usrp.Id
+	                ,usrp.UserName
+                    ,usrp.ContactId
+	                ,co.Name
+	                ,co.MiddleName
+	                ,co.LastName	
+	                ,co.OtherName
+                    ,co.WorkEmail
+                    ,co.WorkPhone
+                    ,co.WorkPhoneExt
+                    ,co.MobilePhone
+	                ,usrp.IsActive
+	                ,usrp.IsDeleted
+	                ,usrp.Color
+                    ,usrp.ProfilePicture
+                    ,usrp.ProfilePictureContentType
+                    ,usrp.IsPasswordChangeRequired
+                    ,1 AS TotalCount
+                FROM UserProfile usrp
+                JOIN Contact co on usrp.ContactId = co.Id
+                WHERE usrp.UserName = @UserName";
+
+                var result = await connection.QueryAsync<UserProfileModel>(sqlQuery, new { UserName = userName });
                 return result.FirstOrDefault();
             }
-        }
-       
-        /*       
-
-        public async Task<int> CrearUsuarioAsync(UsuarioModelo usuario, String password, DateTime fechaRegistro, int idUsuarioRegistro)
-        {
-            
-        }
-
-        public async Task<int> EditarUsuarioAsync(UsuarioModelo usuario, DateTime fechaRegistro)
-        {
-            using (var connection = await connectionProvider.OpenAsync())
-            {
-                string editarUsuarioSQL = @"
-                    UPDATE Usuario
-                    SET 
-                        CorreoElectronico = @CorreoElectronico, 
-                        PrimerNombre = @PrimerNombre, 
-                        SegundoNombre = @SegundoNombre, 
-                        OtrosNombres = @OtrosNombres, 
-                        PrimerApellido = @PrimerApellido, 
-                        SegundoApellido = @SegundoApellido, 
-                        ApellidoCasada = @ApellidoCasada, 
-                        Titulo = @Titulo, 
-                        Cargo = @Cargo, 
-                        Extension = @Extension, 
-                        Telefono = @Telefono, 
-                        Genero = @Genero, 
-                        IdUnidadAdministrativa = @IdUnidadAdministrativa,
-                        Activo = @Activo
-                    WHERE Id=@IdUsuario AND IdEntidad=@IdEntidad";
-
-                string eliminarRolesActualesSQL = @"
-                DELETE RolUsuario 
-                WHERE IdUsuario = @IdUsuario AND IdEntidad = @IdEntidad";
-
-                string asignarRolesSQL = @"
-                INSERT INTO RolUsuario (IdUsuario, IdEntidad, IdRol, FechaRegistro)
-                VALUES(@IdUsuario, @IdEntidad, @IdRol, @FechaRegistro)";
-
-                using (var trx = connection.BeginTransaction())
-                {
-
-                    // Se actualiza el usuario
-                    await connection.ExecuteAsync(editarUsuarioSQL, new
-                    {
-                        usuario.CorreoElectronico,
-                        usuario.PrimerNombre,
-                        usuario.SegundoNombre,
-                        usuario.OtrosNombres,
-                        usuario.PrimerApellido,
-                        usuario.SegundoApellido,
-                        usuario.ApellidoCasada,
-                        usuario.Titulo,
-                        usuario.Cargo,
-                        usuario.Extension,
-                        usuario.Telefono,
-                        usuario.Genero,
-                        usuario.IdUnidadAdministrativa,
-                        usuario.IdEntidad,
-                        usuario.IdUsuario,
-                        usuario.Activo
-                    }, trx);
-
-                    // Se eliminan los roles actuales
-                    await connection.ExecuteAsync(eliminarRolesActualesSQL, new
-                    {
-                        usuario.IdEntidad,
-                        usuario.IdUsuario
-                    }, trx);
-
-                    // Asignar Roles
-                    foreach (int idRol in usuario.ListaRoles)
-                    {
-                        await connection.ExecuteAsync(asignarRolesSQL, new
-                        {
-                            IdRol = idRol,
-                            usuario.IdEntidad,
-                            usuario.IdUsuario,
-                            FechaRegistro = fechaRegistro
-                        }, trx);
-                    }
-
-                    trx.Commit();
-                }
-
-                return usuario.IdUsuario;
-            }
-        }
-
-        public async Task<List<UsuarioListaModelo>> ObtenerUsuariosAsync(int pagina, int cantidad, string buscarTexto)
-        {
-            SqlMapper.AddTypeMap(typeof(bool), DbType.Byte);
-
-            using (var connection = await connectionProvider.OpenAsync())
-            {
-                string sqlQuery = @"
-                SELECT * FROM
-                (
-                    SELECT *, ROW_NUMBER() OVER (ORDER BY UPPER(Nombre)) AS r__
-                    FROM
-                    (
-                        SELECT us.Id,
-			                us.IdEntidad,
-			                us.Id AS IdUsuario, 
-			                us.NoIdentificacionPersonal AS NoIdentificacionPersonal, 
-			                CONCAT(us.PrimerNombre, ' ', us.SegundoNombre, ' ', us.PrimerApellido, ' ', us.SegundoApellido) AS Nombre,
-			                us.CorreoElectronico,
-			                ISNULL(ua.Nombre, '') AS NombreUnidadAdministrativa,
-			                us.Activo AS Estado,
-			                us.FechaRegistro,
-		                COUNT(*) OVER () AS CantidadTotal
-		                FROM Usuario us
-		                LEFT JOIN UnidadAdministrativa ua ON us.IdUnidadAdministrativa = ua.Id
-		                WHERE @BuscarTexto = '*' 
-		                OR us.NoIdentificacionPersonal LIKE '%' + @BuscarTexto + '%'
-		                OR CONCAT(us.PrimerNombre, ' ', us.SegundoNombre, ' ', us.PrimerApellido, ' ', us.SegundoApellido) LIKE '%' + @BuscarTexto + '%'
-		                OR us.CorreoElectronico LIKE '%' +@BuscarTexto + '%'
-		                OR ua.Nombre LIKE '%' + @BuscarTexto + '%'
-                    ) a
-                ) AS Temp
-                WHERE r__ >= (((@Pagina-1) * @Cantidad) + 1) AND r__ < ((@Pagina * @Cantidad) + 1)";
-
-                if (String.IsNullOrEmpty(buscarTexto))
-                    buscarTexto = "*";
-
-                var result = await connection.QueryAsync<UsuarioListaModelo>(sqlQuery, new { 
-                    Pagina = pagina,
-                    Cantidad = cantidad,
-                    BuscarTexto = buscarTexto
-                });
-
-                return result.ToList();
-            }
-        }
-
-        public async Task<bool> EliminarUsuarioAsync(int idEntidad, int idUsuario)
-        {
-            //TODO: verificar si es eliminacion logica
-
-            using (var connection = await connectionProvider.OpenAsync())
-            {
-
-                string eliminarRolesActualesSQL = @"DELETE AD_ROLES_USUARIO WHERE ID_ENTIDAD = :IdEntidad AND ID_USUARIO = :IdUsuario";
-                string eliminarUsuarioSQL = @"DELETE AD_USUARIOS WHERE ID_ENTIDAD = :idEntidad AND ID_USUARIO = :idUsuario";
-
-                using (var trx = connection.BeginTransaction())
-                {
-                    // Se eliminan los roles actuales
-                    await connection.ExecuteAsync(eliminarRolesActualesSQL, new
-                    {
-                        idEntidad,
-                        idUsuario
-                    }, trx);
-
-                    // Se elimina el usuario
-                    await connection.ExecuteAsync(eliminarUsuarioSQL, new
-                    {
-                        idEntidad,
-                        idUsuario
-                    }, trx);
-
-                    trx.Commit();
-                }
-                return true;
-            }
-        }
-
-        public async Task<UsuarioModelo> ObtenerUsuarioAsync(int idUsuario)
-        {
-            SqlMapper.AddTypeMap(typeof(bool), DbType.Byte);
-
-            using (var connection = await connectionProvider.OpenAsync())
-            {
-                string obtenerUsuarioSQL = @"
-                SELECT 
-                    Id AS IdUsuario,
-	                IdEntidad,	                                    
-	                NoIdentificacionPersonal,
-	                CorreoElectronico,
-	                PrimerNombre,
-	                SegundoNombre,
-	                OtrosNombres,
-	                PrimerApellido,
-	                SegundoApellido,
-	                ApellidoCasada,
-	                Titulo,
-	                Cargo,
-	                Extension,
-	                Telefono,
-	                Genero,
-                    Activo,
-	                IdEstado,
-	                IdUnidadAdministrativa
-                FROM Usuario WHERE Id = @IdUsuario";
-
-                string obtenerIdRolUsuario = @"
-                SELECT IdRol 
-                FROM RolUsuario 
-                WHERE IdUsuario = @IdUsuario 
-                ";
-
-                var resultadoUsuario = await connection.QueryAsync<UsuarioModelo>(obtenerUsuarioSQL, new
-                {
-                    IdUsuario = idUsuario
-                });
-
-                var usuario = resultadoUsuario.FirstOrDefault();
-
-                var resultadoRoles = await connection.QueryAsync<int>(obtenerIdRolUsuario, new
-                {
-                    IdUsuario = idUsuario
-                });
-
-                usuario.ListaRoles = resultadoRoles.ToList();
-
-                return usuario;
-            }
-        }
-
-        */
+        }       
     }
 }
