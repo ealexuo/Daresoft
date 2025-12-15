@@ -5,7 +5,8 @@
         "filesExternal": "Expedientes Externos",        
         "settings": "Configuración",
         "workflows": "Procesos",
-        "signout": "Cerrar Sesión"
+        "signout": "Cerrar Sesión",
+        "suppliers": "Proveedores"
     },
 
     "workflowsPage": {

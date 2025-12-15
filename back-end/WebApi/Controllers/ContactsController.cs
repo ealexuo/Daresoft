@@ -26,22 +26,21 @@ namespace WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int offset, [FromQuery] int fetch, [FromQuery] string searchText)
         {
-            //try
-            //{
-            //    var usersList = await _usersService.GetAllAsync(offset, fetch, searchText);
+            try
+            {
+                var contactsList = await _contactsService.GetAllAsync(offset, fetch, searchText);
 
-            //    return Ok(new
-            //    {
-            //        usersList = usersList,
-            //        totalCount = usersList.Count > 0 ? usersList[0].TotalCount : 0
-            //    });
-            //}
-            //catch (Exception ex)
-            //{
-            //    //ex.ToExceptionless().Submit();
-            //    return StatusCode(500, ex.Message);
-            //}
-            return StatusCode(404);
+                return Ok(new
+                {
+                    usersList = contactsList,
+                    totalCount = contactsList.Count > 0 ? contactsList[0].TotalCount : 0
+                });
+            }
+            catch (Exception ex)
+            {
+                //ex.ToExceptionless().Submit();
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [Authorize]

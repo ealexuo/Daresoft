@@ -31,7 +31,7 @@ export type Contact = {
     preferredAddress: number;
     companyName: string;
     website: string;
-    //primaryContactId: number;
+    primaryContactId: number;
     isSupplier: boolean;
-    isDeleted: boolean;
+    isDeleted: boolean;    
 }

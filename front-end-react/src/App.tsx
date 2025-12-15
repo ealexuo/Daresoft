@@ -21,6 +21,7 @@ import AdministrativeUnits from './pages/settings/AdministrativeUnits';
 import defaultTheme from './themes/default';
 import FileDetails from './pages/files/FileDetails';
 import FilesTemp from './pages/files/FilesTemp';
+import Suppliers from './pages/suppliers/Suppliers';
 
 function App() {
 
@@ -42,6 +43,7 @@ function App() {
               <Route path="/" element={<MiniDrawer />}>
                 <Route index element={<Dashboard />} />
                 <Route path="dashboard" element={<Dashboard />} />
+                <Route path="suppliers" element={<Suppliers />} />
                 <Route path="files" element={<Files />} />
                 <Route path="filesTemp" element={<FilesTemp />} />
                 <Route path="settings" element={<Settings />} />

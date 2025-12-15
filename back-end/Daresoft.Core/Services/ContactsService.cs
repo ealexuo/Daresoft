@@ -27,9 +27,9 @@ namespace Daresoft.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText)
+        public async Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText)
         {
-            throw new NotImplementedException();
+            return await _contactsData.GetAllAsync(offset, fetch, searchText);
         }
 
         public async Task<ContactModel> GetByIdAsync(int contactId)

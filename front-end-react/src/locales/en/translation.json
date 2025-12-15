@@ -4,7 +4,8 @@
         "files": "Files",
         "settings": "Settings",
         "workflows": "Workflows",
-        "signout": "Sign Out"
+        "signout": "Sign Out",
+        "suppliers": "Suppliers"
     },
 
     "workflowsPage": {

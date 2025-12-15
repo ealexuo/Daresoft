@@ -29,9 +29,68 @@ namespace Daresoft.Data
             throw new NotImplementedException();
         }
 
-        public Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText)
+        public async Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText)
         {
-            throw new NotImplementedException();
+            SqlMapper.AddTypeMap(typeof(bool), DbType.Byte);
+            
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string sqlQuery = @"
+                SELECT 
+                    Id
+                    ,Salutation
+                    ,Name
+                    ,MiddleName
+                    ,LastName
+                    ,OtherName
+                    ,Title
+                    ,HomeAddressLine1
+                    ,HomeAddressLine2
+                    ,HomeCity
+                    ,HomeState
+                    ,HomePostalCode
+                    ,CountryId
+                    ,WorkAddressLine1
+                    ,WorkAddressLine2
+                    ,WorkCity
+                    ,WorkState
+                    ,WorkPostalCode
+                    ,WorkCountry
+                    ,WorkEmail
+                    ,HomeEmail
+                    ,HomePhone
+                    ,WorkPhone
+                    ,WorkPhoneExt
+                    ,MobilePhone
+                    ,CompanyId
+                    ,ContactTypeId
+                    ,Notes
+                    ,PreferredAddress
+                    ,CompanyName
+                    ,Website
+                    ,PrimaryContactId
+                    ,IsSupplier
+                    ,IsDeleted
+                    ,COUNT(*) OVER () TotalCount
+                FROM Contact
+                WHERE @SearchText = '*'
+                    OR CONCAT(co.Name,' ' ,co.MiddleName , ' ' , co.LastName, ' ' , co.OtherName) LIKE '%' + @SearchText + '%'
+                ORDER BY UPPER(Name) 
+                OFFSET (@Offset-1)*@Fetch ROWS
+                FETCH NEXT @Fetch ROWS ONLY";
+
+                if (String.IsNullOrEmpty(searchText))
+                    searchText = "*";
+
+                var result = await connection.QueryAsync<ContactModel>(sqlQuery, new
+                {
+                    Offset = offset,
+                    Fetch = fetch,
+                    SearchText = searchText
+                });
+
+                return result.ToList();
+            }
         }
 
         public async Task<ContactModel> GetByIdAsync(int contactId)
@@ -39,47 +98,43 @@ namespace Daresoft.Data
             using (var connection = await connectionProvider.OpenAsync())
             {
                 string sqlQuery = @"                    
-                    SELECT 
-                        [Id]
-                        ,[Salutation]
-                        ,[Name]
-                        ,[MiddleName]
-                        ,[LastName]
-                        ,[OtherName]
-                        ,[Title]
-                        ,[HomeAddressLine1]
-                        ,[HomeAddressLine2]
-                        ,[HomeCity]
-                        ,[HomeState]
-                        ,[HomePostalCode]
-                        ,[CountryId]
-                        ,[WorkAddressLine1]
-                        ,[WorkAddressLine2]
-                        ,[WorkCity]
-                        ,[WorkState]
-                        ,[WorkPostalCode]
-                        ,[WorkCountry]
-                        ,[WorkEmail]
-                        ,[HomeEmail]
-                        ,[HomePhone]
-                        ,[WorkPhone]
-                        ,[WorkPhoneExt]
-                        ,[MobilePhone]
-                        ,[CompanyId]
-                        ,[ContactTypeId]
-                        ,[Notes]
-                        ,[PreferredAddress]
-                        ,[CompanyName]
-                        ,[Website]
-                        ,[PrimaryContactId]
-                        ,[IsSupplier]
-                        ,[IsDeleted]
-                        ,[CreatedDate]
-                        ,[LastModifiedDate]
-                        ,[CreatedByUserId]
-                        ,[UpdatedByUserId]
-                    FROM [Contact]
-                    WHERE [Id] = @contactId
+                SELECT 
+                    Id
+                    ,Salutation
+                    ,Name
+                    ,MiddleName
+                    ,LastName
+                    ,OtherName
+                    ,Title
+                    ,HomeAddressLine1
+                    ,HomeAddressLine2
+                    ,HomeCity
+                    ,HomeState
+                    ,HomePostalCode
+                    ,CountryId
+                    ,WorkAddressLine1
+                    ,WorkAddressLine2
+                    ,WorkCity
+                    ,WorkState
+                    ,WorkPostalCode
+                    ,WorkCountry
+                    ,WorkEmail
+                    ,HomeEmail
+                    ,HomePhone
+                    ,WorkPhone
+                    ,WorkPhoneExt
+                    ,MobilePhone
+                    ,CompanyId
+                    ,ContactTypeId
+                    ,Notes
+                    ,PreferredAddress
+                    ,CompanyName
+                    ,Website
+                    ,PrimaryContactId
+                    ,IsSupplier
+                    ,IsDeleted
+                FROM Contact
+                WHERE Id = @contactId
                 ";
                 var result = await connection.QueryAsync<ContactModel>(sqlQuery, new { contactId });
                 return result.FirstOrDefault();

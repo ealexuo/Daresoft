@@ -29,6 +29,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { Collapse } from '@mui/material';
 import { FolderShared } from '@mui/icons-material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 
 const drawerWidth = 240;
 
@@ -135,7 +136,8 @@ export default function MiniDrawer() {
     FilesExternal = 2,
     Settings = 3,
     SignOut = 4,
-    FilesTemp = 5
+    FilesTemp = 5,
+    Suppliers
   }
 
   const[t, i18n] = useTranslation();
@@ -155,6 +157,9 @@ export default function MiniDrawer() {
     switch (item) {
       case menuItems.Dashboard:
         navigate("/dashboard");
+        break;
+      case menuItems.Suppliers:
+        navigate("/suppliers");
         break;      
       case menuItems.Files:
         navigate("/files");
@@ -261,7 +266,7 @@ export default function MiniDrawer() {
         <Divider />
         <List component="nav" dense={true}>
 
-          <ListItemButton 
+          {/* <ListItemButton 
             onClick={() => handleMenuItemClick(menuItems.Dashboard)} 
             selected={selectedItem === menuItems.Dashboard}
           >
@@ -269,16 +274,6 @@ export default function MiniDrawer() {
               <DashboardIcon />
             </ListItemIcon>
             <ListItemText primary={t("navbar.dashboard")} />
-          </ListItemButton>
-
-          {/* <ListItemButton 
-            onClick={() => handleMenuItemClick(menuItems.Files)}
-            selected={selectedItem === menuItems.Files}
-          >
-            <ListItemIcon>
-              <DriveFileMoveIcon />
-            </ListItemIcon>
-            <ListItemText primary={t("navbar.files")} />
           </ListItemButton> */}
 
           <ListItemButton 
@@ -290,6 +285,26 @@ export default function MiniDrawer() {
             </ListItemIcon>
             <ListItemText primary={t("navbar.files")} />
           </ListItemButton>
+
+          <ListItemButton 
+            onClick={() => handleMenuItemClick(menuItems.Suppliers)} 
+            selected={selectedItem === menuItems.Suppliers}
+          >
+            <ListItemIcon>
+              <AddBusinessIcon />
+            </ListItemIcon>
+            <ListItemText primary={t("navbar.suppliers")} />
+          </ListItemButton>
+
+          {/* <ListItemButton 
+            onClick={() => handleMenuItemClick(menuItems.Files)}
+            selected={selectedItem === menuItems.Files}
+          >
+            <ListItemIcon>
+              <DriveFileMoveIcon />
+            </ListItemIcon>
+            <ListItemText primary={t("navbar.files")} />
+          </ListItemButton> */}          
 
           {/* <ListItemButton 
             onClick={() => handleMenuItemClick(menuItems.FilesExternal)}

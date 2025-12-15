@@ -40,9 +40,6 @@ namespace Daresoft.Core.Models
         public int? PrimaryContactId { get; set; }
         public bool IsSupplier { get; set; }
         public bool IsDeleted { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime LastModifiedDate { get; set; }
-        public int CreatedByUserId { get; set; }
-        public int UpdatedByUserId { get; set; }
+        public int TotalCount { get; set; }
     }
 }
