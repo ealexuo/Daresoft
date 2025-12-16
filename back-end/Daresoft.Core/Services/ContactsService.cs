@@ -17,14 +17,14 @@ namespace Daresoft.Core.Services
             _contactsData = contactsData;            
         }
 
-        public Task<int> CreateAsync(ContactModel contact, int currentUserId)
+        public async Task<ContactModel> CreateAsync(ContactModel contact, int currentUserId)
         {
-            throw new NotImplementedException();
+            return await _contactsData.CreateAsync(contact, currentUserId);
         }
 
-        public Task<bool> DeleteAsync(int contactId, int currentUserId)
+        public async Task<bool> DeleteAsync(int contactId, int currentUserId)
         {
-            throw new NotImplementedException();
+            return await _contactsData.DeleteAsync(contactId, currentUserId);
         }
 
         public async Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText)
@@ -37,9 +37,9 @@ namespace Daresoft.Core.Services
             return await _contactsData.GetByIdAsync(contactId);
         }
 
-        public Task<int> UpdateAsync(ContactModel contact, int currentUserId)
+        public async Task<ContactModel> UpdateAsync(ContactModel contact, int currentUserId)
         {
-            throw new NotImplementedException();
+            return await _contactsData.UpdateAsync(contact, currentUserId);
         }
     }
 }

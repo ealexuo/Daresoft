@@ -1,3 +1,4 @@
+import { Contact } from "../../types/Contact";
 import axiosService from "../axios/axiosService";
 
 const BASE_PATH = "api/Contacts/";
@@ -12,16 +13,16 @@ export const contactsService = {
       },
     });
   },
-  // add: async (contact: any): Promise<any> => {
-  //   return await axiosService.post(BASE_PATH, contact);
-  // },
-  // edit: async (entityId: number, userId: number, contact: any): Promise<any> => {
-  //   return await axiosService.put(BASE_PATH + entityId + '/' + userId, contact);
-  // },
+  add: async (contact: Contact): Promise<any> => {
+    return await axiosService.post(BASE_PATH, contact);
+  },
+  edit: async (contact: Contact): Promise<any> => {
+    return await axiosService.put(BASE_PATH, contact);
+  },
   get: async (contactId: number): Promise<any> => {
     return await axiosService.get(BASE_PATH + contactId);
   },
-  // delete: async (entityId: number, userId: number): Promise<any> => {
-  //   return await axiosService.delete(BASE_PATH + entityId + '/' + userId);
-  // }
+  delete: async (contactId: number): Promise<any> => {
+    return await axiosService.delete(BASE_PATH + contactId);
+  }
 };

@@ -3,16 +3,15 @@ import {TableColumnType, StickyHeadTable, ItemActionListType} from '../../compon
 import Page from '../../components/Page'
 import { usersService } from '../../services/settings/usersService';
 import Loader from '../../components/Loader';
-import UserAddEditDialog from '../../dialogs/UserAddEditDialog';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete'
 import Dialog from '@mui/material/Dialog';
 import { useSnackbar } from 'notistack';
 import AlertDialog from '../../components/AlertDialog';
-import { User } from '../../types/User';
 import { Tooltip } from '@mui/material';
 import { Contact } from '../../types/Contact';
 import { contactsService } from '../../services/settings/contactsService';
+import SupplierAddEditDialog from '../../dialogs/SupplierAddEditDialog';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -78,8 +77,8 @@ const columnsInit: TableColumnType[] = [
   }
 ];
 
-// Empty user object
-const emptySuplierObject: Contact = {
+// Empty supplier object
+const emptySupplierObject: Contact = {
   id: -1,
   salutation: '',
   name: '',
@@ -106,14 +105,12 @@ const emptySuplierObject: Contact = {
   workPhoneExt: '',
   mobilePhone: '',
   companyId: -1,
-  contactTypeId: -1,
+  contactTypeId: 1,
   notes: '',
   preferredAddress: -1,
   companyName: '',
   website: '',
-  primaryContactId: -1,
   isSupplier: true,
-  isDeleted: false,  
 };
 
 export default function Suppliers() {
@@ -133,7 +130,7 @@ export default function Suppliers() {
   const [openSupplierDeleteDialog, setOpenSupplierDeleteDialog] = useState<boolean>(false);
 
   const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
-  const [suppliersList, setUsersList] = useState<User[]>([]);
+  const [suppliersList, setSuppliersList] = useState<Contact[]>([]);
   
   /** Fetch Data Section */
   const fetchSuppliers = useCallback(async (offset: number, fetch: number, searchText: string) => {
@@ -148,7 +145,7 @@ export default function Suppliers() {
           setTotalRows(response.data.totalCount);
         }
 
-        response.data.usersList.forEach((item: any) => {
+        response.data.contactsList.forEach((item: any) => {
           rowsTemp.push([
             item.id,
             item.name,
@@ -164,17 +161,17 @@ export default function Suppliers() {
           ]);
         });
 
-        setUsersList(response.data.usersList);
+        setSuppliersList(response.data.contactsList);
         setRows(rowsTemp);
         setLoading(false);
 
       }
       else {
-        enqueueSnackbar('Ocurrió un error al obtener la lista de usuarios.', { variant: 'error' });
+        enqueueSnackbar('Ocurrió un error al obtener la lista de proveedores.', { variant: 'error' });
       }        
     }
     catch(error: any){
-      enqueueSnackbar('Ocurrió un error al obtener la lista de usuarios. Detalles: ' + error.message, { variant: 'error' });
+      enqueueSnackbar('Ocurrió un error al obtener la lista de proveedores. Detalles: ' + error.message, { variant: 'error' });
       setLoading(false);
     }
   }, [enqueueSnackbar]);
@@ -194,18 +191,18 @@ export default function Suppliers() {
     setSearchText(event.target.value);
   };
 
-  // User Add/Edit dialog
-  const handleOpenUserAddEditDialog = () => {
-    setSelectedSupplier(emptySuplierObject);
+  // Supplier Add/Edit dialog
+  const handleOpenSupplierAddEditDialog = () => {
+    setSelectedSupplier(emptySupplierObject);
     setOpenSupplierAddEditDialog(true);
   }
 
-  const handleCloseUserAddEditDialog = () => {
+  const handleCloseSupplierAddEditDialog = () => {
     setOpenSupplierAddEditDialog(false);
   }
 
-  const handleCloseUserAddEditDialogFromAction = (refreshUsersList: boolean = false) => {
-    if(refreshUsersList) {
+  const handleCloseSupplierAddEditDialogFromAction = (refreshSuppliersList: boolean = false) => {
+    if(refreshSuppliersList) {
       fetchSuppliers(currentPage, rowsPerPage, searchText);
     }
     setOpenSupplierAddEditDialog(false);
@@ -221,34 +218,34 @@ export default function Suppliers() {
   }
 
   // User Delete Alert dialog
-  const handleOpenUserDeleteDialog = async (supplier: any) => {
+  const handleOpenSupplierDeleteDialog = async (supplier: any) => {
     const supplierTemp = suppliersList.find(s => s.id === (supplier && supplier[0] ? supplier[0] : 0));
       
     setSelectedSupplier(supplierTemp);
     setOpenSupplierDeleteDialog(true);
   }
 
-  const handleCloseUserDeleteDialog = () => {    
+  const handleCloseSupplierDeleteDialog = () => {    
     setOpenSupplierDeleteDialog(false);
   }
 
-  const handleCloseUserDeleteDialogFromAction = async (actionResult: boolean = false) => {
+  const handleCloseSupplierDeleteDialogFromAction = async (actionResult: boolean = false) => {
     if(actionResult) { 
 
       setLoading(true);
 
       try {
-        const response = await usersService.delete(selectedSupplier.id); 
+        const response = await contactsService.delete(selectedSupplier.id); 
 
         if (response.statusText === "OK") {
           setLoading(false);
           fetchSuppliers(currentPage, rowsPerPage, searchText);
-          enqueueSnackbar('Usuario eliminado.', { variant: "success" });
+          enqueueSnackbar('Proveedor eliminado.', { variant: "success" });
         } else {
-          enqueueSnackbar('Ocurrió un error al eliminar al usuario.', { variant: "error" });
+          enqueueSnackbar('Ocurrió un error al eliminar al proveedor.', { variant: "error" });
         }
       } catch (error: any) {
-        enqueueSnackbar('Ocurrió un Error al eliminar al usuario. Detalles: ' + error.message, { variant: "error" });
+        enqueueSnackbar('Ocurrió un Error al eliminar al proveedor. Detalles: ' + error.message, { variant: "error" });
         setLoading(false);
       }
 
@@ -261,17 +258,17 @@ export default function Suppliers() {
   [
     { 
       name: 'edit',
-      icon: <Tooltip title="Editar Usuario" arrow placement="top-start">
+      icon: <Tooltip title="Editar Proveedor" arrow placement="top-start">
               <EditIcon />
             </Tooltip>,
       callBack: handleSelectedUserEdit, 
     },    
     { 
       name: 'delete',
-      icon: <Tooltip title="Eliminar Usuario" arrow placement="top-start">
+      icon: <Tooltip title="Eliminar Proveedor" arrow placement="top-start">
               <DeleteIcon />
             </Tooltip>,
-      callBack: handleOpenUserDeleteDialog, 
+      callBack: handleOpenSupplierDeleteDialog, 
     }
   ]; 
 
@@ -295,15 +292,15 @@ export default function Suppliers() {
             <StickyHeadTable
               columns={columns}
               rows={rows}
-              addActionRoute={"/settings/users/add-user"}
-              addActionText="Nuevo Usuario"
+              addActionRoute={"/settings/suppliers/add-supplier"}
+              addActionText="Nuevo Proveedor"
               currentPage={currentPage}
               rowsPerPage={rowsPerPage}
               totalRows={totalRows}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
               onSearchTextChange={handleSearchTextChange}
-              onAddActionClick={handleOpenUserAddEditDialog}
+              onAddActionClick={handleOpenSupplierAddEditDialog}
               itemActionList={actionList}
             ></StickyHeadTable>
           )
@@ -312,26 +309,26 @@ export default function Suppliers() {
 
       <Dialog
         open={openSupplierAddEditDialog}
-        onClose={handleCloseUserAddEditDialog}
+        onClose={handleCloseSupplierAddEditDialog}
         maxWidth={"md"}        
       >
-        <UserAddEditDialog 
+        <SupplierAddEditDialog 
           mode = {selectedSupplier && selectedSupplier.id > -1 ? 'edit' : 'add'}
-          selectedUser = {selectedSupplier}
-          onClose = {handleCloseUserAddEditDialogFromAction}
+          selectedSupplier = {selectedSupplier}
+          onClose = {handleCloseSupplierAddEditDialogFromAction}
         />        
       </Dialog>
 
       <Dialog
         open={openSupplierDeleteDialog}
-        onClose={handleCloseUserDeleteDialog}
+        onClose={handleCloseSupplierDeleteDialog}
         maxWidth={"sm"}
       >
         <AlertDialog
           color = {'error'}
-          title = {'Eliminar usuario'}
-          message = {'Está seguro que desea eliminar el usuario seleccionado ?'}
-          onClose = {handleCloseUserDeleteDialogFromAction}
+          title = {'Eliminar proveedor'}
+          message = {'Está seguro que desea eliminar el proveedor seleccionado ?'}
+          onClose = {handleCloseSupplierDeleteDialogFromAction}
         />
       </Dialog>
           

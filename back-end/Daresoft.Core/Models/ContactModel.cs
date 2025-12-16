@@ -37,9 +37,7 @@ namespace Daresoft.Core.Models
         public int? PreferredAddress { get; set; }
         public string CompanyName { get; set; }
         public string Website { get; set; }
-        public int? PrimaryContactId { get; set; }
         public bool IsSupplier { get; set; }
-        public bool IsDeleted { get; set; }
         public int TotalCount { get; set; }
     }
 }
