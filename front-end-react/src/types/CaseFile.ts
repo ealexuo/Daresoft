@@ -1,3 +1,4 @@
+import { Task } from "./Task";
 
 export type CaseFile = {
     id: number;
@@ -13,5 +14,6 @@ export type CaseFile = {
     statusName: string;
     isActive: boolean;
     isDeleted: boolean;
-    totalCount: number;    
+    tasks: Task[];
+    totalCount: number;
 }

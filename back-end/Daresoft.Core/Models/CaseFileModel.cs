@@ -19,6 +19,7 @@ namespace Daresoft.Core.Models
         public string StatusName { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
-        public int TotalCount { get; set; }
+        public List<TaskModel> Tasks { get; set; }
+        public int TotalCount { get; set; } 
     }
 }

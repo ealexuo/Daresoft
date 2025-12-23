@@ -78,6 +78,7 @@ const emptyFileCaseObject: CaseFile = {
   statusName: '',
   isActive: true,
   isDeleted: false,
+  tasks: [],
   totalCount: 0,  
 };
 
@@ -129,7 +130,6 @@ export default function CaseFiles() {
         setUsersList(response.data.caseFilesList);
         setRows(rowsTemp);
         setLoading(false);
-
       }
       else {
         enqueueSnackbar('Ocurrió un error al obtener la lista de expedientes.', { variant: 'error' });

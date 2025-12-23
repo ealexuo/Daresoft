@@ -40,4 +40,16 @@ BEGIN
 	DROP TABLE [dbo].CaseFileWorkflow
 END
 
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Task]') AND type in (N'U'))
+BEGIN
+	DROP TABLE [dbo].Task
+END
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TaskHistory]') AND type in (N'U'))
+BEGIN
+	DROP TABLE [dbo].TaskHistory
+END
+
+
+
 

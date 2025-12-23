@@ -211,27 +211,6 @@ CREATE TABLE dbo.CaseFileWorkflowHistory
 );
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* CaseFile Progress */
 CREATE TABLE dbo.CaseFileWorkflowProgress
 (
@@ -269,4 +248,53 @@ CREATE TABLE dbo.CaseFileWorkflowHistory
     CONSTRAINT FK_History_CaseFileWorkflow
         FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id)
 );
+
+
+/* ----------------------------------------
+Tasks 
+------------------------------------------*/
+
+/* CaseFile Task */
+CREATE TABLE dbo.Task
+(
+    Id INT IDENTITY PRIMARY KEY,
+
+    CaseFileId INT NULL,
+
+    Name NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX) NULL,
+
+    AssignedToUserId INT NULL,
+
+    Priority TINYINT NOT NULL,   -- 1=Low, 2=Medium, 3=High
+    DueDate DATETIME NULL,
+
+    IsCompleted BIT NOT NULL DEFAULT 0,
+    CompletedDate DATETIME NULL,
+
+	CreatedDate DATETIME NOT NULL,
+	LastModifiedDate DATETIME NOT NULL,	
+	CreatedByUserId INT NOT NULL,
+	UpdatedByUserId INT NOT NULL
+
+    CONSTRAINT FK_Task_CaseFile
+        FOREIGN KEY (CaseFileId) REFERENCES dbo.CaseFile(Id)
+);
+
+/* CaseFile Task History */
+--CREATE TABLE dbo.TaskHistory
+--(
+--    Id INT IDENTITY PRIMARY KEY,
+--    TaskId INT NOT NULL,
+    
+--    OldStatusId INT NULL,
+--    NewStatusId INT NULL,
+
+--    Notes NVARCHAR(500) NULL,
+
+--	CreatedDate DATETIME NOT NULL,
+--	LastModifiedDate DATETIME NOT NULL,	
+--	CreatedByUserId INT NOT NULL,
+--	UpdatedByUserId INT NOT NULL
+--);
 

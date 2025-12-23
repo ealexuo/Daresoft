@@ -278,3 +278,12 @@ VALUES
 (22, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1);
 
 
+INSERT INTO Task (CaseFileId, Name, Description, AssignedToUserId, Priority, DueDate, IsCompleted, CompletedDate, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
+VALUES
+(3, 'Reparo 1', 'Descripción de reparo 1', 1, 1, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
+(3, 'Reparo 2', 'Descripción de reparo 2', 1, 2, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
+(3, 'Reparo 3', 'Descripción de reparo 3', 1, 3, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
+(4, 'Reparo 1', 'Descripción de reparo 1', 1, 1, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
+(4, 'Reparo 2', 'Descripción de reparo 2', 1, 2, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
+(5, 'Reparo 1', 'Descripción de reparo 1', 1, 1, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1);
+

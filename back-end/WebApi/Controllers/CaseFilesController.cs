@@ -8,6 +8,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System;
 using WebApi.Models;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WebApi.Controllers
 {
@@ -17,11 +19,17 @@ namespace WebApi.Controllers
     {
         private readonly ApplicationSettingsModel _appSetings;
         private readonly ICaseFilesService _caseFilesService;
+        private readonly ITasksService _tasksService;
 
-        public CaseFilesController(IOptions<ApplicationSettingsModel> appSettings, ICaseFilesService caseFilesService)
+        public CaseFilesController(
+            IOptions<ApplicationSettingsModel> appSettings, 
+            ICaseFilesService caseFilesService,
+            ITasksService tasksService
+        )
         {
             _appSetings = appSettings.Value;
             _caseFilesService = caseFilesService;
+            _tasksService = tasksService;
         }
 
         [Authorize]
@@ -30,7 +38,14 @@ namespace WebApi.Controllers
         {
             try
             {
-                var caseFilesList = await _caseFilesService.GetAllAsync(offset, fetch, searchText);
+                List<CaseFileModel> caseFilesList = await _caseFilesService.GetAllAsync(offset, fetch, searchText);
+                List<int> caseFileIds = caseFilesList.Select(cf => cf.Id).ToList();
+                List<TaskModel> tasksList = await _tasksService.GetByCaseFileIdsAsync(caseFileIds);
+
+                foreach (var caseFile in caseFilesList)
+                {
+                    caseFile.Tasks = tasksList.Where(t => t.CaseFileId == caseFile.Id).ToList();
+                }
 
                 return Ok(new
                 {
