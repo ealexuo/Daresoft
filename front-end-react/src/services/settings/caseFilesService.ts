@@ -22,7 +22,7 @@ export const caseFilesService = {
   // get: async (contactId: number): Promise<any> => {
   //   return await axiosService.get(BASE_PATH + contactId);
   // },
-  // delete: async (contactId: number): Promise<any> => {
-  //   return await axiosService.delete(BASE_PATH + contactId);
-  // }
+  delete: async (caseFileId: number): Promise<any> => {
+    return await axiosService.delete(BASE_PATH + caseFileId);
+  }
 };

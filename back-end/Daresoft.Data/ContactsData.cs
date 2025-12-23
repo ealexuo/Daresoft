@@ -110,7 +110,7 @@ namespace Daresoft.Data
             return result == 1;
         }
 
-        public async Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText)
+        public async Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText, bool? isSupplier)
         {
             SqlMapper.AddTypeMap(typeof(bool), DbType.Byte);
             
@@ -154,8 +154,16 @@ namespace Daresoft.Data
                     ,co.IsDeleted
                     ,COUNT(*) OVER () TotalCount
                 FROM Contact co
-                WHERE @SearchText = '*'
+                WHERE 
+                (
+                    @IsSupplier IS NULL 
+                    OR co.IsSupplier = @IsSupplier
+                )
+                AND 
+                (
+                    @SearchText = '*'
                     OR CONCAT(co.Name,' ' ,co.MiddleName , ' ' , co.LastName, ' ' , co.OtherName) LIKE '%' + @SearchText + '%'
+                )
                 ORDER BY UPPER(Name) 
                 OFFSET (@Offset-1)*@Fetch ROWS
                 FETCH NEXT @Fetch ROWS ONLY";
@@ -167,7 +175,8 @@ namespace Daresoft.Data
                 {
                     Offset = offset,
                     Fetch = fetch,
-                    SearchText = searchText
+                    SearchText = searchText,
+                    IsSupplier = isSupplier
                 });
 
                 return result.ToList();

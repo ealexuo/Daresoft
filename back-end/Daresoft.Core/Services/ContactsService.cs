@@ -27,9 +27,9 @@ namespace Daresoft.Core.Services
             return await _contactsData.DeleteAsync(contactId, currentUserId);
         }
 
-        public async Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText)
+        public async Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText, bool? isSupplier)
         {
-            return await _contactsData.GetAllAsync(offset, fetch, searchText);
+            return await _contactsData.GetAllAsync(offset, fetch, searchText, isSupplier);
         }
 
         public async Task<ContactModel> GetByIdAsync(int contactId)

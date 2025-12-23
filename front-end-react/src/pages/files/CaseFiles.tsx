@@ -3,14 +3,14 @@ import {TableColumnType, StickyHeadTable, ItemActionListType} from '../../compon
 import Page from '../../components/Page'
 import { usersService } from '../../services/settings/usersService';
 import Loader from '../../components/Loader';
-import UserAddEditDialog from '../../dialogs/UserAddEditDialog';
+import CaseFileAddEditDialog from '../../dialogs/CaseFileAddEditDialog';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete'
 import Dialog from '@mui/material/Dialog';
 import { useSnackbar } from 'notistack';
 import AlertDialog from '../../components/AlertDialog';
 import { User } from '../../types/User';
-import { Box, Collapse, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import { CaseFile } from '../../types/CaseFile';
 import { caseFilesService } from '../../services/settings/caseFilesService';
 import { Task } from '../../types/Task';
@@ -64,8 +64,8 @@ const columnsInit: TableColumnType[] = [
   }
 ];
 
-// Empty filecase object
-const emptyFileCaseObject: CaseFile = {
+// Empty CaseFile object
+const emptyCaseFileObject: CaseFile = {
   id: -1,
   caseNumber: '',
   name: '',
@@ -96,11 +96,11 @@ export default function CaseFiles() {
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(0);
 
-  const [openUserAddEditDialog, setOpenUserAddEditDialog] = useState<boolean>(false);
-  const [openUserDeleteDialog, setOpenUserDeleteDialog] = useState<boolean>(false);
+  const [openCaseFileAddEditDialog, setOpenCaseFileAddEditDialog] = useState<boolean>(false);
+  const [openCaseFileDeleteDialog, setOpenCaseFileDeleteDialog] = useState<boolean>(false);
 
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [usersList, setUsersList] = useState<User[]>([]);
+  const [selectedCaseFile, setSelectedCaseFile] = useState<any>(null);
+  const [caseFilesList, setCaseFilesList] = useState<User[]>([]);
 
   const generateCollapsableContent = (tasks: Task[]) => {
     return (
@@ -161,7 +161,7 @@ export default function CaseFiles() {
           ]);
         });
         
-        setUsersList(response.data.caseFilesList);
+        setCaseFilesList(response.data.caseFilesList);
         setRows(rowsTemp);
         setLoading(false);
       }
@@ -190,51 +190,51 @@ export default function CaseFiles() {
     setSearchText(event.target.value);
   };
 
-  // FileCase Add/Edit dialog
-  const handleOpenUserAddEditDialog = () => {
-    setSelectedUser(emptyFileCaseObject);
-    setOpenUserAddEditDialog(true);
+  // CaseFile Add/Edit dialog
+  const handleOpenCaseFileAddEditDialog = () => {
+    setSelectedCaseFile(emptyCaseFileObject);
+    setOpenCaseFileAddEditDialog(true);
   }
 
-  const handleCloseUserAddEditDialog = () => {
-    setOpenUserAddEditDialog(false);
+  const handleCloseCaseFileAddEditDialog = () => {
+    setOpenCaseFileAddEditDialog(false);
   }
 
-  const handleCloseUserAddEditDialogFromAction = (refreshUsersList: boolean = false) => {
-    if(refreshUsersList) {
+  const handleCloseCaseFileAddEditDialogFromAction = (refreshCaseFilesList: boolean = false) => {
+    if(refreshCaseFilesList) {
       fetchCaseFiles(currentPage, rowsPerPage, searchText);
     }
-    setOpenUserAddEditDialog(false);
+    setOpenCaseFileAddEditDialog(false);
   }
 
-  const handleSelectedUserEdit = async (user: any) => {    
-    const userTemp = usersList.find(u => u.id === (user && user[0] ? user[0] : 0));
+  const handleSelectedCaseFileEdit = async (caseFile: any) => {    
+    const caseFileTemp = caseFilesList.find(c => c.id === (caseFile && caseFile[0] ? caseFile[0] : 0));
     
-    if(userTemp) {
-      setSelectedUser(userTemp);
-      setOpenUserAddEditDialog(true);
+    if(caseFileTemp) {
+      setSelectedCaseFile(caseFileTemp);
+      setOpenCaseFileAddEditDialog(true);
     }    
   }
 
-  // User Delete Alert dialog
-  const handleOpenUserDeleteDialog = async (user: any) => {
-    const userTemp = usersList.find(u => u.id === (user && user[0] ? user[0] : 0));
+  // CaseFile Delete Alert dialog
+  const handleOpenCaseFileDeleteDialog = async (caseFile: any) => {
+    const caseFileTemp = caseFilesList.find(c => c.id === (caseFile && caseFile[0] ? caseFile[0] : 0));
       
-    setSelectedUser(userTemp);
-    setOpenUserDeleteDialog(true);
+    setSelectedCaseFile(caseFileTemp);
+    setOpenCaseFileDeleteDialog(true);
   }
 
-  const handleCloseUserDeleteDialog = () => {    
-    setOpenUserDeleteDialog(false);
+  const handleCloseCaseFileDeleteDialog = () => {    
+    setOpenCaseFileDeleteDialog(false);
   }
 
-  const handleCloseUserDeleteDialogFromAction = async (actionResult: boolean = false) => {
+  const handleCloseCaseFileDeleteDialogFromAction = async (actionResult: boolean = false) => {
     if(actionResult) { 
 
       setLoading(true);
 
       try {
-        const response = await usersService.delete(selectedUser.id); 
+        const response = await caseFilesService.delete(selectedCaseFile.id); 
 
         if (response.statusText === "OK") {
           setLoading(false);
@@ -249,7 +249,7 @@ export default function CaseFiles() {
       }
 
     }
-    setOpenUserDeleteDialog(false);
+    setOpenCaseFileDeleteDialog(false);
   } 
 
   /** Defined Objects Section */
@@ -260,14 +260,14 @@ export default function CaseFiles() {
       icon: <Tooltip title="Editar Usuario" arrow placement="top-start">
               <EditIcon />
             </Tooltip>,
-      callBack: handleSelectedUserEdit, 
+      callBack: handleSelectedCaseFileEdit, 
     },    
     { 
       name: 'delete',
       icon: <Tooltip title="Eliminar Usuario" arrow placement="top-start">
               <DeleteIcon />
             </Tooltip>,
-      callBack: handleOpenUserDeleteDialog, 
+      callBack: handleOpenCaseFileDeleteDialog, 
     }
   ]; 
 
@@ -292,14 +292,14 @@ export default function CaseFiles() {
               columns={columns}
               rows={rows}
               addActionRoute={"/settings/users/add-user"}
-              addActionText="Nuevo Usuario"
+              addActionText="Nuevo Expediente"
               currentPage={currentPage}
               rowsPerPage={rowsPerPage}
               totalRows={totalRows}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
               onSearchTextChange={handleSearchTextChange}
-              onAddActionClick={handleOpenUserAddEditDialog}
+              onAddActionClick={handleOpenCaseFileAddEditDialog}
               itemActionList={actionList}
               isCollapsible={true}
             ></StickyHeadTable>
@@ -308,30 +308,30 @@ export default function CaseFiles() {
       </Page>
 
       <Dialog
-        open={openUserAddEditDialog}
-        onClose={handleCloseUserAddEditDialog}
+        open={openCaseFileAddEditDialog}
+        onClose={handleCloseCaseFileAddEditDialog}
         maxWidth={"md"}        
       >
-        <UserAddEditDialog 
-          mode = {selectedUser && selectedUser.id > -1 ? 'edit' : 'add'}
-          selectedUser = {selectedUser}
-          onClose = {handleCloseUserAddEditDialogFromAction}
+        <CaseFileAddEditDialog 
+          mode = {selectedCaseFile && selectedCaseFile.id > -1 ? 'edit' : 'add'}
+          selectedCaseFile = {selectedCaseFile}
+          onClose = {handleCloseCaseFileAddEditDialogFromAction}
         />        
       </Dialog>
 
       <Dialog
-        open={openUserDeleteDialog}
-        onClose={handleCloseUserDeleteDialog}
+        open={openCaseFileDeleteDialog}
+        onClose={handleCloseCaseFileDeleteDialog}
         maxWidth={"sm"}
       >
         <AlertDialog
           color = {'error'}
-          title = {'Eliminar usuario'}
-          message = {'Está seguro que desea eliminar el usuario seleccionado ?'}
-          onClose = {handleCloseUserDeleteDialogFromAction}
+          title = {'Eliminar expediente'}
+          message = {'Está seguro que desea eliminar el expediente seleccionado ?'}
+          onClose = {handleCloseCaseFileDeleteDialogFromAction}
         />
       </Dialog>
           
-    </>    
+    </>
   );
 }

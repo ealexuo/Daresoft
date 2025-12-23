@@ -26,11 +26,17 @@ namespace WebApi.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int offset, [FromQuery] int fetch, [FromQuery] string searchText)
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int offset, 
+            [FromQuery] int fetch, 
+            [FromQuery] string searchText, 
+            int contactTypeId,
+            bool? isSupplier = null
+        )
         {
             try
             {
-                var contactsList = await _contactsService.GetAllAsync(offset, fetch, searchText);
+                var contactsList = await _contactsService.GetAllAsync(offset, fetch, searchText, isSupplier);
 
                 return Ok(new
                 {

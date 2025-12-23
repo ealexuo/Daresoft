@@ -9,7 +9,7 @@ namespace Daresoft.Core.Services
         Task<ContactModel> GetByIdAsync(int contactId);
         Task<ContactModel> CreateAsync(ContactModel contact, int currentUserId);
         Task<ContactModel> UpdateAsync(ContactModel contact, int currentUserId);
-        Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText);
+        Task<List<ContactModel>> GetAllAsync(int offset, int fetch, string searchText, bool? isSupplier);
         Task<bool> DeleteAsync(int contactId, int currentUserId);
     }
 }
