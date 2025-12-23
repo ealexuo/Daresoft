@@ -81,6 +81,7 @@ namespace Daresoft.Data
                 SELECT 
                     Id
 	                ,CaseFileId
+                    ,WorkflowId
 	                ,Name
 	                ,Description
 	                ,AssignedToUserId 

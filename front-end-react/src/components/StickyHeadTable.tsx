@@ -257,35 +257,7 @@ export function StickyHeadTable({
                       <TableRow>
                         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
                           <Collapse in={openIndex === index} timeout="auto" unmountOnExit>
-                            <Box sx={{ margin: 1 }}>
-                              {/* <Typography variant="h6" gutterBottom component="div">
-                                History
-                              </Typography> */}
-                              <Table size="small" aria-label="purchases">
-                                <TableHead>
-                                  <TableRow>
-                                    <TableCell>Date</TableCell>
-                                    <TableCell>Customer</TableCell>
-                                    <TableCell align="right">Amount</TableCell>
-                                    <TableCell align="right">Total price ($)</TableCell>
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {tasks.map((task) => (
-                                    <TableRow key={task.date}>
-                                      <TableCell component="th" scope="row">
-                                        {task.date}
-                                      </TableCell>
-                                      <TableCell>{task.customerId}</TableCell>
-                                      <TableCell align="right">{task.amount}</TableCell>
-                                      <TableCell align="right">
-                                        {'250'}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </Box>
+                            {row[8]}
                           </Collapse>
                         </TableCell>
                       </TableRow>                        

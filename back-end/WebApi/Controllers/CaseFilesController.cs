@@ -44,7 +44,7 @@ namespace WebApi.Controllers
 
                 foreach (var caseFile in caseFilesList)
                 {
-                    caseFile.Tasks = tasksList.Where(t => t.CaseFileId == caseFile.Id).ToList();
+                    caseFile.Tasks = tasksList.Where(t => t.CaseFileId == caseFile.Id && t.WorkflowId == caseFile.WorkflowId).ToList();
                 }
 
                 return Ok(new

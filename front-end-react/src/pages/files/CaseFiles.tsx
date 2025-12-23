@@ -10,9 +10,10 @@ import Dialog from '@mui/material/Dialog';
 import { useSnackbar } from 'notistack';
 import AlertDialog from '../../components/AlertDialog';
 import { User } from '../../types/User';
-import { Tooltip } from '@mui/material';
+import { Box, Collapse, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import { CaseFile } from '../../types/CaseFile';
 import { caseFilesService } from '../../services/settings/caseFilesService';
+import { Task } from '../../types/Task';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -100,6 +101,38 @@ export default function CaseFiles() {
 
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [usersList, setUsersList] = useState<User[]>([]);
+
+  const generateCollapsableContent = (tasks: Task[]) => {
+    return (
+      <Box sx={{ margin: 1 }}>
+        <Typography variant="h6" gutterBottom component="div">
+          Notas de reparo
+        </Typography>
+        <Table size="small" aria-label="purchases">
+          <TableHead>
+            <TableRow>
+              <TableCell>Nombre</TableCell>
+              <TableCell>Descripción</TableCell>
+              <TableCell>Usuario Asignado</TableCell>
+              <TableCell>Finalizada</TableCell>
+              <TableCell>Fecha Finalización</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {tasks.map((task) => (
+              <TableRow key={task.id}>
+                <TableCell component="th" scope="row">{task.name}</TableCell>
+                <TableCell>{task.description}</TableCell>                
+                <TableCell>{task.assignedToUserId}</TableCell>
+                <TableCell>{task.isCompleted}</TableCell>
+                <TableCell>{task.completedDate.toString()}</TableCell>                
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
+    )
+  }
   
   /** Fetch Data Section */
   const fetchCaseFiles = useCallback(async (offset: number, fetch: number, searchText: string) => {
@@ -124,6 +157,7 @@ export default function CaseFiles() {
             item.supplierLastName,
             item.workflowName,
             item.statusName,
+            generateCollapsableContent(item.tasks), // Colapsable Content at the end of the array
           ]);
         });
         

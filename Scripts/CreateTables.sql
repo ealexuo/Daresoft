@@ -260,6 +260,7 @@ CREATE TABLE dbo.Task
     Id INT IDENTITY PRIMARY KEY,
 
     CaseFileId INT NULL,
+	WorkflowId INT NULL,
 
     Name NVARCHAR(255) NOT NULL,
     Description NVARCHAR(MAX) NULL,
