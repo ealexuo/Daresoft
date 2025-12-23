@@ -267,6 +267,7 @@ export default function CaseFiles() {
               onSearchTextChange={handleSearchTextChange}
               onAddActionClick={handleOpenUserAddEditDialog}
               itemActionList={actionList}
+              isCollapsible={true}
             ></StickyHeadTable>
           )
         }

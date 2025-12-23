@@ -16,7 +16,9 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Checkbox from '@mui/material/Checkbox';
 import { useNavigate } from 'react-router-dom';
-import { alpha, Button, InputBase, styled } from '@mui/material';
+import { alpha, Button, Collapse, InputBase, styled } from '@mui/material';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 export type ItemActionType = {
   name: string;
@@ -59,7 +61,8 @@ type TableProps<T> = {
   },
   itemActionList?: ItemActionListType,
   hideSearch?: boolean,
-  hidePagination?: boolean
+  hidePagination?: boolean,
+  isCollapsible?: boolean
 }
 
 function DebounceTextField({ handleDebounce, debounceTimeout }: any) {
@@ -150,9 +153,25 @@ export function StickyHeadTable({
   itemActionList,
   hideSearch,
   hidePagination,
+  isCollapsible
 }: TableProps<string | number | boolean | React.ReactNode | any>) {
 
   const navigate = useNavigate();
+
+  const [openIndex, setOpenIndex] = React.useState(-1);
+
+  const tasks:any [] = [
+      {
+        date: '2020-01-05',
+        customerId: '11091700',
+        amount: 3,
+      },
+      {
+        date: '2020-01-02',
+        customerId: 'Anonymous',
+        amount: 1,
+      },
+    ]
 
   return (
     <>
@@ -175,6 +194,7 @@ export function StickyHeadTable({
         <Table stickyHeader size="small" aria-label="sticky table">
           <TableHead>
             <TableRow>
+              {isCollapsible && <TableCell />}
               {columns.map((column) => (
                 column.hidden ? (<></>) : (
                   <TableCell
@@ -195,32 +215,81 @@ export function StickyHeadTable({
               <TableBody>
                 {rows.map((row, index) => {
                   return (
-                    <TableRow hover role="checkbox" key={index}>
-                      {row.map((item, index) => {
-                        return (
-                          ( columns[index].hidden ? (<></>) :
-                            typeof item === "object" 
-                            ? ''
-                            : (<TableCell align={columns[index].align} key={index}>
-                            {typeof item === "boolean" 
-                            ? ( <Checkbox checked={item} disabled={true} />) 
-                            : ( validaHexa(item) 
-                              ? (<div style={{ width: "8mm", height: "8mm", backgroundColor: item }}></div>)
-                              : ( typeof item === "object" 
-                                  ? ''
-                                  : item)
-                            )}
-                          </TableCell>))                      
-                        );
-                      })}
-                      <TableCell>
-                      {
-                        itemActionList?.map((action: ItemActionType, index) => {
-                          return(<IconButton key={index} onClick={() =>{ action.callBack(row) }}> {action.icon} </IconButton>)                      
-                        })
-                      }
-                      </TableCell>
-                    </TableRow>
+                    <>
+                      <TableRow hover role="checkbox" key={index}>                      
+                        {isCollapsible && 
+                        (
+                          <TableCell>
+                            <IconButton
+                              aria-label="expand row"
+                              size="small"
+                              onClick={() => setOpenIndex(openIndex === index ? -1 : index)}
+                            >
+                              { openIndex === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon /> }
+                            </IconButton>
+                          </TableCell>)
+                        }
+                        {row.map((item, index) => {
+                          return (
+                            ( columns[index].hidden ? (<></>) :
+                              typeof item === "object" 
+                              ? ''
+                              : (<TableCell align={columns[index].align} key={index}>
+                              {typeof item === "boolean" 
+                              ? ( <Checkbox checked={item} disabled={true} />) 
+                              : ( validaHexa(item) 
+                                ? (<div style={{ width: "8mm", height: "8mm", backgroundColor: item }}></div>)
+                                : ( typeof item === "object" 
+                                    ? ''
+                                    : item)
+                              )}
+                            </TableCell>))                      
+                          );
+                        })}
+                        <TableCell>
+                        {
+                          itemActionList?.map((action: ItemActionType, index) => {
+                            return(<IconButton key={index} onClick={() =>{ action.callBack(row) }}> {action.icon} </IconButton>)                      
+                          })
+                        }
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                          <Collapse in={openIndex === index} timeout="auto" unmountOnExit>
+                            <Box sx={{ margin: 1 }}>
+                              {/* <Typography variant="h6" gutterBottom component="div">
+                                History
+                              </Typography> */}
+                              <Table size="small" aria-label="purchases">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Date</TableCell>
+                                    <TableCell>Customer</TableCell>
+                                    <TableCell align="right">Amount</TableCell>
+                                    <TableCell align="right">Total price ($)</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {tasks.map((task) => (
+                                    <TableRow key={task.date}>
+                                      <TableCell component="th" scope="row">
+                                        {task.date}
+                                      </TableCell>
+                                      <TableCell>{task.customerId}</TableCell>
+                                      <TableCell align="right">{task.amount}</TableCell>
+                                      <TableCell align="right">
+                                        {'250'}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </Box>
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>                        
+                    </>
                   );
                 })}
               </TableBody>
