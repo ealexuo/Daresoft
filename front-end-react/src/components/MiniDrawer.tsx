@@ -136,7 +136,7 @@ export default function MiniDrawer() {
     FilesExternal = 2,
     Settings = 3,
     SignOut = 4,
-    FilesTemp = 5,
+    CaseFiles = 5,
     Suppliers
   }
 
@@ -164,8 +164,8 @@ export default function MiniDrawer() {
       case menuItems.Files:
         navigate("/files");
         break;
-      case menuItems.FilesTemp:
-        navigate("/filesTemp");
+      case menuItems.CaseFiles:
+        navigate("/caseFiles");
       break;
       case menuItems.FilesExternal:
         navigate("/files");
@@ -277,8 +277,8 @@ export default function MiniDrawer() {
           </ListItemButton> */}
 
           <ListItemButton 
-            onClick={() => handleMenuItemClick(menuItems.FilesTemp)}
-            selected={selectedItem === menuItems.FilesTemp}
+            onClick={() => handleMenuItemClick(menuItems.CaseFiles)}
+            selected={selectedItem === menuItems.CaseFiles}
           >
             <ListItemIcon>
               <DriveFileMoveIcon />
@@ -341,7 +341,13 @@ export default function MiniDrawer() {
               sx={{color: theme.palette.primary.main}}
             >
               <ListItemIcon>
-                <LogoutIcon sx={{color: theme.palette.primary.main}}/>
+                <LogoutIcon 
+                  sx={{
+                    color: theme.palette.primary.main,
+                    transform: 'rotate(180deg)',
+                    //transition: 'transform 0.3s ease-in-out', // Optional: adds a smooth transition
+                  }}                
+                />
               </ListItemIcon>
               <ListItemText primary={t("navbar.signout")} />
             </ListItemButton>

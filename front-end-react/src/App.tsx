@@ -20,7 +20,7 @@ import Origins from './pages/settings/Origins';
 import AdministrativeUnits from './pages/settings/AdministrativeUnits';
 import defaultTheme from './themes/default';
 import FileDetails from './pages/files/FileDetails';
-import FilesTemp from './pages/files/FilesTemp';
+import CaseFiles from './pages/files/CaseFiles';
 import Suppliers from './pages/suppliers/Suppliers';
 
 function App() {
@@ -45,7 +45,7 @@ function App() {
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="suppliers" element={<Suppliers />} />
                 <Route path="files" element={<Files />} />
-                <Route path="filesTemp" element={<FilesTemp />} />
+                <Route path="caseFiles" element={<CaseFiles />} />
                 <Route path="settings" element={<Settings />} />
 
                 {/* Users Setting Section */}
