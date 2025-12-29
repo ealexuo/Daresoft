@@ -10,10 +10,13 @@ import Dialog from '@mui/material/Dialog';
 import { useSnackbar } from 'notistack';
 import AlertDialog from '../../components/AlertDialog';
 import { User } from '../../types/User';
-import { Box, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
+import { Alert, Box, Chip, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
 import { CaseFile } from '../../types/CaseFile';
 import { caseFilesService } from '../../services/settings/caseFilesService';
 import { Task } from '../../types/Task';
+import moment from 'moment';
+import 'moment/locale/es';
+import { DateField } from '@mui/x-date-pickers';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -29,12 +32,7 @@ const columnsInit: TableColumnType[] = [
   },
   { 
     id: "Name", 
-    label: "Nombre", 
-    minWidth: 100 
-  },
-  { 
-    id: "Description", 
-    label: "Descripción", 
+    label: "Producto", 
     minWidth: 100 
   },
   { 
@@ -43,49 +41,66 @@ const columnsInit: TableColumnType[] = [
     minWidth: 100 
   },
   { 
-    id: "SupplierLastName", 
-    label: "Apellido Proveedor", 
+    id: "StatusMOH", 
+    label: "Estado MOH", 
+    minWidth: 100 
+  },
+  { 
+    id: "TasksCountMOH", 
+    label: "Notas MOH", 
+    minWidth: 100 
+  },
+  { 
+    id: "DueDateMOH", 
+    label: "Fecha límite MOH", 
+    minWidth: 100 
+  },
+  { 
+    id: "StatusLNS", 
+    label: "Estado LNS", 
+    minWidth: 100 
+  },
+  { 
+    id: "TasksCountLNS", 
+    label: "Notas LNS", 
+    minWidth: 100 
+  },
+  { 
+    id: "DueDateLNS", 
+    label: "Fecha límite LNS", 
     minWidth: 100 
   },
   {
-    id: "WorkflowName",
-    label: "Proceso",
-    minWidth: 100,    
-  },
-  {
-    id: "StatusName",
-    label: "Estado",
-    minWidth: 100,    
-  },  
-  {
     id: "Actions",
     label: "Acciones",
-    minWidth: 100,    
+    minWidth: 100,
   }
 ];
 
 // Empty CaseFile object
-const emptyCaseFileObject: CaseFile = {
-  id: -1,
-  caseNumber: '',
-  name: '',
-  description: '',
-  supplierId: -1,
-  supplierName: '',
-  supplierLastName: '',
-  workflowId: -1,
-  workflowName: '',
-  statusId: -1,
-  statusName: '',
-  isActive: true,
-  isDeleted: false,
-  tasks: [],
-  totalCount: 0,  
-};
+// const emptyCaseFileObject: CaseFile = {
+//   id: -1,
+//   caseNumber: '',
+//   name: '',
+//   description: '',
+//   supplierId: -1,
+//   supplierName: '',
+//   supplierLastName: '',
+//   workflowId: -1,
+//   workflowName: '',
+//   statusId: -1,
+//   statusName: '',
+//   isActive: true,
+//   isDeleted: false,
+//   tasks: [],
+//   totalCount: 0,  
+// };
 
 export default function CaseFiles() {
 
   const { enqueueSnackbar } = useSnackbar();
+  const theme = useTheme();
+  
 
   const [loading, setLoading] = useState<boolean>(false);
   const [columns, setColumns] = useState(columnsInit as any);
@@ -134,6 +149,59 @@ export default function CaseFiles() {
     )
   }
   
+  const generateTasksCountContent = (taskCount: number) => {
+
+    let indicator;
+    let message = taskCount + ' de 3';
+
+    switch (taskCount) {
+      case 0: 
+        indicator = <Chip label='Sin notas' size="small"/>; 
+        break;
+      case 1: 
+        indicator = <Chip label={message} sx={{ backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText }}/>;
+        break;
+      case 2: 
+        indicator = <Chip label={message} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
+        break;
+      default: 
+        indicator = <Chip label={message} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>
+    }
+    
+    return (<>{indicator}</>);    
+  }
+
+  const generateDueDateContent = (dueDate: Date | null) => {
+
+    let dueDateContent;
+
+    let safeDate = new Date();
+    safeDate.setDate(safeDate.getDate() - 30);
+
+    let dangerDate = new Date();
+    safeDate.setDate(safeDate.getDate() - 15);
+    
+    if(dueDate === null){
+      dueDateContent = <></>;
+    }
+    else {
+      
+      let dueDateTemp = new Date(dueDate);
+
+      if(dueDateTemp <= safeDate){
+        dueDateContent = <Alert severity='info' variant="standard">{dueDateTemp.toLocaleDateString()}</Alert>;
+      }
+      else if(dueDateTemp > safeDate && dueDateTemp < dangerDate){
+        dueDateContent = <Alert severity='warning' variant="standard">{dueDateTemp.toLocaleDateString()}</Alert>;
+      }
+      else {
+        dueDateContent = <Alert severity='error' variant="standard">{dueDateTemp.toLocaleDateString()}</Alert>;
+      }
+    }  
+
+    return (<>{dueDateContent}</>);
+  }
+
   /** Fetch Data Section */
   const fetchCaseFiles = useCallback(async (offset: number, fetch: number, searchText: string) => {
     try {
@@ -147,16 +215,31 @@ export default function CaseFiles() {
           setTotalRows(response.data.totalCount);
         }
 
-        response.data.caseFilesList.forEach((item: any) => {
+        response.data.caseFilesList.forEach((item: CaseFile) => {
+
+          item.createdDate = item.createdDate ? new Date(item.createdDate) : new Date();
+          
+          const year = item.createdDate.getFullYear();                   
+          const caseNumberTemp = item.supplierName.replace(' ', '') + '-' + item.id + '-' + year;
+          const tasksMOH = item.tasks.filter(t => t.workflowId === 2).sort((t1, t2) => t2.id - t1.id);
+          const tasksLNS = item.tasks.filter(t => t.workflowId === 1).sort((t1, t2) => t2.id - t1.id);
+          // const statusMOH = item.workflows ? item.workflows.find(w => w.id === 2)?.statusName : 'Sin estado';
+          // const statusLNS = item.workflows ? item.workflows.find(w => w.id === 1)?.statusName : 'Sin estado';          
+
           rowsTemp.push([
             item.id,
-            item.caseNumber,
+            item.caseNumber && item.caseNumber !== '' ? item.caseNumber : caseNumberTemp,
             item.name,
-            item.description,
             item.supplierName,
-            item.supplierLastName,
-            item.workflowName,
-            item.statusName,
+            // MOH
+            'Creado',
+            generateTasksCountContent(tasksMOH.length),
+            generateDueDateContent(tasksMOH.length > 0 ? tasksMOH[0].dueDate : null),
+            // LNS
+            'Creado',
+            generateTasksCountContent(tasksLNS.length),
+            generateDueDateContent(tasksLNS.length > 0 ? tasksLNS[0].dueDate : null),
+
             generateCollapsableContent(item.tasks), // Colapsable Content at the end of the array
           ]);
         });
@@ -192,7 +275,7 @@ export default function CaseFiles() {
 
   // CaseFile Add/Edit dialog
   const handleOpenCaseFileAddEditDialog = () => {
-    setSelectedCaseFile(emptyCaseFileObject);
+    setSelectedCaseFile(undefined);
     setOpenCaseFileAddEditDialog(true);
   }
 

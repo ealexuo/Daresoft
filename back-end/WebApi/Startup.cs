@@ -57,6 +57,7 @@ namespace WebApi
             services.AddTransient<IContactsService, ContactsService>(); // daresoft
             services.AddTransient<ICaseFilesService, CaseFilesService>(); // daresoft
             services.AddTransient<ITasksService, TasksService>(); // daresoft
+            services.AddTransient<IDocumentsService, DocumentsService>(); // daresoft
 
 
             // datos
@@ -67,6 +68,7 @@ namespace WebApi
             services.AddTransient<IContactsData, ContactsData>(); // daresoft
             services.AddTransient<ICaseFilesData, CaseFilesData>(); // daresoft
             services.AddTransient<ITasksData, TasksData>(); // daresoft
+            services.AddTransient<IDocumentsData, DocumentsData>(); // daresoft
 
 
             // appSettings

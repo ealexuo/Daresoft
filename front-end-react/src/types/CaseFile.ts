@@ -1,19 +1,21 @@
+
+import { CaseFileWorkflow } from "./CaseFileWorkflow";
 import { Task } from "./Task";
+import { Document } from "./Document";
 
 export type CaseFile = {
     id: number;
     caseNumber: string; 
     name: string; 
     description: string; 
-    supplierId: number;
+    supplierContactId: number;
     supplierName: string;
     supplierLastName: string;
-    workflowId: number;
-    workflowName: string;
-    statusId: number;
-    statusName: string;
     isActive: boolean;
     isDeleted: boolean;
+    workflows: CaseFileWorkflow[];
     tasks: Task[];
+    documents: Document[];
+    createdDate?: Date;
     totalCount: number;
 }

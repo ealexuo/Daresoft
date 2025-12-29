@@ -10,16 +10,15 @@ namespace Daresoft.Core.Models
         public string CaseNumber { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public int? SupplierId { get; set; }
+        public int? SupplierContactId { get; set; }
         public string SupplierName { get; set; }
         public string SupplierLastName { get; set; }
-        public int WorkflowId { get; set; }
-        public string WorkflowName { get; set; }
-        public int StatusId { get; set; }
-        public string StatusName { get; set; }
+        public List<CaseFileWorkflowModel> Workflows { get; set; }
+        public List<TaskModel> Tasks { get; set; }
+        public List<DocumentModel> Documents { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
-        public List<TaskModel> Tasks { get; set; }
+        public DateTime CreatedDate { get; set; }
         public int TotalCount { get; set; } 
     }
 }

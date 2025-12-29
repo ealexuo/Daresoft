@@ -299,3 +299,18 @@ CREATE TABLE dbo.Task
 --	UpdatedByUserId INT NOT NULL
 --);
 
+/* Documents */
+
+CREATE TABLE dbo.Document
+(
+    Id INT IDENTITY PRIMARY KEY,
+    CaseFileId INT NOT NULL,
+	Name NVARCHAR(255) NOT NULL,
+	Path NVARCHAR(MAX) NOT NULL,
+	ContentType NVARCHAR(100) NOT NULL,
+	Size INT NOT NULL,
+
+    CONSTRAINT FK_Document_CaseFile
+        FOREIGN KEY (CaseFileId) REFERENCES dbo.CaseFile(Id)
+);
+

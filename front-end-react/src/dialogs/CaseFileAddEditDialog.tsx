@@ -1,8 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import {
     DialogContent, DialogTitle, DialogActions, Button, Grid, TextField, Autocomplete, Box,
     ToggleButtonGroup,
-    ToggleButton
+    ToggleButton,
+    styled,
+    selectClasses,
+    Divider,
+    Typography,
+    Paper,
+    useTheme, 
+    Theme,
 } from "@mui/material"
 import { useForm, SubmitHandler, Controller } from 'react-hook-form'
 import { z } from 'zod'
@@ -24,9 +31,21 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import 'moment/locale/es';
 
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { Task } from '../types/Task'
+import { Document } from '../types/Document'
+import { CaseFileWorkflow } from '../types/CaseFileWorkflow'
+import { caseFilesService } from '../services/settings/caseFilesService'
+import { ThemeContext, ThemeProvider } from '@emotion/react'
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+
+type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
+
+type WorkflowType = 'both' | 'lns' | 'moh';
+
 type DialogProps = {
     mode: 'add'|'edit',
-    selectedCaseFile: CaseFile,
+    selectedCaseFile: CaseFile | undefined,
     onClose: (refresh: boolean) => void    
 }
 
@@ -37,85 +56,107 @@ type DialogProps = {
 //     descripcion: string;
 // }
 
+type SupplierListData = {
+    id: number;
+    label: string;        
+};
+
 export default function CaseFileAddEditDialog({ mode, selectedCaseFile, onClose }: DialogProps) {
     
     const { enqueueSnackbar } = useSnackbar();
     const [t] = useTranslation();
+    const theme = useTheme();
     
     const [loading, setLoading] = useState<boolean>(false);
-    const [suppliersList, setSupliersList] = useState<Contact[]>([]);
+    const [suppliersList, setSupliersList] = useState<SupplierListData[]>([]);
     const [selectedSupplierId, setSelectedSupplierId] = useState<number>(0);
-    const [entryDate, setEntryDate] = useState<moment.Moment>(moment());
+    const [entryDateMOH, setEntryDateMOH] = useState<moment.Moment>(moment());
+    const [entryDateLNS, setEntryDateLNS] = useState<moment.Moment>(moment());
 
+    const [workflow, setWorkflow] = useState<WorkflowType>('both');
+
+    const [documentLNS, setDocumentLNS] = useState<File | null>(null);
+    const [documentMOH, setDocumentMOH] = useState<File | null>(null);
+
+    const [uploadStatusLNS, setUploadStatusLNS] = useState<UploadStatus>('idle');
+    const [uploadStatusMOH, setUploadStatusMOH] = useState<UploadStatus>('idle');
+
+    const VisuallyHiddenInput = styled('input')({
+        clip: 'rect(0 0 0 0)',
+        clipPath: 'inset(50%)',
+        height: 1,
+        overflow: 'hidden',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        whiteSpace: 'nowrap',
+        width: 1,
+    });
+
+    if(!selectedCaseFile) {
+        selectedCaseFile = {
+            id: -1,
+            caseNumber: '',
+            name: '',
+            description: '',
+            supplierContactId: -1,
+            supplierName: '',
+            supplierLastName: '',
+            isActive: true,
+            isDeleted: false,
+            workflows: [],
+            tasks: [],
+            documents: [],
+            totalCount: 0
+        }
+    }
+
+    // Form Schema definition
     const formSchema = z.object({
-        Proceso: z.custom<Proceso>((val) => val !== null, {
-            message: "Campo requerido",
-        }),
-        Origen: z.custom<Proceso>((val) => val !== null, {
-            message: "Campo requerido",
-        }),
-        emisor: z.string().min(1, "Campo requerido"),
-        descripcion: z.string().min(1, "Campo requerido").max(500, "Máximo 500 caracteres"),        
-        supplier: z.string().min(1, t("errorMessages.requieredField")),
-        
-    })
+        supplierName: z.string(),
+        name: z.string(),       
+        MOHEntry: z.string(),
+        MOHKey: z.string(),
+        LNSEntry: z.string(),
+        LNSKey: z.string(),        
+    });
 
-    type FileFormType = {
-        Proceso: Proceso | null;
-        Origen: Origen | null;
-        emisor: string;
-        descripcion: string;
-        supplier: Contact | null;
-    }
-
-    const defaultValues: FileFormType = {
-        Proceso: null,
-        Origen: null,
-        emisor: '',
-        descripcion: '',
-        supplier: null
-    }
-
-    const { control, register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FileFormType>({
+    // Form Schema Type
+    type CaseFileFormType = z.infer<typeof formSchema>;
+    
+    // Form Hook
+    const { control, register, handleSubmit, formState: { errors, isSubmitting } } = useForm<CaseFileFormType>({
         resolver: zodResolver(formSchema),
-        defaultValues,
-        mode: 'onTouched'
+        defaultValues: {
+            supplierName: '',
+            name: '',
+            MOHEntry: '',
+            MOHKey: '',
+            LNSEntry: '',
+            LNSKey: '',
+        }
     })
 
-    const onSubmit: SubmitHandler<FileFormType> = async (formData) => {
-
-        // if (!formData.Proceso || !formData.Origen) return;
-
-        // const fileObject: File = {
-        //     idProceso: formData.Proceso?.idProceso,
-        //     idOrigen: formData.Origen?.idOrigen,
-        //     emisor: formData.emisor,
-        //     descripcion: formData.descripcion
-        // };
-        // try {
-        //     await fileService.add(fileObject);
-        //     enqueueSnackbar("Expediente creado exitosamente", { variant: "success" })
-        //     onClose(true)
-        // } catch (error) {
-        //     enqueueSnackbar("Error al crear expediente", { variant: "error" })
-        // }
-    }
-
-    const safeNombre = (option: any) =>
-        typeof option === 'object' && option !== null && 'nombre' in option ? option.nombre : '';
-
-
-    const [alignment, setAlignment] = React.useState('web');
-
-    const handleToggleButtonChange = (
+    const handleWorkflowChange = (
         event: React.MouseEvent<HTMLElement>,
-        newAlignment: string,
+        newValue: WorkflowType
     ) => {
-        setAlignment(newAlignment);
+        setWorkflow(newValue);
     };
 
+    const handleDocumentChangeMOH = (e: ChangeEvent<HTMLInputElement>) => {
+        if(e.target.files){
+            setDocumentMOH(e.target.files[0]);
+        }
+    };
 
-    /** Fetch Data Section */
+    const handleDocumentChangeLNS = (e: ChangeEvent<HTMLInputElement>) => {
+        if(e.target.files){
+            setDocumentLNS(e.target.files[0]);
+        }
+    };
+
+        /** Fetch Data Section */
     const fetchSuppliers = useCallback(async () => {
         try {
             setLoading(true);
@@ -150,8 +191,84 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, onClose 
 
     useEffect(()=>{
         fetchSuppliers();
-    }, [fetchSuppliers])
+    }, [fetchSuppliers]);
 
+    // For Submit Logic
+    const onSubmit: SubmitHandler<CaseFileFormType> = async (formData) => {
+
+        const selectedSupplierTemp = suppliersList.find(s => s.label === formData.supplierName);
+
+        const workflowLNS: CaseFileWorkflow = {
+            id: 0,
+            caseFileId: 0,
+            caseFileName: '',
+            workflowId: 1,
+            workflowName: '',
+            workflowStatusId: 1,
+            statusName: '',
+            externalIdentifier: formData.LNSEntry + '|' + formData.LNSKey,
+            startDate: entryDateLNS.toDate(),
+            endDate: null
+        }
+
+        const workflowMOH: CaseFileWorkflow = {
+            id: 0,
+            caseFileId: 0,
+            caseFileName: '',
+            workflowId: 2,
+            workflowName: '',
+            workflowStatusId: 1,
+            statusName: '',
+            externalIdentifier: formData.MOHEntry + '|' + formData.MOHKey,
+            startDate: entryDateMOH.toDate(),
+            endDate: null
+        }
+        
+        const entryDocumentMOH: Document = {
+            id: 0,
+            caseFileId: 0,
+            name: documentMOH ? documentMOH.name : '',
+            path: 'MOH',
+            contentType: documentMOH ? documentMOH.type : '',
+            size: documentMOH ? documentMOH.size : 0
+        }
+
+        const entryDocumentLNS: Document = {
+            id: 0,
+            caseFileId: 0,
+            name: documentLNS ? documentLNS.name : '',
+            path: 'LNS',
+            contentType: documentLNS ? documentLNS.type : '',
+            size: documentLNS ? documentLNS.size : 0
+        }
+
+        const caseFileToSave: CaseFile = {
+            id: 0,
+            caseNumber: '',
+            name: formData.name,
+            description: '',
+            supplierContactId: selectedSupplierTemp ? selectedSupplierTemp.id : 0,
+            supplierName: '',
+            supplierLastName: '',
+            isActive: true,
+            isDeleted: false,
+            workflows: [workflowMOH, workflowLNS],
+            tasks: [],
+            documents: [entryDocumentMOH, entryDocumentLNS],            
+            totalCount: 0
+        }
+
+        try {
+            const caseFileResponse = await caseFilesService.add(caseFileToSave);
+            // todo save and upload document
+            
+            enqueueSnackbar("Expediente creado exitosamente", { variant: "success" })
+            onClose(true)
+        } catch (error) {
+            enqueueSnackbar("Error al crear expediente.", { variant: "error" })
+        }
+    }
+   
     return (
         <form onSubmit={handleSubmit(onSubmit, (errors) => {
             console.log("Errores del formulario:", errors);
@@ -161,75 +278,194 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, onClose 
                 <Box sx={{ mt: 1, mb: 2, fontSize: 12, color: '#666' }}>
                     Los campos marcados con (*) son obligatorios.
                 </Box>
-                <Grid container spacing={2}>
-                    {/* <Grid item xs={12} sm={12}>
+
+                <Typography variant="subtitle1">
+                    Información general
+                </Typography>
+
+                {/* <Grid item xs={12} sm={12}>
                         <ToggleButtonGroup
                             color="primary"
-                            value={alignment}
+                            value={workflow}
                             exclusive
-                            onChange={handleToggleButtonChange}
-                            aria-label="Platform"
+                            onChange={handleWorkflowChange}
+                            aria-label="Workflow"
                             >
-                            <ToggleButton value="web">Laboratorio Nacional de Salud (LNS)</ToggleButton>
-                            <ToggleButton value="android">Ministry of Health (MOH)</ToggleButton>                            
+                            <ToggleButton value="both">Ambos LNS y MOH</ToggleButton>
+                            <ToggleButton value="lns">Solo LNS</ToggleButton>
+                            <ToggleButton value="moh">Solo MOH</ToggleButton>                            
                         </ToggleButtonGroup>
                     </Grid> */}
-                    <Grid item xs={12} sm={6}>
-                        <Autocomplete
-                            disablePortal
-                            id="suppliersList"
-                            options={suppliersList}
-                            isOptionEqualToValue={(option: any, value: any) => option.name === value.name}
-                            defaultValue={suppliersList[0]}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="* Proveedor"
-                                    {...register("supplier")}
-                                    error = { errors.supplier?.message ? true : false }
-                                    helperText= { errors.supplier?.message }
-                                />
-                            )}                      
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <LocalizationProvider dateAdapter={AdapterMoment}>
-                            <DatePicker
-                                views={['year', 'month', 'day']}
-                                label="* Fecha de ingreso"
-                                name="entryDate"
-                                value={entryDate}
-                                slotProps={{ textField: { fullWidth: true } }}
-                                onChange={(newDate) => setEntryDate(newDate || moment())}
+
+                <Paper
+                    variant="outlined"
+                    sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
+                >
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                disablePortal
+                                id="suppliersList"
+                                options={suppliersList}
+                                isOptionEqualToValue={(option: any, value: any) => option.name === value.name}
+                                defaultValue={suppliersList[0]}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="* Proveedor"
+                                        {...register("supplierName")}
+                                        error = { errors.supplierName?.message ? true : false }
+                                        helperText= { errors.supplierName?.message }
+                                    />
+                                )}                      
                             />
-                        </LocalizationProvider>
+                        </Grid>                        
+                        <Grid item xs={12}>
+                            <TextField
+                                label="* Producto"                            
+                                fullWidth
+                                type='text'
+                                inputProps={{ maxLength: 500 }}
+                                {...register("name")}
+                            />
+                        </Grid>
+                    </Grid>                    
+                </Paper>
+                
+                <Typography variant="subtitle1">
+                    Ministry of Health (MOH)
+                </Typography>
+
+                <Paper
+                    variant="outlined"
+                    sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
+                >                    
+                    <Grid container spacing={2}>                        
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Número de Entrada SIAD"                            
+                                fullWidth
+                                type='number'
+                                inputProps={{ maxLength: 500 }}
+                                {...register("MOHEntry")}
+                            />                        
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Llave"                            
+                                fullWidth
+                                type='text'
+                                inputProps={{ maxLength: 500 }}
+                                {...register("MOHKey")}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <LocalizationProvider dateAdapter={AdapterMoment}>
+                                <DatePicker
+                                    views={['year', 'month', 'day']}
+                                    label="* Fecha de ingreso"
+                                    name="entryDate"
+                                    value={entryDateMOH}
+                                    slotProps={{ textField: { fullWidth: true } }}
+                                    onChange={(newDate) => setEntryDateMOH(newDate || moment())}                                
+                                />
+                            </LocalizationProvider>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Button
+                                component="label"
+                                role={undefined}
+                                variant="outlined"
+                                tabIndex={-1}
+                                startIcon={<UploadFileIcon />}                                
+                                >
+                                Agregar documento
+                                <VisuallyHiddenInput
+                                    type="file"
+                                    onChange={handleDocumentChangeMOH}
+                                    multiple
+                                />
+                            </Button>
+                            {
+                                documentMOH && (
+                                    <div>
+                                        <p style={{fontSize: '14px', paddingTop: 0, marginTop: 5}}>Documento seleccionado: {documentMOH.name}</p>
+                                        {/* <p>Size: {(document.size / 1024).toFixed(2)} KB</p>
+                                        <p>Type: {document.type}</p> */}
+                                    </div>
+                                )
+                            }
+                        </Grid>                        
                     </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            label="* Producto"                            
-                            fullWidth
-                            type='text'
-                            inputProps={{ maxLength: 500 }}                                                
-                        />
+                </Paper>
+
+                <Typography variant="subtitle1">
+                    Laboratorio Nacional de Salud (LNS)
+                </Typography>
+
+                <Paper
+                    variant="outlined"
+                    sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
+                >
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Número de Entrada SIAD"                            
+                                fullWidth
+                                type='number'
+                                inputProps={{ maxLength: 500 }}
+                                {...register("LNSEntry")}
+                            />                        
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Llave"                            
+                                fullWidth
+                                type='text'
+                                inputProps={{ maxLength: 500 }}
+                                {...register("LNSKey")}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <LocalizationProvider dateAdapter={AdapterMoment}>
+                                <DatePicker
+                                    views={['year', 'month', 'day']}
+                                    label="* Fecha de ingreso"
+                                    name="entryDate"
+                                    value={entryDateMOH}
+                                    slotProps={{ textField: { fullWidth: true } }}
+                                    onChange={(newDate) => setEntryDateLNS(newDate || moment())}                                
+                                />
+                            </LocalizationProvider>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Button
+                                component="label"
+                                role={undefined}
+                                variant="outlined"
+                                tabIndex={-1}
+                                startIcon={<UploadFileIcon />}
+                                >
+                                Agregar documento
+                                <VisuallyHiddenInput
+                                    type="file"
+                                    onChange={handleDocumentChangeLNS}
+                                    multiple
+                                />
+                            </Button>
+                            {
+                                documentLNS && (
+                                    <div>
+                                        <p style={{fontSize: '14px', paddingTop: 0, marginTop: 5}}>Documento seleccionado: {documentLNS.name}</p>
+                                        {/* <p>Size: {(document.size / 1024).toFixed(2)} KB</p>
+                                        <p>Type: {document.type}</p> */}
+                                    </div>
+                                )
+                            }
+                        </Grid> 
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <TextField
-                            label="Número de Entrada SIAD"                            
-                            fullWidth
-                            type='number'
-                            inputProps={{ maxLength: 500 }}                            
-                        />                        
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <TextField
-                            label="Llave"                            
-                            fullWidth
-                            type='text'
-                            inputProps={{ maxLength: 500 }}                            
-                        />
-                    </Grid>
-                    
-                </Grid>
+                </Paper>                
+
             </DialogContent>
             <DialogActions>
                 <Button variant="outlined" onClick={() => { onClose(false) }}>

@@ -1,3 +1,4 @@
+import { CaseFile } from "../../types/CaseFile";
 import { Contact } from "../../types/Contact";
 import axiosService from "../axios/axiosService";
 
@@ -13,9 +14,9 @@ export const caseFilesService = {
       },
     });
   },
-  // add: async (contact: Contact): Promise<any> => {
-  //   return await axiosService.post(BASE_PATH, contact);
-  // },
+  add: async (caseFile: CaseFile): Promise<any> => {
+    return await axiosService.post(BASE_PATH, caseFile);
+  },
   // edit: async (contact: Contact): Promise<any> => {
   //   return await axiosService.put(BASE_PATH, contact);
   // },

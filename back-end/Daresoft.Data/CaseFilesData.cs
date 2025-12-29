@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 //using Org.BouncyCastle.Asn1.X509;
 
@@ -20,77 +21,106 @@ namespace Daresoft.Data
             this.connectionProvider = connectionProvider;
         }
 
-        public async Task<CaseFileModel> CreateAsync(CaseFileModel contact, int currentUserId)
+        public async Task<CaseFileModel> CreateAsync(CaseFileModel caseFile, int currentUserId)
         {
-            //int contactId = 0;
+            int caseFileId = 0;
+            int caseFileWorkflowId = 0;
 
-            //using (var connection = await connectionProvider.OpenAsync())
-            //{
-            //    string insertContactDataSql = @"            
-            //    INSERT INTO Contact
-            //    (
-            //        Name
-            //        ,MiddleName
-            //        ,LastName
-            //        ,OtherName
-            //        ,ContactTypeId
-            //        ,WorkEmail
-            //        ,WorkPhone
-            //        ,WorkPhoneExt
-            //        ,MobilePhone
-            //        ,IsSupplier
-            //        ,IsDeleted
-            //        ,CreatedDate
-            //        ,CreatedByUserId
-            //        ,LastModifiedDate
-            //        ,UpdatedByUserId
-            //    )
-            //    OUTPUT INSERTED.Id
-            //    VALUES(
-            //        @Name
-            //        ,@MiddleName
-            //        ,@LastName
-            //        ,@OtherName
-            //        ,@ContactTypeId
-            //        ,@WorkEmail
-            //        ,@WorkPhone
-            //        ,@WorkPhoneExt
-            //        ,@MobilePhone
-            //        ,@IsSupplier
-            //        ,@IsDeleted
-            //        ,GETUTCDATE()
-            //        ,@CreatedByUserId
-            //        ,GETUTCDATE()
-            //        ,@UpdatedByUserId
-            //    )";                
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string insertCaseFileDataSql = @"            
+                INSERT INTO CaseFile
+                (
+                    CaseNumber
+                    ,Name
+                    ,Description
+                    ,SupplierContactId
+                    ,IsActive
+                    ,IsDeleted                    
+                    ,CreatedDate
+                    ,CreatedByUserId
+                    ,LastModifiedDate
+                    ,UpdatedByUserId
+                )
+                OUTPUT INSERTED.Id
+                VALUES(
+                    @CaseNumber
+                    ,@Name
+                    ,@Description
+                    ,@SupplierContactId
+                    ,@IsActive
+                    ,@IsDeleted
+                    ,GETUTCDATE()
+                    ,@CreatedByUserId
+                    ,GETUTCDATE()
+                    ,@UpdatedByUserId
+                )";
 
-            //    using (var trx = connection.BeginTransaction())
-            //    {
-            //        // Insert contact data
-            //        contactId = connection.QuerySingle<int>(insertContactDataSql, new
-            //        {
-            //            contact.Name,
-            //            contact.MiddleName,
-            //            contact.LastName,
-            //            contact.OtherName,
-            //            contact.WorkEmail,
-            //            contact.WorkPhone,
-            //            contact.WorkPhoneExt,
-            //            contact.MobilePhone,
-            //            contact.ContactTypeId,
-            //            contact.IsSupplier,
-            //            IsDeleted = false,                        
-            //            CreatedByUserId = currentUserId,
-            //            UpdatedByUserId = currentUserId
-            //        }, trx);
-                                        
-            //        trx.Commit();
-            //    }
-            //}
 
-            //return await GetByIdAsync(contactId);
+                string insertCaseFileWorkflowDataSql = @"            
+                INSERT INTO CaseFileWorkflow
+                (
+                    CaseFileId
+                    ,WorkflowId
+                    ,WorkflowStatusId
+                    ,StartDate
+                    ,EndDate
+                    ,ExternalIdentifier                    
+                    ,CreatedDate
+                    ,CreatedByUserId
+                    ,LastModifiedDate
+                    ,UpdatedByUserId
+                )
+                OUTPUT INSERTED.Id
+                VALUES(
+                    @CaseFileId
+                    ,@WorkflowId
+                    ,@WorkflowStatusId
+                    ,@StartDate
+                    ,@EndDate
+                    ,@ExternalIdentifier
+                    ,GETUTCDATE()
+                    ,@CreatedByUserId
+                    ,GETUTCDATE()
+                    ,@UpdatedByUserId
+                )";
 
-            throw new NotImplementedException();
+                using (var trx = connection.BeginTransaction())
+                {
+                    // Insert casefile data
+                    caseFileId = connection.QuerySingle<int>(insertCaseFileDataSql, new
+                    {
+                        caseFile.CaseNumber,
+                        caseFile.Name,
+                        caseFile.Description,
+                        caseFile.SupplierContactId,
+                        caseFile.IsActive,
+                        caseFile.IsDeleted,
+                        CreatedByUserId = currentUserId,
+                        UpdatedByUserId = currentUserId
+                    }, trx);
+
+                    // Insert casefileworkflow data
+                    foreach(CaseFileWorkflowModel wf in caseFile.Workflows)
+                    {
+                        caseFileWorkflowId = connection.QuerySingle<int>(insertCaseFileWorkflowDataSql, new
+                        {
+                            caseFileId,
+                            wf.WorkflowId,
+                            wf.WorkflowStatusId,
+                            wf.StartDate, 
+                            wf.EndDate,
+                            wf.ExternalIdentifier,
+                            CreatedByUserId = currentUserId,
+                            UpdatedByUserId = currentUserId
+                        }, trx);
+                    }
+
+                    trx.Commit();
+                }
+            }
+
+            return await GetByIdAsync(caseFileId);
         }
 
         public async Task<bool> DeleteAsync(int contactId, int currentUserId)
@@ -127,23 +157,15 @@ namespace Daresoft.Data
 	                ,cf.CaseNumber
 	                ,cf.Name
 	                ,cf.Description
-	                ,co.Id SupplierId
+	                ,co.Id SupplierContactId
 	                ,co.Name AS SupplierName
 	                ,co.LastName AS SupplierLastName
-	                ,wo.Id AS WorkflowId
-	                ,wo.Name AS WorkflowName
-	                ,wos.Id AS StatusId
-	                ,wos.Name AS StatusName
+                    ,cf.CreatedDate
                     ,COUNT(*) OVER () TotalCount
                 FROM CaseFile cf 
-                JOIN CaseFileWorkflow cfw on cf.Id = cfw.CaseFileId 
                 JOIN Contact co ON co.Id = cf.SupplierContactId
-                JOIN Workflow wo ON wo.Id = cfw.WorkflowId 
-                JOIN WorkflowStatus wos ON wos.Id = cfw.WorkFlowStatusId
                 WHERE @SearchText = '*'
-                    OR cf.CaseNumber LIKE '%' + @SearchText + '%'
                     OR cf.Name LIKE '%' + @SearchText + '%'
-                    OR cf.Description LIKE '%' + @SearchText + '%'
                     OR CONCAT(co.Name,' ', co.LastName) LIKE '%' + @SearchText + '%'
                 ORDER BY UPPER(cf.CaseNumber) 
                 OFFSET (@Offset-1)*@Fetch ROWS
@@ -163,54 +185,33 @@ namespace Daresoft.Data
             }
         }
 
-        public async Task<CaseFileModel> GetByIdAsync(int contactId)
+        public async Task<CaseFileModel> GetByIdAsync(int caseFileId)
         {
-            //using (var connection = await connectionProvider.OpenAsync())
-            //{
-            //    string sqlQuery = @"                    
-            //    SELECT 
-            //        Id
-            //        ,Salutation
-            //        ,Name
-            //        ,MiddleName
-            //        ,LastName
-            //        ,OtherName
-            //        ,Title
-            //        ,HomeAddressLine1
-            //        ,HomeAddressLine2
-            //        ,HomeCity
-            //        ,HomeState
-            //        ,HomePostalCode
-            //        ,CountryId
-            //        ,WorkAddressLine1
-            //        ,WorkAddressLine2
-            //        ,WorkCity
-            //        ,WorkState
-            //        ,WorkPostalCode
-            //        ,WorkCountry
-            //        ,WorkEmail
-            //        ,HomeEmail
-            //        ,HomePhone
-            //        ,WorkPhone
-            //        ,WorkPhoneExt
-            //        ,MobilePhone
-            //        ,CompanyId
-            //        ,ContactTypeId
-            //        ,Notes
-            //        ,PreferredAddress
-            //        ,CompanyName
-            //        ,Website
-            //        ,PrimaryContactId
-            //        ,IsSupplier
-            //    FROM Contact
-            //    WHERE Id = @contactId
-            //    ";
-            //    var result = await connection.QueryAsync<CaseFileModel>(sqlQuery, new { contactId });
-            //    return result.FirstOrDefault();
-            //}
+            SqlMapper.AddTypeMap(typeof(bool), DbType.Byte);
 
-            throw new NotImplementedException();
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string sqlQuery = @"
+                SELECT 
+                    cf.Id	
+	                ,cf.CaseNumber
+	                ,cf.Name
+	                ,cf.Description
+	                ,co.Id SupplierContactId
+	                ,co.Name AS SupplierName
+	                ,co.LastName AS SupplierLastName
+                    ,cf.CreatedDate
+                FROM CaseFile cf 
+                JOIN Contact co ON co.Id = cf.SupplierContactId                
+                WHERE cf.Id = @CaseFileId";                
 
+                var result = await connection.QueryAsync<CaseFileModel>(sqlQuery, new
+                {
+                    CaseFileId = caseFileId
+                });
+
+                return result.FirstOrDefault();
+            }
         }
 
         public async Task<CaseFileModel> UpdateAsync(CaseFileModel contact, int currentUserId)

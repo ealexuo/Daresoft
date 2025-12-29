@@ -173,6 +173,27 @@ export function StickyHeadTable({
       },
     ]
 
+  /*
+  {row.map((item, index) => {
+    return (
+      ( columns[index].hidden ? (<></>) :
+        typeof item === "object" 
+        ? ''
+        : (<TableCell align={columns[index].align} key={index}>
+        {typeof item === "boolean" 
+        ? ( <Checkbox checked={item} disabled={true} />) 
+        : ( validaHexa(item) 
+          ? (<div style={{ width: "8mm", height: "8mm", backgroundColor: item }}></div>)
+          : ( typeof item === "object" 
+              ? ''
+              : item)
+        )}
+      </TableCell>))                      
+    );
+
+  })}
+  */
+ 
   return (
     <>
       <Toolbar style={{ paddingLeft: "0px", justifyContent: hideSearch ? "flex-end" : "space-between" }}> 
@@ -229,22 +250,23 @@ export function StickyHeadTable({
                             </IconButton>
                           </TableCell>)
                         }
-                        {row.map((item, index) => {
-                          return (
-                            ( columns[index].hidden ? (<></>) :
-                              typeof item === "object" 
-                              ? ''
-                              : (<TableCell align={columns[index].align} key={index}>
-                              {typeof item === "boolean" 
-                              ? ( <Checkbox checked={item} disabled={true} />) 
-                              : ( validaHexa(item) 
-                                ? (<div style={{ width: "8mm", height: "8mm", backgroundColor: item }}></div>)
-                                : ( typeof item === "object" 
-                                    ? ''
-                                    : item)
-                              )}
-                            </TableCell>))                      
-                          );
+                        {
+                          row.map((item, index) => {
+                            let content;
+
+                            if(isCollapsible && index === (row.length - 1)){
+                              content = (<></>);
+                            } else if(columns[index].hidden){
+                              content = (<></>);
+                            } else {
+                              content = (
+                                <TableCell>
+                                  {item}
+                                </TableCell>
+                              )
+                            }
+
+                            return content;
                         })}
                         <TableCell>
                         {
@@ -257,7 +279,7 @@ export function StickyHeadTable({
                       <TableRow>
                         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
                           <Collapse in={openIndex === index} timeout="auto" unmountOnExit>
-                            {row[8]}
+                            {row[row.length-1]}
                           </Collapse>
                         </TableCell>
                       </TableRow>                        

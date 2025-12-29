@@ -20,16 +20,19 @@ namespace WebApi.Controllers
         private readonly ApplicationSettingsModel _appSetings;
         private readonly ICaseFilesService _caseFilesService;
         private readonly ITasksService _tasksService;
+        private readonly IDocumentsService _documentsService;
 
         public CaseFilesController(
             IOptions<ApplicationSettingsModel> appSettings, 
             ICaseFilesService caseFilesService,
-            ITasksService tasksService
+            ITasksService tasksService,
+            IDocumentsService documentsService
         )
         {
             _appSetings = appSettings.Value;
             _caseFilesService = caseFilesService;
             _tasksService = tasksService;
+            _documentsService = documentsService;
         }
 
         [Authorize]
@@ -41,10 +44,12 @@ namespace WebApi.Controllers
                 List<CaseFileModel> caseFilesList = await _caseFilesService.GetAllAsync(offset, fetch, searchText);
                 List<int> caseFileIds = caseFilesList.Select(cf => cf.Id).ToList();
                 List<TaskModel> tasksList = await _tasksService.GetByCaseFileIdsAsync(caseFileIds);
+                List<DocumentModel> documentsList = await _documentsService.GetByCaseFileIdsAsync(caseFileIds);
 
                 foreach (var caseFile in caseFilesList)
                 {
-                    caseFile.Tasks = tasksList.Where(t => t.CaseFileId == caseFile.Id && t.WorkflowId == caseFile.WorkflowId).ToList();
+                    caseFile.Tasks = tasksList.Where(t => t.CaseFileId == caseFile.Id).ToList();
+                    caseFile.Documents = documentsList.Where(d => d.CaseFileId == caseFile.Id).ToList();
                 }
 
                 return Ok(new
@@ -61,12 +66,12 @@ namespace WebApi.Controllers
         }
 
         [Authorize]
-        [HttpGet("{contactId}")]
-        public async Task<IActionResult> GetById(int contactId)
+        [HttpGet("{caseFileId}")]
+        public async Task<IActionResult> GetById(int caseFileId)
         {
             try
             {
-                var contact = await _caseFilesService.GetByIdAsync(contactId);
+                var contact = await _caseFilesService.GetByIdAsync(caseFileId);
                 return Ok(contact);
             }
             catch (Exception ex)
@@ -103,21 +108,29 @@ namespace WebApi.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ContactModel contact)
+        public async Task<IActionResult> Create([FromBody] CaseFileModel caseFile)
         {
             try
             {
-                //var identity = HttpContext.User.Identity as ClaimsIdentity;
-                //int currentUserId = 0;
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                int currentUserId = 0;
+                string companyName = "arael_test";
 
-                //if (identity != null)
-                //{
-                //    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
-                //}
+                if (identity != null)
+                {
+                    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
+                }
+                                
+                var createdCaseFile = await _caseFilesService.CreateAsync(caseFile, currentUserId);
 
-                //var updatedUser = await _caseFilesService.CreateAsync(contact, currentUserId);
+                for (int i = 0; i < caseFile.Documents.Count; i++)
+                {
+                    caseFile.Documents[i].CaseFileId = createdCaseFile.Id;
+                    caseFile.Documents[i].Path = "CF" + createdCaseFile.Id + "/" + caseFile.Documents[i].Path + "/Entry/" + caseFile.Documents[i].Name;
+                    caseFile.Documents[i] = await _documentsService.CreateAsync(caseFile.Documents[i], currentUserId);
+                }           
 
-                return Ok();
+                return Ok(createdCaseFile);
             }
             catch (InvalidOperationException ex)
             {
