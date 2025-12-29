@@ -6,7 +6,7 @@ export type CaseFileWorkflow = {
     workflowId: number;
     workflowName: string;
     workflowStatusId: number;
-    statusName: string;
+    workflowStatusName: string;
     externalIdentifier: string;
     startDate: Date;
     endDate: Date | null;

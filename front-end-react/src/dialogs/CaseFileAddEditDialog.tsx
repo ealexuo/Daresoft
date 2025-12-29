@@ -205,7 +205,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, onClose 
             workflowId: 1,
             workflowName: '',
             workflowStatusId: 1,
-            statusName: '',
+            workflowStatusName: '',
             externalIdentifier: formData.LNSEntry + '|' + formData.LNSKey,
             startDate: entryDateLNS.toDate(),
             endDate: null
@@ -218,7 +218,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, onClose 
             workflowId: 2,
             workflowName: '',
             workflowStatusId: 1,
-            statusName: '',
+            workflowStatusName: '',
             externalIdentifier: formData.MOHEntry + '|' + formData.MOHKey,
             startDate: entryDateMOH.toDate(),
             endDate: null

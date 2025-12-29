@@ -17,6 +17,8 @@ import { Task } from '../../types/Task';
 import moment from 'moment';
 import 'moment/locale/es';
 import { DateField } from '@mui/x-date-pickers';
+import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
+import SIADSearchDialog from '../../dialogs/SIADSearchDialog';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -27,18 +29,13 @@ const columnsInit: TableColumnType[] = [
   },
   { 
     id: "CaseNumber", 
-    label: 'Número de Expediente', 
-    minWidth: 50 
+    label: 'Expediente', 
+    minWidth: 150 
   },
   { 
     id: "Name", 
     label: "Producto", 
-    minWidth: 100 
-  },
-  { 
-    id: "SupplierName", 
-    label: "Nombre Proveedor", 
-    minWidth: 100 
+    minWidth: 200 
   },
   { 
     id: "StatusMOH", 
@@ -56,6 +53,12 @@ const columnsInit: TableColumnType[] = [
     minWidth: 100 
   },
   { 
+    id: "ExternalIdentifierMOH", 
+    label: "Identificador externo MOH", 
+    minWidth: 100,
+    hidden: true
+  },
+  { 
     id: "StatusLNS", 
     label: "Estado LNS", 
     minWidth: 100 
@@ -70,10 +73,16 @@ const columnsInit: TableColumnType[] = [
     label: "Fecha límite LNS", 
     minWidth: 100 
   },
+  { 
+    id: "ExternalIdentifierLNS", 
+    label: "Identificador externo LNS", 
+    minWidth: 100,
+    hidden: true
+  },
   {
     id: "Actions",
     label: "Acciones",
-    minWidth: 100,
+    minWidth: 250,
   }
 ];
 
@@ -113,6 +122,7 @@ export default function CaseFiles() {
 
   const [openCaseFileAddEditDialog, setOpenCaseFileAddEditDialog] = useState<boolean>(false);
   const [openCaseFileDeleteDialog, setOpenCaseFileDeleteDialog] = useState<boolean>(false);
+  const [openSIADSearchDialog, setOpenSIADSearchDialog] = useState<boolean>(false);
 
   const [selectedCaseFile, setSelectedCaseFile] = useState<any>(null);
   const [caseFilesList, setCaseFilesList] = useState<User[]>([]);
@@ -223,22 +233,26 @@ export default function CaseFiles() {
           const caseNumberTemp = item.supplierName.replace(' ', '') + '-' + item.id + '-' + year;
           const tasksMOH = item.tasks.filter(t => t.workflowId === 2).sort((t1, t2) => t2.id - t1.id);
           const tasksLNS = item.tasks.filter(t => t.workflowId === 1).sort((t1, t2) => t2.id - t1.id);
-          // const statusMOH = item.workflows ? item.workflows.find(w => w.id === 2)?.statusName : 'Sin estado';
-          // const statusLNS = item.workflows ? item.workflows.find(w => w.id === 1)?.statusName : 'Sin estado';          
+
+          const workflowMOH = item.workflows ? item.workflows.find(w => w.workflowId === 2) : undefined;
+          const workflowLNS = item.workflows ? item.workflows.find(w => w.workflowId === 1) : undefined;
 
           rowsTemp.push([
             item.id,
             item.caseNumber && item.caseNumber !== '' ? item.caseNumber : caseNumberTemp,
             item.name,
-            item.supplierName,
+
             // MOH
-            'Creado',
+            workflowMOH ? workflowMOH.workflowStatusName : 'Sin estado',
             generateTasksCountContent(tasksMOH.length),
             generateDueDateContent(tasksMOH.length > 0 ? tasksMOH[0].dueDate : null),
+            '',
+
             // LNS
-            'Creado',
+            workflowLNS ? workflowLNS.workflowStatusName : 'Sin estado',
             generateTasksCountContent(tasksLNS.length),
             generateDueDateContent(tasksLNS.length > 0 ? tasksLNS[0].dueDate : null),
+            '',
 
             generateCollapsableContent(item.tasks), // Colapsable Content at the end of the array
           ]);
@@ -281,6 +295,20 @@ export default function CaseFiles() {
 
   const handleCloseCaseFileAddEditDialog = () => {
     setOpenCaseFileAddEditDialog(false);
+  }
+
+  // SIAD search dialog
+  const handleOpenSIADSearchDialog = async (caseFile: any) => {
+    const caseFileTemp = caseFilesList.find(c => c.id === (caseFile && caseFile[0] ? caseFile[0] : 0));
+    
+    if(caseFileTemp) {
+      setSelectedCaseFile(caseFileTemp);
+      setOpenSIADSearchDialog(true);
+    }      
+  }
+
+  const handleCloseSIADSearchDialog = () => {
+    setOpenSIADSearchDialog(false);
   }
 
   const handleCloseCaseFileAddEditDialogFromAction = (refreshCaseFilesList: boolean = false) => {
@@ -340,14 +368,21 @@ export default function CaseFiles() {
   [
     { 
       name: 'edit',
-      icon: <Tooltip title="Editar Usuario" arrow placement="top-start">
+      icon: <Tooltip title="Editar" arrow placement="top-start">
               <EditIcon />
             </Tooltip>,
       callBack: handleSelectedCaseFileEdit, 
-    },    
+    },
+    { 
+      name: 'siad',
+      icon: <Tooltip title="Consulta SIAD" arrow placement="top-start">
+              <ContentPasteSearchIcon />
+            </Tooltip>,
+      callBack: handleOpenSIADSearchDialog, 
+    },     
     { 
       name: 'delete',
-      icon: <Tooltip title="Eliminar Usuario" arrow placement="top-start">
+      icon: <Tooltip title="Eliminar" arrow placement="top-start">
               <DeleteIcon />
             </Tooltip>,
       callBack: handleOpenCaseFileDeleteDialog, 
@@ -399,6 +434,17 @@ export default function CaseFiles() {
           mode = {selectedCaseFile && selectedCaseFile.id > -1 ? 'edit' : 'add'}
           selectedCaseFile = {selectedCaseFile}
           onClose = {handleCloseCaseFileAddEditDialogFromAction}
+        />        
+      </Dialog>
+
+      <Dialog
+        open={openSIADSearchDialog}
+        onClose={handleCloseSIADSearchDialog}
+        maxWidth={"lg"}        
+      >
+        <SIADSearchDialog          
+          onClose = {handleCloseSIADSearchDialog}
+          selectedCaseFile = {selectedCaseFile}
         />        
       </Dialog>
 

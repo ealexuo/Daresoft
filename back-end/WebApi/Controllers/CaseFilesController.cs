@@ -21,18 +21,21 @@ namespace WebApi.Controllers
         private readonly ICaseFilesService _caseFilesService;
         private readonly ITasksService _tasksService;
         private readonly IDocumentsService _documentsService;
+        private readonly IWorkflowsService _workflowsService;
 
         public CaseFilesController(
             IOptions<ApplicationSettingsModel> appSettings, 
             ICaseFilesService caseFilesService,
             ITasksService tasksService,
-            IDocumentsService documentsService
+            IDocumentsService documentsService,
+            IWorkflowsService workflowsService
         )
         {
             _appSetings = appSettings.Value;
             _caseFilesService = caseFilesService;
             _tasksService = tasksService;
             _documentsService = documentsService;
+            _workflowsService = workflowsService;
         }
 
         [Authorize]
@@ -45,11 +48,13 @@ namespace WebApi.Controllers
                 List<int> caseFileIds = caseFilesList.Select(cf => cf.Id).ToList();
                 List<TaskModel> tasksList = await _tasksService.GetByCaseFileIdsAsync(caseFileIds);
                 List<DocumentModel> documentsList = await _documentsService.GetByCaseFileIdsAsync(caseFileIds);
+                List<CaseFileWorkflowModel> workflowsList = await _workflowsService.GetByCaseFileIdsAsync(caseFileIds);
 
                 foreach (var caseFile in caseFilesList)
                 {
                     caseFile.Tasks = tasksList.Where(t => t.CaseFileId == caseFile.Id).ToList();
                     caseFile.Documents = documentsList.Where(d => d.CaseFileId == caseFile.Id).ToList();
+                    caseFile.Workflows = workflowsList.Where(w => w.CaseFileId == caseFile.Id).ToList();
                 }
 
                 return Ok(new
