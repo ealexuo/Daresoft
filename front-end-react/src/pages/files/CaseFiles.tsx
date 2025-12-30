@@ -19,6 +19,12 @@ import 'moment/locale/es';
 import { DateField } from '@mui/x-date-pickers';
 import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import SIADSearchDialog from '../../dialogs/SIADSearchDialog';
+import { contactsService } from '../../services/settings/contactsService';
+import { Contact } from '../../types/Contact';
+import { AutoCompleteData } from '../../types/AutoCompleteData';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import { EditNote, NoteAdd, NoteAddOutlined } from '@mui/icons-material';
+import CaseFileNoteAddEditDialog from '../../dialogs/CaseFileNoteAddEditDialog';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -123,9 +129,12 @@ export default function CaseFiles() {
   const [openCaseFileAddEditDialog, setOpenCaseFileAddEditDialog] = useState<boolean>(false);
   const [openCaseFileDeleteDialog, setOpenCaseFileDeleteDialog] = useState<boolean>(false);
   const [openSIADSearchDialog, setOpenSIADSearchDialog] = useState<boolean>(false);
+  const [openCaseFileNoteAddEditDialog, setOpenCaseFileNoteAddEditDialog] = useState<boolean>(false);
 
   const [selectedCaseFile, setSelectedCaseFile] = useState<any>(null);
   const [caseFilesList, setCaseFilesList] = useState<User[]>([]);
+  const [suppliersList, setSupliersList] = useState<AutoCompleteData[]>([]);
+  
 
   const generateCollapsableContent = (tasks: Task[]) => {
     return (
@@ -150,7 +159,7 @@ export default function CaseFiles() {
                 <TableCell>{task.description}</TableCell>                
                 <TableCell>{task.assignedToUserId}</TableCell>
                 <TableCell>{task.isCompleted}</TableCell>
-                <TableCell>{task.completedDate.toString()}</TableCell>                
+                <TableCell>{task.completedDate ? task.completedDate.toString() : ''}</TableCell>                
               </TableRow>
             ))}
           </TableBody>
@@ -272,6 +281,37 @@ export default function CaseFiles() {
     }
   }, [enqueueSnackbar]);
 
+  const fetchSuppliers = useCallback(async () => {
+      try {
+          setLoading(true);
+          
+          const offset = 1;
+          const fetch = 10000;
+          const searchText = '';
+          const isSupplier = true;
+
+          const response = await contactsService.getAll(offset, fetch, searchText, isSupplier);
+
+          if(response.statusText === 'OK') {               
+              setSupliersList(
+                  response.data.contactsList.map((s: Contact) => {
+                      return { 
+                          id: s.id, label: s.name + (s.lastName === '' ? s.lastName : ' ' + s.lastName)
+                      }
+                  })              
+              );
+              setLoading(false);
+          }
+          else {
+              enqueueSnackbar('Ocurrió un error al obtener la lista de expedientes.', { variant: 'error' });
+          }        
+      }
+      catch(error: any){
+          enqueueSnackbar('Ocurrió un error al obtener la lista de expedientes. Detalles: ' + error.message, { variant: 'error' });
+          setLoading(false);
+      }
+  }, [enqueueSnackbar]);
+
   /** Handle Functions Section */
 
   const handlePageChange = (event: unknown, newPage: number) => {
@@ -327,6 +367,54 @@ export default function CaseFiles() {
     }    
   }
 
+  // CaseFile Note add/edit dialog
+  const handleSelectedCaseFileAddNote = async (caseFile: any) => {    
+    const caseFileTemp = caseFilesList.find(c => c.id === (caseFile && caseFile[0] ? caseFile[0] : 0));
+    
+    if(caseFileTemp) {
+      setSelectedCaseFile(caseFileTemp);
+      setOpenCaseFileNoteAddEditDialog(true);
+    }    
+  }
+
+  const handleOpenCaseFileNoteAddEditDialog = async (caseFile: any) => {
+    const caseFileTemp = caseFilesList.find(c => c.id === (caseFile && caseFile[0] ? caseFile[0] : 0));
+      
+    setSelectedCaseFile(caseFileTemp);
+    setOpenCaseFileNoteAddEditDialog(true);
+  }
+
+  const handleCloseCaseFileNoteAddEditDialog = () => {    
+    setOpenCaseFileNoteAddEditDialog(false);
+  }
+
+  const handleCloseCaseFileNoteAddEditDialogFromAction = async (actionResult: boolean = false) => {
+    if(actionResult) { 
+
+      // setLoading(true);
+
+      // try {
+      //   const response = await caseFilesService.delete(selectedCaseFile.id); 
+
+      //   if (response.statusText === "OK") {
+      //     setLoading(false);
+      //     fetchCaseFiles(currentPage, rowsPerPage, searchText);
+      //     enqueueSnackbar('Usuario eliminado.', { variant: "success" });
+      //   } else {
+      //     enqueueSnackbar('Ocurrió un error al eliminar al usuario.', { variant: "error" });
+      //   }
+      // } catch (error: any) {
+      //   enqueueSnackbar('Ocurrió un Error al eliminar al usuario. Detalles: ' + error.message, { variant: "error" });
+      //   setLoading(false);
+      // }
+
+    }
+    setOpenCaseFileNoteAddEditDialog(false);
+  } 
+
+
+
+
   // CaseFile Delete Alert dialog
   const handleOpenCaseFileDeleteDialog = async (caseFile: any) => {
     const caseFileTemp = caseFilesList.find(c => c.id === (caseFile && caseFile[0] ? caseFile[0] : 0));
@@ -367,6 +455,13 @@ export default function CaseFiles() {
   const actionList: ItemActionListType =
   [
     { 
+      name: 'addNote',
+      icon: <Tooltip title="Nueva nota" arrow placement="top-start">
+              <NoteAddOutlined />
+            </Tooltip>,
+      callBack: handleOpenCaseFileNoteAddEditDialog, 
+    },
+    { 
       name: 'edit',
       icon: <Tooltip title="Editar" arrow placement="top-start">
               <EditIcon />
@@ -395,8 +490,9 @@ export default function CaseFiles() {
 
     setColumns(columnsInit);
     fetchCaseFiles(currentPage, rowsPerPage, searchText);
+    fetchSuppliers();
 
-  }, [currentPage, rowsPerPage, searchText, fetchCaseFiles]);
+  }, [currentPage, rowsPerPage, searchText, fetchCaseFiles, fetchSuppliers]);
 
   /** Return Section */
   return (
@@ -433,6 +529,7 @@ export default function CaseFiles() {
         <CaseFileAddEditDialog 
           mode = {selectedCaseFile && selectedCaseFile.id > -1 ? 'edit' : 'add'}
           selectedCaseFile = {selectedCaseFile}
+          suppliersList={suppliersList}
           onClose = {handleCloseCaseFileAddEditDialogFromAction}
         />        
       </Dialog>
@@ -446,6 +543,17 @@ export default function CaseFiles() {
           onClose = {handleCloseSIADSearchDialog}
           selectedCaseFile = {selectedCaseFile}
         />        
+      </Dialog>
+
+      <Dialog
+        open={openCaseFileNoteAddEditDialog}
+        onClose={handleCloseCaseFileNoteAddEditDialog}
+        maxWidth={"md"}        
+      >
+        <CaseFileNoteAddEditDialog         
+          onClose = {handleCloseCaseFileNoteAddEditDialogFromAction}
+          selectedCaseFile = {selectedCaseFile}
+        />
       </Dialog>
 
       <Dialog

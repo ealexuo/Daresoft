@@ -214,49 +214,69 @@ namespace Daresoft.Data
             }
         }
 
-        public async Task<CaseFileModel> UpdateAsync(CaseFileModel contact, int currentUserId)
+        public async Task<CaseFileModel> UpdateAsync(CaseFileModel caseFile, int currentUserId)
         {
-            //using (var connection = await connectionProvider.OpenAsync())
-            //{
-            //    string updateContactDataSql = @"
-            //    UPDATE Contact
-            //    SET 
-            //     Name = @Name
-            //     ,MiddleName = @MiddleName
-            //     ,LastName = @LastName
-            //     ,OtherName = @OtherName
-            //        ,WorkEmail = @WorkEmail
-            //        ,WorkPhone = @WorkPhone
-            //        ,WorkPhoneExt = @WorkPhoneExt
-            //        ,MobilePhone = @MobilePhone
-            //        ,LastModifiedDate = GETUTCDATE()
-            //        ,UpdatedByUserId = @CurrentUserId
-            //    WHERE Id = @Id";        
+            int caseFileId = 0;
+            int caseFileWorkflowId = 0;
 
-            //    using (var trx = connection.BeginTransaction())
-            //    {
-            //        // Update contact data
-            //        await connection.ExecuteAsync(updateContactDataSql, new
-            //        {
-            //            contact.Id,
-            //            contact.Name,
-            //            contact.MiddleName,
-            //            contact.LastName,
-            //            contact.OtherName,
-            //            contact.WorkEmail,
-            //            contact.WorkPhone,
-            //            contact.WorkPhoneExt,
-            //            contact.MobilePhone,
-            //            CurrentUserId = currentUserId
-            //        }, trx);                    
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string updateCaseFileDataSql = @"            
+                UPDATE CaseFile
+                SET CaseNumber = @CaseNumber
+                    ,Name = @Name
+                    ,Description = @Description
+                    ,SupplierContactId = @SupplierContactId
+                    ,IsActive = @IsActive
+                    ,IsDeleted = @IsDeleted
+                    ,LastModifiedDate = GETUTCDATE()
+                    ,UpdatedByUserId = @UpdatedByUserId
+                WHERE Id = @Id
+                ";
 
-            //        trx.Commit();
-            //    }
-            //}
+                string updateCaseFileWorkflowDataSql = @"            
+                UPDATE CaseFileWorkflow                
+                SET StartDate = @StartDate
+                    ,EndDate = @EndDate
+                    ,ExternalIdentifier = @ExternalIdentifier                    
+                    ,LastModifiedDate = GETUTCDATE()
+                    ,UpdatedByUserId = @UpdatedByUserId
+                WHERE Id = @Id
+                ";
 
-            //return await GetByIdAsync(contact.Id);
+                using (var trx = connection.BeginTransaction())
+                {
+                    // Update casefile data
+                    await connection.ExecuteAsync(updateCaseFileDataSql, new
+                    {
+                        caseFile.Id,
+                        caseFile.CaseNumber,
+                        caseFile.Name,
+                        caseFile.Description,
+                        caseFile.SupplierContactId,
+                        caseFile.IsActive,
+                        caseFile.IsDeleted,                        
+                        UpdatedByUserId = currentUserId
+                    }, trx);
 
-            throw new NotImplementedException();
+                    // Insert casefileworkflow data
+                    foreach (CaseFileWorkflowModel wf in caseFile.Workflows)
+                    {
+                        caseFileWorkflowId = await connection.ExecuteAsync(updateCaseFileWorkflowDataSql, new
+                        {
+                            wf.Id,
+                            wf.StartDate,
+                            wf.EndDate,
+                            wf.ExternalIdentifier,
+                            UpdatedByUserId = currentUserId
+                        }, trx);
+                    }
+
+                    trx.Commit();
+                }
+            }
+
+            return await GetByIdAsync(caseFileId);
 
         }
     }

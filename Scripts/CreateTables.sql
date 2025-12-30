@@ -270,6 +270,8 @@ CREATE TABLE dbo.Task
     Priority TINYINT NOT NULL,   -- 1=Low, 2=Medium, 3=High
     DueDate DATETIME NULL,
 
+	Reviewer NVARCHAR(255) NULL,
+
     IsCompleted BIT NOT NULL DEFAULT 0,
     CompletedDate DATETIME NULL,
 

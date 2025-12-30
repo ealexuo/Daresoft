@@ -14,7 +14,9 @@ namespace Daresoft.Core.Models
         public int? AssignedToUserId { get; set; }
         public int Priority { get; set; }
         public DateTime DueDate { get; set; }
+        public string Reviewer { get; set; }
         public bool IsCompleted { get; set; }
-        public DateTime CompletedDate { get; set; }
+        public DateTime? CompletedDate { get; set; }
+        public List<DocumentModel> Documents { get; set; }
     }
 }

@@ -193,7 +193,7 @@ export function StickyHeadTable({
 
   })}
   */
- 
+
   return (
     <>
       <Toolbar style={{ paddingLeft: "0px", justifyContent: hideSearch ? "flex-end" : "space-between" }}> 
@@ -211,7 +211,9 @@ export function StickyHeadTable({
           <AddIcon fontSize="small" /> {addActionText ? addActionText : 'Add New'}	
         </Button>
       </Toolbar>
-      <TableContainer sx={{ maxHeight: 440 }}>
+      <TableContainer 
+        // sx={{ maxHeight: 500 }}
+      >
         <Table stickyHeader size="small" aria-label="sticky table">
           <TableHead>
             <TableRow>

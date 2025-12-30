@@ -52,7 +52,8 @@ namespace Daresoft.Data
                     , cfw.EndDate
                     , cfw.ExternalIdentifier
                     , cfw.StartDate
-                    , cfw.EndDate                
+                    , cfw.EndDate
+                    , cfw.CreatedDate
                 FROM CaseFileWorkflow cfw
                 JOIN Workflow wf ON cfw.WorkflowId = wf.Id
                 JOIN WorkflowStatus wfs ON cfw.WorkflowStatusId = wfs.Id

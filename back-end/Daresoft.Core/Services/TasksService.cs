@@ -17,9 +17,9 @@ namespace Daresoft.Core.Services
             _tasksData = tasksData;            
         }
 
-        public Task<TaskModel> CreateAsync(TaskModel task, int currentUserId)
+        public async Task<TaskModel> CreateAsync(TaskModel task, int currentUserId)
         {
-            throw new NotImplementedException();
+            return await _tasksData.CreateAsync(task, currentUserId);
         }
 
         public Task<bool> DeleteAsync(int taskId, int currentUserId)

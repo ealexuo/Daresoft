@@ -17,9 +17,9 @@ export const caseFilesService = {
   add: async (caseFile: CaseFile): Promise<any> => {
     return await axiosService.post(BASE_PATH, caseFile);
   },
-  // edit: async (contact: Contact): Promise<any> => {
-  //   return await axiosService.put(BASE_PATH, contact);
-  // },
+  edit: async (caseFile: CaseFile): Promise<any> => {
+    return await axiosService.put(BASE_PATH, caseFile);
+  },
   // get: async (contactId: number): Promise<any> => {
   //   return await axiosService.get(BASE_PATH + contactId);
   // },

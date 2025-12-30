@@ -1,3 +1,4 @@
+import { Document } from "./Document";
 
 export type Task = {
     id: number;
@@ -5,9 +6,11 @@ export type Task = {
     workflowId: number;
     name: string;
     description: string;
-    assignedToUserId: number;
+    assignedToUserId: number | null;
     priority: number;
     dueDate: Date;
     isCompleted: boolean;
-    completedDate: Date;
+    completedDate: Date | null;
+    reviewer: string;
+    documents: Document[];
 }

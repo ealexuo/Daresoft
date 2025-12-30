@@ -8,6 +8,7 @@ using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 //using Org.BouncyCastle.Asn1.X509;
 
 namespace Daresoft.Data
@@ -21,9 +22,72 @@ namespace Daresoft.Data
             this.connectionProvider = connectionProvider;
         }
 
-        public Task<TaskModel> CreateAsync(TaskModel task, int currentUserId)
+        public async Task<TaskModel> CreateAsync(TaskModel task, int currentUserId)
         {
-            throw new NotImplementedException();
+            int taskId = 0;
+            
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string insertTaskDataSql = @"            
+                INSERT INTO Task
+                (
+                    CaseFileId
+                    ,WorkflowId
+                    ,Name
+                    ,Description
+                    ,AssignedToUserId
+                    ,Priority
+                    ,DueDate
+                    ,Reviewer
+                    ,IsCompleted
+                    ,CompletedDate                    
+                    ,CreatedDate
+                    ,LastModifiedDate
+                    ,CreatedByUserId
+                    ,UpdatedByUserId
+                )
+                OUTPUT INSERTED.Id
+                VALUES(
+                    @CaseFileId
+                    ,@WorkflowId
+                    ,@Name
+                    ,@Description
+                    ,@AssignedToUserId
+                    ,@Priority
+                    ,@DueDate
+                    ,@Reviewer
+                    ,@IsCompleted
+                    ,@CompletedDate                    
+                    ,GETUTCDATE()
+                    ,GETUTCDATE()
+                    ,@CreatedByUserId
+                    ,@UpdatedByUserId
+                )";
+
+                using (var trx = connection.BeginTransaction())
+                {
+                    // Insert casefile data
+                    taskId = connection.QuerySingle<int>(insertTaskDataSql, new
+                    {
+                        task.CaseFileId,
+                        task.WorkflowId,
+                        task.Name,
+                        task.Description,
+                        task.AssignedToUserId,
+                        task.Priority,
+                        task.DueDate,
+                        task.Reviewer,
+                        task.IsCompleted,
+                        task.CompletedDate,
+                        CreatedByUserId = currentUserId,
+                        UpdatedByUserId = currentUserId
+                    }, trx);                    
+
+                    trx.Commit();
+                }
+            }
+
+            return await GetByIdAsync(taskId);
         }
 
         public Task<bool> DeleteAsync(int task, int currentUserId)
@@ -102,9 +166,34 @@ namespace Daresoft.Data
             }
         }
 
-        public Task<TaskModel> GetByIdAsync(int taskId)
+        public async Task<TaskModel> GetByIdAsync(int taskId)
         {
-            throw new NotImplementedException();
+            SqlMapper.AddTypeMap(typeof(bool), DbType.Byte);
+
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string sqlQuery = @"
+                SELECT 
+                    Id
+	                ,CaseFileId
+                    ,WorkflowId
+	                ,Name
+	                ,Description
+	                ,AssignedToUserId 
+	                ,Priority
+	                ,DueDate
+	                ,IsCompleted
+	                ,CompletedDate
+                FROM Task                
+                WHERE Id = @TaskId";
+
+                var result = await connection.QueryAsync<TaskModel>(sqlQuery, new
+                {
+                    TaskId = taskId
+                });
+
+                return result.FirstOrDefault();
+            }
         }
 
         public Task<TaskModel> UpdateAsync(TaskModel task, int currentUserId)

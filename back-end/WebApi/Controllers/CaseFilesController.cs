@@ -88,19 +88,19 @@ namespace WebApi.Controllers
 
         [Authorize]
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] ContactModel contact)
+        public async Task<IActionResult> Update([FromBody] CaseFileModel caseFile)
         {
             try
             {
-                //var identity = HttpContext.User.Identity as ClaimsIdentity;
-                //int currentUserId = 0;
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                int currentUserId = 0;
 
-                //if (identity != null)
-                //{
-                //    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
-                //}
+                if (identity != null)
+                {
+                    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
+                }
 
-                //var updatedUser = await _caseFilesService.UpdateAsync(contact, currentUserId);
+                var updatedUser = await _caseFilesService.UpdateAsync(caseFile, currentUserId);
 
                 return Ok();
             }
