@@ -4,13 +4,14 @@ export type Task = {
     id: number;
     caseFileId: number;
     workflowId: number;
+    workflowColor: string | null;
     name: string;
     description: string;
     assignedToUserId: number | null;
     priority: number;
     dueDate: Date;
-    isCompleted: boolean;
-    completedDate: Date | null;
     reviewer: string;
+    isCompleted: boolean;
+    completedDate: Date | null;    
     documents: Document[];
 }

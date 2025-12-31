@@ -137,6 +137,7 @@ CREATE TABLE dbo.Workflow
     Name NVARCHAR(100) NOT NULL, -- complete name
     Code NVARCHAR(50) NULL, -- abreviation 
     Description NVARCHAR(500) NULL,
+	Color NVARCHAR(7) NULL,
     IsActive BIT NOT NULL DEFAULT 1,
     CreatedDate DATETIME NOT NULL,
 	LastModifiedDate DATETIME NOT NULL,	

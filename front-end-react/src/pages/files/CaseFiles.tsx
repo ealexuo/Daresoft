@@ -10,7 +10,7 @@ import Dialog from '@mui/material/Dialog';
 import { useSnackbar } from 'notistack';
 import AlertDialog from '../../components/AlertDialog';
 import { User } from '../../types/User';
-import { Alert, Box, Chip, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
+import { Alert, Box, Checkbox, Chip, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
 import { CaseFile } from '../../types/CaseFile';
 import { caseFilesService } from '../../services/settings/caseFilesService';
 import { Task } from '../../types/Task';
@@ -25,6 +25,7 @@ import { AutoCompleteData } from '../../types/AutoCompleteData';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import { EditNote, NoteAdd, NoteAddOutlined } from '@mui/icons-material';
 import CaseFileNoteAddEditDialog from '../../dialogs/CaseFileNoteAddEditDialog';
+import PreviewIcon from '@mui/icons-material/Preview';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -138,28 +139,63 @@ export default function CaseFiles() {
 
   const generateCollapsableContent = (tasks: Task[]) => {
     return (
-      <Box sx={{ margin: 1 }}>
+      <Box sx={{ margin: 3, maxWidth: 500 }}>
         <Typography variant="h6" gutterBottom component="div">
           Notas de reparo
         </Typography>
         <Table size="small" aria-label="purchases">
           <TableHead>
             <TableRow>
-              <TableCell>Nombre</TableCell>
-              <TableCell>Descripción</TableCell>
-              <TableCell>Usuario Asignado</TableCell>
-              <TableCell>Finalizada</TableCell>
-              <TableCell>Fecha Finalización</TableCell>
+              <TableCell><b>Proceso</b></TableCell>
+              <TableCell style={{ minWidth: 300 }}><b>Descripción</b></TableCell>
+              <TableCell style={{ minWidth: 150 }}><b>Revisor</b></TableCell>
+              <TableCell style={{ minWidth: 150 }}><b>Fecha límite</b></TableCell>
+              <TableCell><b>Completada</b></TableCell>
+              <TableCell style={{ minWidth: 150 }}><b>Fecha finalización</b></TableCell>
+              <TableCell style={{ minWidth: 200 }}><b>Acciones</b></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {tasks.map((task) => (
-              <TableRow key={task.id}>
-                <TableCell component="th" scope="row">{task.name}</TableCell>
+              <TableRow hover key={task.id}>
+                <TableCell component="th" scope="row">
+                  <div style={{ display: "inline" }}>
+                    <div
+                        style={{
+                          display: "inline-block",
+                          float: "left",
+                          width: "2mm",
+                          height: "5mm",
+                          backgroundColor:  task.workflowId === 1 ? '#ffc300' : '#a7db18',
+                        }}
+                    ></div>
+                    <div style={{ display: "inlineBlock", marginLeft: "21px" }}>
+                      {task.workflowId === 1 ? 'MOH' : 'LNS'}
+                    </div>
+                  </div>                  
+                </TableCell>                
                 <TableCell>{task.description}</TableCell>                
-                <TableCell>{task.assignedToUserId}</TableCell>
-                <TableCell>{task.isCompleted}</TableCell>
-                <TableCell>{task.completedDate ? task.completedDate.toString() : ''}</TableCell>                
+                <TableCell>{task.reviewer}</TableCell>
+                <TableCell>{task.dueDate.toLocaleDateString('es-ES')}</TableCell>
+                <TableCell><Checkbox checked={task.isCompleted} disabled={true} /></TableCell>
+                <TableCell>{task.completedDate ? task.completedDate.toLocaleDateString('es-ES') : ''}</TableCell>
+                <TableCell>
+                  <IconButton>
+                    <Tooltip title="Ver documento" arrow placement="top-start">
+                      <PreviewIcon />
+                    </Tooltip>
+                  </IconButton>
+                  <IconButton>
+                    <Tooltip title="Editar" arrow placement="top-start">
+                      <EditIcon />
+                    </Tooltip>
+                  </IconButton>
+                  <IconButton>
+                    <Tooltip title="Eliminar" arrow placement="top-start">
+                      <DeleteIcon />
+                    </Tooltip>
+                  </IconButton>                                    
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -240,9 +276,16 @@ export default function CaseFiles() {
           
           const year = item.createdDate.getFullYear();                   
           const caseNumberTemp = item.supplierName.replace(' ', '') + '-' + item.id + '-' + year;
-          const tasksMOH = item.tasks.filter(t => t.workflowId === 2).sort((t1, t2) => t2.id - t1.id);
-          const tasksLNS = item.tasks.filter(t => t.workflowId === 1).sort((t1, t2) => t2.id - t1.id);
 
+          item.tasks = item.tasks.map(t => {
+            t.dueDate = new Date(t.dueDate);
+            t.completedDate = t.completedDate ? new Date(t.completedDate) : null;
+            return t
+          });
+
+          let tasksMOH = item.tasks.filter(t => t.workflowId === 2).sort((t1, t2) => t2.id - t1.id);          
+          let tasksLNS = item.tasks.filter(t => t.workflowId === 1).sort((t1, t2) => t2.id - t1.id);
+          
           const workflowMOH = item.workflows ? item.workflows.find(w => w.workflowId === 2) : undefined;
           const workflowLNS = item.workflows ? item.workflows.find(w => w.workflowId === 1) : undefined;
 
@@ -390,30 +433,10 @@ export default function CaseFiles() {
 
   const handleCloseCaseFileNoteAddEditDialogFromAction = async (actionResult: boolean = false) => {
     if(actionResult) { 
-
-      // setLoading(true);
-
-      // try {
-      //   const response = await caseFilesService.delete(selectedCaseFile.id); 
-
-      //   if (response.statusText === "OK") {
-      //     setLoading(false);
-      //     fetchCaseFiles(currentPage, rowsPerPage, searchText);
-      //     enqueueSnackbar('Usuario eliminado.', { variant: "success" });
-      //   } else {
-      //     enqueueSnackbar('Ocurrió un error al eliminar al usuario.', { variant: "error" });
-      //   }
-      // } catch (error: any) {
-      //   enqueueSnackbar('Ocurrió un Error al eliminar al usuario. Detalles: ' + error.message, { variant: "error" });
-      //   setLoading(false);
-      // }
-
+      fetchCaseFiles(currentPage, rowsPerPage, searchText);
     }
     setOpenCaseFileNoteAddEditDialog(false);
-  } 
-
-
-
+  }
 
   // CaseFile Delete Alert dialog
   const handleOpenCaseFileDeleteDialog = async (caseFile: any) => {
@@ -506,7 +529,7 @@ export default function CaseFiles() {
               columns={columns}
               rows={rows}
               addActionRoute={"/settings/users/add-user"}
-              addActionText="Nuevo Expediente"
+              addActionText="Ingresar expediente"
               currentPage={currentPage}
               rowsPerPage={rowsPerPage}
               totalRows={totalRows}

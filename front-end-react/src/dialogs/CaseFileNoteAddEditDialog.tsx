@@ -43,7 +43,7 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }:
     const { enqueueSnackbar } = useSnackbar()
     const [document, setDocument] = useState<File | null>(null);
     const [entryDate, setEntryDate] = useState<moment.Moment>(moment());
-    const [workflow, setWorkflow] = React.useState('MOH');
+    const [workflowId, setWorkflowId] = useState<number>(1);
 
     const formSchema = z.object({
         reviewer: z.string(),        
@@ -71,7 +71,8 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }:
         const taskToSave: Task = {
             id: 0,
             caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
-            workflowId: workflow === 'MOH' ? 2 : 1,
+            workflowId: workflowId,
+            workflowColor: null,
             name: '',
             description: formData.description,
             assignedToUserId: null,
@@ -84,7 +85,7 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }:
                 id: 0,
                 caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
                 name: document ? document.name : '',
-                path: workflow,
+                path: '',
                 contentType: document ? document.type : '',
                 size: document ? document.size : 0
             }],
@@ -101,9 +102,9 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }:
 
     const handleToggleButtonChange = (
         event: React.MouseEvent<HTMLElement>,
-        newValue: string,
+        newValue: number,
     ) => {
-        setWorkflow(newValue);
+        setWorkflowId(newValue);
     };
 
     const handleDocumentChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -126,14 +127,14 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }:
                     <Grid item xs={12} sm={12}>
                         <ToggleButtonGroup
                             color="primary"
-                            value={workflow}
+                            value={workflowId}
                             exclusive
                             onChange={handleToggleButtonChange}
                             aria-label="Workflow"
                             fullWidth
                             >
-                            <ToggleButton value="MOH">Ministry of Health (MOH)</ToggleButton>
-                            <ToggleButton value="LNS">Laboratorio Nacional de Salud (LNS)</ToggleButton>
+                            <ToggleButton value={1}>Ministry of Health (MOH)</ToggleButton>
+                            <ToggleButton value={2}>Laboratorio Nacional de Salud (LNS)</ToggleButton>
                         </ToggleButtonGroup>
                     </Grid>                 
                     <Grid item xs={12} sm={6}>

@@ -15,11 +15,13 @@ namespace WebApi.Controllers
     {
         private readonly ITasksService _tasksService;
         private readonly IDocumentsService _documentsService;
+        private readonly IWorkflowsService _workflowsService;
 
-        public TasksController(ITasksService tasksService, IDocumentsService documentsService)
+        public TasksController(ITasksService tasksService, IDocumentsService documentsService, IWorkflowsService workflowsService)
         {
             _tasksService = tasksService;
             _documentsService = documentsService;
+            _workflowsService = workflowsService;
         }
 
         [Authorize]
@@ -114,10 +116,13 @@ namespace WebApi.Controllers
                 }
 
                 var createdTask = await _tasksService.CreateAsync(task, currentUserId);
+                var workflowsList = await _workflowsService.GetAllAsync();
+
+                var workflow = workflowsList.Find(w => w.Id == task.WorkflowId);
 
                 for (int i = 0; i < task.Documents.Count; i++)
-                {
-                    task.Documents[i].Path = "CF" + task.CaseFileId + "/" + task.Documents[i].Path + "/Tasks/" + createdTask.Id + "/" + task.Documents[i].Name;
+                {                                        
+                    task.Documents[i].Path = "CF" + task.CaseFileId + "/" + workflow.Code + "/Tasks/" + createdTask.Id + "/" + task.Documents[i].Name;
                     task.Documents[i] = await _documentsService.CreateAsync(task.Documents[i], currentUserId);
                 }
 

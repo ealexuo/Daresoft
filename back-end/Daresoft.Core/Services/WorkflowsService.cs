@@ -27,9 +27,9 @@ namespace Daresoft.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<List<WorkflowModel>> GetAllAsync(int offset, int fetch, string searchText)
+        public async Task<List<WorkflowModel>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _workflowsData.GetAllAsync();
         }
 
         public async Task<List<CaseFileWorkflowModel>> GetByCaseFileIdsAsync(List<int> caseFileIds)

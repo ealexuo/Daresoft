@@ -9,6 +9,7 @@ namespace Daresoft.Core.Models
         public int Id { get; set; }
         public int CaseFileId { get; set; }
         public int WorkflowId { get; set; }
+        public int WorkflowColor { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int? AssignedToUserId { get; set; }

@@ -224,8 +224,9 @@ VALUES
 
 INSERT INTO Workflow (Name, Code, Description, IsActive, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
 VALUES
-('LNS', 'LNS', 'LNS', 1, GETDATE(), GETDATE(), 1, 1),
 ('MOH', 'MOH', 'MOH', 1, GETDATE(), GETDATE(), 1, 1);
+('LNS', 'LNS', 'LNS', 1, GETDATE(), GETDATE(), 1, 1),
+
 
 INSERT INTO WorkflowStatus (Name, Description)
 VALUES

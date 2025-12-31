@@ -143,18 +143,21 @@ namespace Daresoft.Data
             {
                 string sqlQuery = @"
                 SELECT 
-                    Id
-	                ,CaseFileId
-                    ,WorkflowId
-	                ,Name
-	                ,Description
-	                ,AssignedToUserId 
-	                ,Priority
-	                ,DueDate
-	                ,IsCompleted
-	                ,CompletedDate
+                    ta.Id
+	                ,ta.CaseFileId
+                    ,ta.WorkflowId
+                    ,wf.Color
+	                ,ta.Name
+	                ,ta.Description
+	                ,ta.AssignedToUserId 
+	                ,ta.Priority
+	                ,ta.DueDate
+                    ,ta.Reviewer
+	                ,ta.IsCompleted
+	                ,ta.CompletedDate
                     ,COUNT(*) OVER () TotalCount
-                FROM Task                
+                FROM Task ta
+                LEFT JOIN Workflow wf on ta.WorkflowId = wf.Id
                 WHERE CaseFileId IN @CaseFileIds";
                 
                 var result = await connection.QueryAsync<TaskModel>(sqlQuery, new
