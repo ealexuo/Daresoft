@@ -72,6 +72,8 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }:
             id: 0,
             caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
             workflowId: workflowId,
+            workflowName: '',
+            workflowCode: '',
             workflowColor: null,
             name: '',
             description: formData.description,

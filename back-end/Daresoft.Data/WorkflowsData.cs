@@ -64,6 +64,8 @@ namespace Daresoft.Data
                     , cfw.CaseFileId
                     , cfw.WorkflowId
                     , wf.Name AS WorkflowName
+                    , wf.Code AS WorkflowCode
+                    , wf.Color AS WorkflowColor
                     , cfw.WorkflowStatusId
                     , wfs.Name AS WorkflowStatusName
                     , cfw.StartDate
@@ -75,7 +77,8 @@ namespace Daresoft.Data
                 FROM CaseFileWorkflow cfw
                 JOIN Workflow wf ON cfw.WorkflowId = wf.Id
                 JOIN WorkflowStatus wfs ON cfw.WorkflowStatusId = wfs.Id
-                WHERE CaseFileId IN @CaseFileIds";
+                WHERE CaseFileId IN @CaseFileIds
+                ORDER BY cfw.WorkflowId";
 
                 var result = await connection.QueryAsync<CaseFileWorkflowModel>(sqlQuery, new
                 {

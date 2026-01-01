@@ -10,7 +10,7 @@ import Dialog from '@mui/material/Dialog';
 import { useSnackbar } from 'notistack';
 import AlertDialog from '../../components/AlertDialog';
 import { User } from '../../types/User';
-import { Alert, Box, Checkbox, Chip, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
+import { Alert, Box, Checkbox, Chip, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
 import { CaseFile } from '../../types/CaseFile';
 import { caseFilesService } from '../../services/settings/caseFilesService';
 import { Task } from '../../types/Task';
@@ -26,6 +26,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import { EditNote, NoteAdd, NoteAddOutlined } from '@mui/icons-material';
 import CaseFileNoteAddEditDialog from '../../dialogs/CaseFileNoteAddEditDialog';
 import PreviewIcon from '@mui/icons-material/Preview';
+import { CaseFileWorkflow } from '../../types/CaseFileWorkflow';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -45,46 +46,24 @@ const columnsInit: TableColumnType[] = [
     minWidth: 200 
   },
   { 
-    id: "StatusMOH", 
-    label: "Estado MOH", 
+    id: "Status", 
+    label: "Estado", 
     minWidth: 100 
   },
   { 
-    id: "TasksCountMOH", 
-    label: "Notas MOH", 
+    id: "Workflows", 
+    label: "Procesos", 
     minWidth: 100 
   },
   { 
-    id: "DueDateMOH", 
-    label: "Fecha límite MOH", 
+    id: "Tasks", 
+    label: "Notas", 
     minWidth: 100 
   },
   { 
-    id: "ExternalIdentifierMOH", 
-    label: "Identificador externo MOH", 
-    minWidth: 100,
-    hidden: true
-  },
-  { 
-    id: "StatusLNS", 
-    label: "Estado LNS", 
+    id: "DueDate", 
+    label: "Fecha límite", 
     minWidth: 100 
-  },
-  { 
-    id: "TasksCountLNS", 
-    label: "Notas LNS", 
-    minWidth: 100 
-  },
-  { 
-    id: "DueDateLNS", 
-    label: "Fecha límite LNS", 
-    minWidth: 100 
-  },
-  { 
-    id: "ExternalIdentifierLNS", 
-    label: "Identificador externo LNS", 
-    minWidth: 100,
-    hidden: true
   },
   {
     id: "Actions",
@@ -204,57 +183,113 @@ export default function CaseFiles() {
     )
   }
   
-  const generateTasksCountContent = (taskCount: number) => {
-
-    let indicator;
-    let message = taskCount + ' de 3';
-
-    switch (taskCount) {
-      case 0: 
-        indicator = <Chip label='Sin notas' size="small"/>; 
-        break;
-      case 1: 
-        indicator = <Chip label={message} sx={{ backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText }}/>;
-        break;
-      case 2: 
-        indicator = <Chip label={message} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
-        break;
-      default: 
-        indicator = <Chip label={message} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>
-    }
-    
-    return (<>{indicator}</>);    
+  const generateWorkflowListContent = (workflows: CaseFileWorkflow[]) => {   
+    return (<Stack direction="row" spacing={1}>{
+        workflows.map(w => (
+        <Chip 
+          label={w.workflowCode} 
+          size='small'
+          //sx={{ borderColor: w.workflowColor, color: w.workflowColor }}          
+          variant='outlined'
+        />) 
+      )}</Stack>);    
   }
 
-  const generateDueDateContent = (dueDate: Date | null) => {
+  const generateTasksCountContent = (tasks: Task[]) => {
 
-    let dueDateContent;
+    if(!tasks || tasks.length === 0) return (<></>);
+    
+    const distinctWorkflows: any[] = tasks.reduce((accumulator: any, currentItem: any) => {
+      const value = currentItem.workflowId;
+      if (!accumulator.includes(value)) {
+        accumulator.push(value);
+      }
+      return accumulator;
+    }, []); // Start with an empty array
+
+    let componentsList: React.ReactNode[] = [];
+
+    distinctWorkflows.forEach((workflowId: number) => {
+
+      let tasksTemp = tasks.filter(t => t.workflowId === workflowId);
+      let message = !tasksTemp[0] ? '' : tasksTemp[0].workflowCode + ' | ' + tasksTemp.length;
+      let component;
+
+      switch (tasksTemp.length) {
+        case 0: 
+          component = <></>; 
+          break;
+        case 1: 
+          component = <Chip size='small' label={message} />;
+          break;
+        case 2: 
+          component = <Chip size='small' label={message} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
+          break;
+        default: 
+          component = <Chip size='small' label={message} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>
+      }
+
+      componentsList.push(component);
+    });   
+
+    return(
+      <Stack direction="row" spacing={1}>{
+          componentsList.map(c => { return c})
+        }
+      </Stack>
+    ); 
+  }
+
+  const generateTasksDueDateContent = (tasks: Task[]) => {
+
+    if(!tasks || tasks.length === 0) return (<></>);
 
     let safeDate = new Date();
     safeDate.setDate(safeDate.getDate() - 30);
 
     let dangerDate = new Date();
-    safeDate.setDate(safeDate.getDate() - 15);
-    
-    if(dueDate === null){
-      dueDateContent = <></>;
-    }
-    else {
-      
-      let dueDateTemp = new Date(dueDate);
+    dangerDate.setDate(dangerDate.getDate() - 15);
 
-      if(dueDateTemp <= safeDate){
-        dueDateContent = <Alert severity='info' variant="standard">{dueDateTemp.toLocaleDateString()}</Alert>;
+    const distinctWorkflows: any[] = tasks.reduce((accumulator: any, currentItem: any) => {
+      const value = currentItem.workflowId;
+      if (!accumulator.includes(value)) {
+        accumulator.push(value);
       }
-      else if(dueDateTemp > safeDate && dueDateTemp < dangerDate){
-        dueDateContent = <Alert severity='warning' variant="standard">{dueDateTemp.toLocaleDateString()}</Alert>;
-      }
-      else {
-        dueDateContent = <Alert severity='error' variant="standard">{dueDateTemp.toLocaleDateString()}</Alert>;
-      }
-    }  
+      return accumulator;
+    }, []); 
 
-    return (<>{dueDateContent}</>);
+    let componentsList: React.ReactNode[] = [];
+
+    distinctWorkflows.forEach((workflowId: number) => {
+
+      let tasksTemp = tasks.filter(t => t.workflowId === workflowId);
+      let latestTask =  tasksTemp.at(-1);
+
+      let message = latestTask?.workflowCode + ' | ' + latestTask?.dueDate.toLocaleDateString('es-GT');
+      let component;
+
+      if(latestTask?.dueDate) {
+
+        if(latestTask.dueDate <= safeDate){
+          component = <Chip size='small' label={message} />;
+        }
+        else if(latestTask.dueDate > safeDate && latestTask.dueDate < dangerDate){
+          component = <Chip size='small' label={message} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
+        }
+        else {
+          component = component = <Chip size='small' label={message} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>;
+        }
+      }     
+
+      componentsList.push(component);
+    });
+
+    return(
+      <Stack direction="row" spacing={1}>{
+          componentsList.map(c => { return c})
+        }
+      </Stack>
+    ); 
   }
 
   /** Fetch Data Section */
@@ -283,9 +318,7 @@ export default function CaseFiles() {
             return t
           });
 
-          let tasksMOH = item.tasks.filter(t => t.workflowId === 2).sort((t1, t2) => t2.id - t1.id);          
-          let tasksLNS = item.tasks.filter(t => t.workflowId === 1).sort((t1, t2) => t2.id - t1.id);
-          
+                 
           const workflowMOH = item.workflows ? item.workflows.find(w => w.workflowId === 2) : undefined;
           const workflowLNS = item.workflows ? item.workflows.find(w => w.workflowId === 1) : undefined;
 
@@ -293,20 +326,13 @@ export default function CaseFiles() {
             item.id,
             item.caseNumber && item.caseNumber !== '' ? item.caseNumber : caseNumberTemp,
             item.name,
-
-            // MOH
-            workflowMOH ? workflowMOH.workflowStatusName : 'Sin estado',
-            generateTasksCountContent(tasksMOH.length),
-            generateDueDateContent(tasksMOH.length > 0 ? tasksMOH[0].dueDate : null),
-            '',
-
-            // LNS
-            workflowLNS ? workflowLNS.workflowStatusName : 'Sin estado',
-            generateTasksCountContent(tasksLNS.length),
-            generateDueDateContent(tasksLNS.length > 0 ? tasksLNS[0].dueDate : null),
-            '',
-
-            generateCollapsableContent(item.tasks), // Colapsable Content at the end of the array
+            workflowMOH ? workflowMOH.workflowStatusName : workflowLNS ? workflowLNS.workflowStatusName : 'Sin estado',
+            generateWorkflowListContent(item.workflows),
+            generateTasksCountContent(item.tasks),
+            generateTasksDueDateContent(item.tasks),
+            
+            // Colapsable Content at the end of the array
+            generateCollapsableContent(item.tasks), 
           ]);
         });
         

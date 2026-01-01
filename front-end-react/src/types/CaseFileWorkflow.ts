@@ -5,6 +5,8 @@ export type CaseFileWorkflow = {
     caseFileName: string;
     workflowId: number;
     workflowName: string;
+    workflowCode: string;
+    workflowColor: string;
     workflowStatusId: number;
     workflowStatusName: string;
     externalIdentifier: string;

@@ -146,7 +146,9 @@ namespace Daresoft.Data
                     ta.Id
 	                ,ta.CaseFileId
                     ,ta.WorkflowId
-                    ,wf.Color
+                    ,wf.Name AS WorkflowName
+                    ,wf.Code AS WorkflowCode
+                    ,wf.Color AS WorkflowColor
 	                ,ta.Name
 	                ,ta.Description
 	                ,ta.AssignedToUserId 
@@ -158,7 +160,8 @@ namespace Daresoft.Data
                     ,COUNT(*) OVER () TotalCount
                 FROM Task ta
                 LEFT JOIN Workflow wf on ta.WorkflowId = wf.Id
-                WHERE CaseFileId IN @CaseFileIds";
+                WHERE CaseFileId IN @CaseFileIds
+                ORDER BY ta.Id";
                 
                 var result = await connection.QueryAsync<TaskModel>(sqlQuery, new
                 {

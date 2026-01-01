@@ -4,6 +4,8 @@ export type Task = {
     id: number;
     caseFileId: number;
     workflowId: number;
+    workflowName: string; 
+    workflowCode: string; 
     workflowColor: string | null;
     name: string;
     description: string;
