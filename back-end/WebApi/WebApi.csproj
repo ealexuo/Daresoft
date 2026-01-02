@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Daresoft.Core\Daresoft.Core.csproj" />
     <ProjectReference Include="..\Daresoft.Data\Daresoft.Data.csproj" />
+    <ProjectReference Include="..\Daresoft.Integrations\Daresoft.Integrations.csproj" />
     <ProjectReference Include="..\Qfile.Core\Qfile.Core.csproj" />
     <ProjectReference Include="..\Qfile.Datos\Qfile.Datos.csproj" />
   </ItemGroup>

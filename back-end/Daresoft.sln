@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "WebApi\WebApi.csproj", "{165179CD-FB86-465B-B20C-055EBD68F1E7}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daresoft.Core", "Daresoft.Core\Daresoft.Core.csproj", "{E176503E-5A76-4393-B755-4D71490C35A1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daresoft.Data", "Daresoft.Data\Daresoft.Data.csproj", "{4DC7A79A-E0EB-4E6B-A725-346C49078337}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daresoft.Integrations", "Daresoft.Integrations\Daresoft.Integrations.csproj", "{307484C4-55AB-4F74-A45A-1B4B22F5741C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{4DC7A79A-E0EB-4E6B-A725-346C49078337}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DC7A79A-E0EB-4E6B-A725-346C49078337}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DC7A79A-E0EB-4E6B-A725-346C49078337}.Release|Any CPU.Build.0 = Release|Any CPU
+		{307484C4-55AB-4F74-A45A-1B4B22F5741C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{307484C4-55AB-4F74-A45A-1B4B22F5741C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{307484C4-55AB-4F74-A45A-1B4B22F5741C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{307484C4-55AB-4F74-A45A-1B4B22F5741C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

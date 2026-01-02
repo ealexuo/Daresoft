@@ -27,6 +27,12 @@ import { EditNote, NoteAdd, NoteAddOutlined } from '@mui/icons-material';
 import CaseFileNoteAddEditDialog from '../../dialogs/CaseFileNoteAddEditDialog';
 import PreviewIcon from '@mui/icons-material/Preview';
 import { CaseFileWorkflow } from '../../types/CaseFileWorkflow';
+import DocumentViewer from '../../components/DocumentViewer';
+import ViewEntryDocumentDialog from '../../dialogs/ViewDocumentDialog';
+import { documentsService } from '../../services/settings/documentsService';
+import { Document } from '../../types/Document';
+import ViewDocumentDialog from '../../dialogs/ViewDocumentDialog';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -110,15 +116,32 @@ export default function CaseFiles() {
   const [openCaseFileDeleteDialog, setOpenCaseFileDeleteDialog] = useState<boolean>(false);
   const [openSIADSearchDialog, setOpenSIADSearchDialog] = useState<boolean>(false);
   const [openCaseFileNoteAddEditDialog, setOpenCaseFileNoteAddEditDialog] = useState<boolean>(false);
+  const [openViewDocumentDialog, setOpenViewDocumentDialog] = useState<boolean>(false);
 
   const [selectedCaseFile, setSelectedCaseFile] = useState<any>(null);
-  const [caseFilesList, setCaseFilesList] = useState<User[]>([]);
+  const [caseFilesList, setCaseFilesList] = useState<any[]>([]);
   const [suppliersList, setSupliersList] = useState<AutoCompleteData[]>([]);
+
+  const [documentURL, setDocumentURL] = useState<string>('');
   
 
   const generateCollapsableContent = (tasks: Task[]) => {
-    return (
-      <Box sx={{ margin: 3, maxWidth: 500 }}>
+
+    const distinctWorkflows: any[] = tasks.reduce((accumulator: any, currentItem: any) => {
+      const value = currentItem.workflowId;
+      if (!accumulator.includes(value)) {
+        accumulator.push(value);
+      }
+      return accumulator;
+    }, []); // Start with an empty array 
+
+    let componentsList: React.ReactNode[] = [];
+
+    distinctWorkflows.forEach((workflowId: number) => {
+
+      let tasksTemp = tasks.filter(t => t.workflowId === workflowId);
+      
+      let component = <Box key={workflowId} sx={{ margin: 3, maxWidth: 500 }}>
         <Typography variant="h6" gutterBottom component="div">
           Notas de reparo
         </Typography>
@@ -135,7 +158,7 @@ export default function CaseFiles() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {tasks.map((task) => (
+            {tasksTemp.map((task) => (
               <TableRow hover key={task.id}>
                 <TableCell component="th" scope="row">
                   <div style={{ display: "inline" }}>
@@ -179,18 +202,31 @@ export default function CaseFiles() {
             ))}
           </TableBody>
         </Table>
-      </Box>
-    )
+      </Box>;     
+
+      componentsList.push(component);
+    });   
+
+    return(
+      <>{
+          componentsList.map(c => { return c})
+        }
+      </>
+    ); 
+
   }
   
-  const generateWorkflowListContent = (workflows: CaseFileWorkflow[]) => {   
+  const generateWorkflowListContent = (workflows: CaseFileWorkflow[], documents: Document[]) => {
     return (<Stack direction="row" spacing={1}>{
         workflows.map(w => (
         <Chip 
           label={w.workflowCode} 
+          key={w.id}
           size='small'
           //sx={{ borderColor: w.workflowColor, color: w.workflowColor }}          
           variant='outlined'
+          onClick={() => handleOpenViewDocumentDialog(w, documents)}
+          icon={<ArticleOutlinedIcon />}
         />) 
       )}</Stack>);    
   }
@@ -220,13 +256,13 @@ export default function CaseFiles() {
           component = <></>; 
           break;
         case 1: 
-          component = <Chip size='small' label={message} />;
+          component = <Chip key={workflowId} size='small' label={message} />;
           break;
         case 2: 
-          component = <Chip size='small' label={message} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
+          component = <Chip key={workflowId} size='small' label={message} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
           break;
         default: 
-          component = <Chip size='small' label={message} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>
+          component = <Chip key={workflowId} size='small' label={message} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>
       }
 
       componentsList.push(component);
@@ -271,13 +307,13 @@ export default function CaseFiles() {
       if(latestTask?.dueDate) {
 
         if(latestTask.dueDate <= safeDate){
-          component = <Chip size='small' label={message} />;
+          component = <Chip key={workflowId} size='small' label={message} />;
         }
         else if(latestTask.dueDate > safeDate && latestTask.dueDate < dangerDate){
-          component = <Chip size='small' label={message} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
+          component = <Chip key={workflowId} size='small' label={message} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
         }
         else {
-          component = component = <Chip size='small' label={message} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>;
+          component = <Chip key={workflowId} size='small' label={message} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>;
         }
       }     
 
@@ -327,7 +363,7 @@ export default function CaseFiles() {
             item.caseNumber && item.caseNumber !== '' ? item.caseNumber : caseNumberTemp,
             item.name,
             workflowMOH ? workflowMOH.workflowStatusName : workflowLNS ? workflowLNS.workflowStatusName : 'Sin estado',
-            generateWorkflowListContent(item.workflows),
+            generateWorkflowListContent(item.workflows, item.documents),
             generateTasksCountContent(item.tasks),
             generateTasksDueDateContent(item.tasks),
             
@@ -337,6 +373,7 @@ export default function CaseFiles() {
         });
         
         setCaseFilesList(response.data.caseFilesList);
+
         setRows(rowsTemp);
         setLoading(false);
       }
@@ -464,6 +501,22 @@ export default function CaseFiles() {
     setOpenCaseFileNoteAddEditDialog(false);
   }
 
+  // Document viewer dialog
+  const handleOpenViewDocumentDialog = async (workflow: CaseFileWorkflow, documents: Document[]) => {
+
+    const pathContent = 'wf-' + workflow.workflowCode.toLowerCase() + '/entry-documents/';
+    const documentTemp = documents.find(d => d.caseFileId === workflow.caseFileId && d.path.includes(pathContent));
+    const response = await documentsService.get(documentTemp ? documentTemp.id: 0);
+  
+    setDocumentURL(response.data);
+
+    setOpenViewDocumentDialog(true);
+  }
+
+  const handleCloseViewDocumentDialog = () => {    
+    setOpenViewDocumentDialog(false);
+  }
+
   // CaseFile Delete Alert dialog
   const handleOpenCaseFileDeleteDialog = async (caseFile: any) => {
     const caseFileTemp = caseFilesList.find(c => c.id === (caseFile && caseFile[0] ? caseFile[0] : 0));
@@ -502,7 +555,7 @@ export default function CaseFiles() {
 
   /** Defined Objects Section */
   const actionList: ItemActionListType =
-  [
+  [    
     { 
       name: 'addNote',
       icon: <Tooltip title="Nueva nota" arrow placement="top-start">
@@ -602,6 +655,17 @@ export default function CaseFiles() {
         <CaseFileNoteAddEditDialog         
           onClose = {handleCloseCaseFileNoteAddEditDialogFromAction}
           selectedCaseFile = {selectedCaseFile}
+        />
+      </Dialog>
+
+      <Dialog
+        open={openViewDocumentDialog}
+        onClose={handleCloseViewDocumentDialog}
+        maxWidth={"lg"}        
+      >
+        <ViewDocumentDialog
+          documentURL={documentURL}      
+          onClose = {handleCloseViewDocumentDialog}
         />
       </Dialog>
 
