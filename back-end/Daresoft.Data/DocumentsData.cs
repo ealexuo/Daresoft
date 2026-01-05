@@ -119,9 +119,36 @@ namespace Daresoft.Data
             }
         }
 
-        public Task<DocumentModel> UpdateAsync(DocumentModel document, int currentUserId)
+        public async Task<DocumentModel> UpdateAsync(DocumentModel document, int currentUserId)
         {
-            throw new NotImplementedException();
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string updateDocumentDataSql = @"            
+                UPDATE Document set
+                    CaseFileId = @CaseFileId
+                    ,Name = @Name
+                    ,Path = @Path
+                    ,ContentType = @ContentType
+                    ,Size = @Size
+                WHERE Id = @Id
+                ";
+
+                using (var trx = connection.BeginTransaction())
+                {
+                    await connection.ExecuteAsync(updateDocumentDataSql, new
+                    {
+                        document.Id,
+                        document.CaseFileId,
+                        document.Name,
+                        document.Path,
+                        document.ContentType,
+                        document.Size
+                    }, trx);
+                    
+                    trx.Commit();
+                }
+            }
+            return await GetByIdAsync(document.Id);
         }
     }
 }

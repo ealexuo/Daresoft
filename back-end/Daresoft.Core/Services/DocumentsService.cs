@@ -42,9 +42,9 @@ namespace Daresoft.Core.Services
             return await _documentsData.GetByIdAsync(documentId);
         }
 
-        public Task<DocumentModel> UpdateAsync(DocumentModel document, int currentUserId)
+        public async Task<DocumentModel> UpdateAsync(DocumentModel document, int currentUserId)
         {
-            throw new NotImplementedException();
+            return await _documentsData.UpdateAsync(document, currentUserId);
         }
     }
 }

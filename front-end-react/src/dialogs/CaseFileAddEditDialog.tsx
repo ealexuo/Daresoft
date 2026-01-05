@@ -239,51 +239,76 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
 
         console.log(caseFileToSave);
 
-        // // Add/edit api calls
-        // try {
-        //     if (mode === "add") {
-        //         const caseFileResponse = await caseFilesService.add(caseFileToSave);
+        // Add/edit api calls
+        try {
+            if (mode === "add") {
+                const caseFileResponse = await caseFilesService.add(caseFileToSave);
 
-        //         if(caseFileResponse.statusText === 'OK') {
+                if(caseFileResponse.statusText === 'OK') {
                     
-        //             // upload documents
-        //             caseFileResponse.data.documents.forEach(async (d: Document) => {
+                    // upload documents
+                    caseFileResponse.data.documents.forEach(async (d: Document) => {
 
-        //                 let uploadUrl = await documentsService.getUploadUrl(d.id);
+                        let uploadUrl = await documentsService.getUploadUrl(d.id);
 
-        //                 try{
-        //                     if(d.path.includes('wf'+workflowIdMOH) && documentMOH && documentMOH.size > 0){
-        //                         documentsService.upload(documentMOH, uploadUrl.data);
-        //                     }
-        //                     else if(d.path.includes('wf'+workflowIdLNS) && documentLNS && documentLNS.size > 0){
-        //                         documentsService.upload(documentLNS, uploadUrl.data);
-        //                     }
-        //                 }
-        //                 catch(error){
-        //                     console.error('Error al gargar el archivo:', error);
-        //                 }
-        //             });
+                        try{
+                            if(d.path.includes('wf'+workflowIdMOH) && documentMOH && documentMOH.size > 0){
+                                documentsService.upload(documentMOH, uploadUrl.data);
+                            }
+                            else if(d.path.includes('wf'+workflowIdLNS) && documentLNS && documentLNS.size > 0){
+                                documentsService.upload(documentLNS, uploadUrl.data);
+                            }
+                        }
+                        catch(error){
+                            console.error('Error al gargar el archivo:', error);
+                        }
+                    });
 
-        //             enqueueSnackbar("Expediente creado.", { variant: "success" });                    
-        //         }
-        //         else {
-        //             enqueueSnackbar('Ocurrió un error al obtener los valores de la lista.', { variant: 'error' });
-        //         }
+                    enqueueSnackbar("Expediente creado.", { variant: "success" });                    
+                }
+                else {
+                    enqueueSnackbar('Ocurrió un error al ingresar el expediente.', { variant: 'error' });
+                }
 
-        //     } else {
-        //         const caseFileResponse = await caseFilesService.edit(caseFileToSave);
-        //         // todo save and upload document
-        //         enqueueSnackbar("Expediente actualizado.", { variant: "success" });
-        //     }           
-        //     onClose(true);
+            } else {
+                const caseFileResponse = await caseFilesService.edit(caseFileToSave);
+                
+                if(caseFileResponse.statusText === 'OK') {
+                    
+                    // upload documents
+                    caseFileResponse.data.documents.forEach(async (d: Document) => {
 
-        // } catch (error: any) {
-        //      if (error.response?.data) {
-        //     enqueueSnackbar(error.response.data, { variant: "error" });
-        //   } else {
-        //     enqueueSnackbar(error.response.data, { variant: "error" });
-        //   }
-        // }
+                        let uploadUrl = await documentsService.getUploadUrl(d.id);
+
+                        try{
+                            if(d.path.includes('wf'+workflowIdMOH) && documentMOH && documentMOH.size > 0){
+                                documentsService.upload(documentMOH, uploadUrl.data);
+                            }
+                            else if(d.path.includes('wf'+workflowIdLNS) && documentLNS && documentLNS.size > 0){
+                                documentsService.upload(documentLNS, uploadUrl.data);
+                            }
+                        }
+                        catch(error){
+                            console.error('Error al gargar el archivo:', error);
+                        }
+                    });
+
+                    enqueueSnackbar("Expediente actualizado.", { variant: "success" });
+                }
+                else {
+                    enqueueSnackbar('Ocurrió un error al ingresar el expediente.', { variant: 'error' });
+                }
+                
+            }           
+            onClose(true);
+
+        } catch (error: any) {
+             if (error.response?.data) {
+            enqueueSnackbar(error.response.data, { variant: "error" });
+          } else {
+            enqueueSnackbar(error.response.data, { variant: "error" });
+          }
+        }
     }
    
     return (

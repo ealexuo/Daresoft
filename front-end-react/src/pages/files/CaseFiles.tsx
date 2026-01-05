@@ -601,6 +601,13 @@ export default function CaseFiles() {
               <NoteAddOutlined />
             </Tooltip>,
       callBack: handleOpenCaseFileNoteAddEditDialog, 
+    },    
+    { 
+      name: 'siad',
+      icon: <Tooltip title="Consulta SIAD" arrow placement="top-start">
+              <ContentPasteSearchIcon />
+            </Tooltip>,
+      callBack: handleOpenSIADSearchDialog, 
     },
     { 
       name: 'edit',
@@ -608,13 +615,6 @@ export default function CaseFiles() {
               <EditIcon />
             </Tooltip>,
       callBack: handleSelectedCaseFileEdit, 
-    },
-    { 
-      name: 'siad',
-      icon: <Tooltip title="Consulta SIAD" arrow placement="top-start">
-              <ContentPasteSearchIcon />
-            </Tooltip>,
-      callBack: handleOpenSIADSearchDialog, 
     },     
     { 
       name: 'delete',

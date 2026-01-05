@@ -224,7 +224,6 @@ namespace Daresoft.Data
 
         public async Task<CaseFileModel> UpdateAsync(CaseFileModel caseFile, int currentUserId)
         {
-            int caseFileId = 0;
             int caseFileWorkflowId = 0;
 
             using (var connection = await connectionProvider.OpenAsync())
@@ -284,7 +283,7 @@ namespace Daresoft.Data
                 }
             }
 
-            return await GetByIdAsync(caseFileId);
+            return await GetByIdAsync(caseFile.Id);
 
         }
     }

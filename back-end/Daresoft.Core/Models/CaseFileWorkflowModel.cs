@@ -12,7 +12,7 @@ namespace Daresoft.Core.Models
         public int WorkflowId { get; set; }
         public string WorkflowName { get; set; }
         public string WorkflowCode { get; set; }
-        public string WorkflowColor { get; set; }
+        public string? WorkflowColor { get; set; }
         public int WorkflowStatusId { get; set; }
         public string WorkflowStatusName { get; set; }
         public string ExternalIdentifier { get; set; }

@@ -100,9 +100,18 @@ namespace WebApi.Controllers
                     currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
                 }
 
-                var updatedUser = await _caseFilesService.UpdateAsync(caseFile, currentUserId);
+                var updatedCaseFile = await _caseFilesService.UpdateAsync(caseFile, currentUserId);
 
-                return Ok();
+                for (int i = 0; i < caseFile.Documents.Count; i++)
+                {
+                    caseFile.Documents[i].CaseFileId = updatedCaseFile.Id;
+                    caseFile.Documents[i].Path = "/cf" + updatedCaseFile.Id + "/" + caseFile.Documents[i].Path + "/entry-documents/" + caseFile.Documents[i].Name;
+                    caseFile.Documents[i] = await _documentsService.UpdateAsync(caseFile.Documents[i], currentUserId);
+
+                    updatedCaseFile.Documents.Add(caseFile.Documents[i]);
+                }
+
+                return Ok(updatedCaseFile);
             }
             catch (Exception ex)
             {
