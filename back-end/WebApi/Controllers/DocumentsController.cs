@@ -24,8 +24,8 @@ namespace WebApi.Controllers
         }
 
         [Authorize]
-        [HttpGet("{documentId}")]
-        public async Task<IActionResult> Get(int documentId)
+        [HttpGet("read-url/{documentId}")]
+        public async Task<IActionResult> GetRead(int documentId)
         {
             try
             {
@@ -34,6 +34,27 @@ namespace WebApi.Controllers
                 var company = "arael";
 
                 var documentURL = documentIntegration.GetReadURL(company + document.Path);
+
+                return Ok(documentURL);
+            }
+            catch (Exception ex)
+            {
+                //ex.ToExceptionless().Submit();
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("upload-url/{documentId}")]
+        public async Task<IActionResult> GetUpload(int documentId)
+        {
+            try
+            {
+                MicrosoftAzure documentIntegration = new MicrosoftAzure();
+                var document = await _documentsService.GetByIdAsync(documentId);
+                var company = "arael";
+
+                var documentURL = documentIntegration.GetUploadURL(company + document.Path);
 
                 return Ok(documentURL);
             }

@@ -123,26 +123,29 @@ namespace Daresoft.Data
             return await GetByIdAsync(caseFileId);
         }
 
-        public async Task<bool> DeleteAsync(int contactId, int currentUserId)
+        public async Task<bool> DeleteAsync(int caseFileId, int currentUserId)
         {
-            //int result = 0;
+            int result = 0;
 
-            ////Hard delete
-            //using (var connection = await connectionProvider.OpenAsync())
-            //{
-            //    string hardDeleteContactSql = @"DELETE Contact WHERE Id = @ContactId";
+            //Hard delete
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string hardDeleteDocumentSql = @"DELETE Document WHERE CaseFileId = @CaseFileId";
+                string hardDeleteTaskSql = @"DELETE Task WHERE CaseFileId = @CaseFileId";
+                string hardDeleteCaseFileWorkflowSql = @"DELETE CaseFileWorkflow WHERE CaseFileId = @CaseFileId";
+                string hardDeleteCaseFileSql = @"DELETE CaseFile WHERE Id = @CaseFileId";
 
-            //    using (var trx = connection.BeginTransaction())
-            //    {                    
-            //        result = await connection.ExecuteAsync(hardDeleteContactSql, new { ContactId = contactId }, trx);
-            //        trx.Commit();
-            //    }
-            //}
+                using (var trx = connection.BeginTransaction())
+                {
+                    result = await connection.ExecuteAsync(hardDeleteDocumentSql, new { CaseFileId = caseFileId }, trx);
+                    result = await connection.ExecuteAsync(hardDeleteTaskSql, new { CaseFileId = caseFileId }, trx);
+                    result = await connection.ExecuteAsync(hardDeleteCaseFileWorkflowSql, new { CaseFileId = caseFileId }, trx);
+                    result = await connection.ExecuteAsync(hardDeleteCaseFileSql, new { CaseFileId = caseFileId }, trx);
+                    trx.Commit();
+                }
+            }
 
-            //return result == 1;
-
-            throw new NotImplementedException();
-
+            return result == 1;
         }
 
         public async Task<List<CaseFileModel>> GetAllAsync(int offset, int fetch, string searchText)
@@ -209,6 +212,11 @@ namespace Daresoft.Data
                 {
                     CaseFileId = caseFileId
                 });
+
+                var createdCaseFile = result.FirstOrDefault();
+                createdCaseFile.Documents = new List<DocumentModel>();
+                createdCaseFile.Workflows = new List<CaseFileWorkflowModel>();
+                createdCaseFile.Tasks = new List<TaskModel>();
 
                 return result.FirstOrDefault();
             }

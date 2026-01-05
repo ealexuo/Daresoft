@@ -29,5 +29,29 @@ namespace Daresoft.Integrations.Documents
 
             return readURI.ToString();
         }
+
+        public string GetUploadURL(string documentPath)
+        {
+            BlobContainerClient container = _blobServiceClient.GetBlobContainerClient("daresoft-test");
+            BlobClient blob = container.GetBlobClient(documentPath);
+
+            BlobSasBuilder sasBuilder = new BlobSasBuilder()
+            {
+                BlobContainerName = container.Name,
+                BlobName = documentPath,
+                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(1)
+            };
+
+            // Grant 'Write' and 'Create' permissions for the upload operation            
+            sasBuilder.SetPermissions(BlobSasPermissions.Write | BlobSasPermissions.Create);
+
+            // Generate the SAS token
+            string sasToken = blob.GenerateSasUri(sasBuilder).Query;
+
+            // The URL format is: https://<account_name>.blob.core.windows.net/<container_name>/<blob_name>?<sas_token>
+            string uploadUrl = $"{blob.Uri.AbsoluteUri}{sasToken}";
+
+            return uploadUrl;
+        }
     }
 }

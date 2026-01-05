@@ -212,6 +212,26 @@ VALUES
 ('Mrs.', 'Jennifer', 'Anne', 'Brown', '', 'Analyst', '555 Maple Lane', '', 'Seattle', 'WA', '98101', 1, '987 Tech Park', 'Suite 300', 'Seattle', 'WA', '98102', 'USA', 'jennifer.brown@company.com', 'jennifer@home.com', '206-8888', '206-9999', '415', '206-1111', NULL, 1, 'Data analyst', 1, 'Data Systems Inc', 'www.datasys.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
 ('Mr.', 'David', 'Christopher', 'Lee', '', 'Supervisor', '777 Cedar Court', 'Apt 201', 'Denver', 'CO', '80201', 1, '147 Business Park', 'Tower 2', 'Denver', 'CO', '80202', 'USA', 'david.lee@company.com', 'david@home.com', '303-2222', '303-3333', '520', '303-4444', NULL, 1, 'Team supervisor', 1, 'Global Services', 'www.global.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1);
 
+-- suppliers
+/* Insert sample contacts */
+INSERT INTO Contact (Salutation, Name, MiddleName, LastName, OtherName, Title, HomeAddressLine1, HomeAddressLine2, HomeCity, HomeState, HomePostalCode, CountryId, WorkAddressLine1, WorkAddressLine2, WorkCity, WorkState, WorkPostalCode, WorkCountry, WorkEmail, HomeEmail, HomePhone, WorkPhone, WorkPhoneExt, MobilePhone, CompanyId, ContactTypeId, Notes, PreferredAddress, CompanyName, Website, PrimaryContactId, IsSupplier, IsDeleted, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
+VALUES 
+--('', 'REMUS', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1);
+('', 'REMUS', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'LCJ', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'MEGA', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'STEVA', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'PHOENIX', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'SWASTHYA', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'Lotus Pharma', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'Miopharma', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'BIOKAL', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'Wensur', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'Ratnatris', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'JDS', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
+('', 'PHARMA FOCUS', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1);
+
+
 /* Insert corresponding user profiles */
 INSERT INTO UserProfile (UserName, PasswordHash, ContactId, Color, ProfilePicture, ProfilePictureContentType, IsActive, IsPasswordChangeRequired, IsDeleted, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
 VALUES 

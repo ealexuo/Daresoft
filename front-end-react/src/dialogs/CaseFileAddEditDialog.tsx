@@ -4,6 +4,8 @@ import {
     styled,    
     Typography,
     Paper,
+    FormControlLabel,
+    Checkbox,
 } from "@mui/material"
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { z } from 'zod'
@@ -25,26 +27,24 @@ import { CaseFileWorkflow } from '../types/CaseFileWorkflow'
 import { caseFilesService } from '../services/settings/caseFilesService'
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { AutoCompleteData } from '../types/AutoCompleteData'
-
-type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
+import { documentsService } from '../services/settings/documentsService'
+import { Workflow } from '../types/Workflow'
 
 type DialogProps = {
     mode: 'add'|'edit',
     selectedCaseFile: CaseFile | undefined,
     suppliersList: AutoCompleteData[],
+    workflowsList: Workflow[],
     onClose: (refresh: boolean) => void    
 }
 
-export default function CaseFileAddEditDialog({ mode, selectedCaseFile, suppliersList, onClose }: DialogProps) {
+export default function CaseFileAddEditDialog({ mode, selectedCaseFile, suppliersList, workflowsList, onClose }: DialogProps) {
     
     const { enqueueSnackbar } = useSnackbar();
     const [t] = useTranslation();
     
-    const [loading, setLoading] = useState<boolean>(false);
-    const [selectedSupplierId, setSelectedSupplierId] = useState<number>(0);   
-
-    const [uploadStatusLNS, setUploadStatusLNS] = useState<UploadStatus>('idle');
-    const [uploadStatusMOH, setUploadStatusMOH] = useState<UploadStatus>('idle');
+    const [enableSectionMOH, setEnableSectionMOH] = useState<boolean>(false);
+    const [enableSectionLNS, setEnableSectionLNS] = useState<boolean>(false);
 
     const VisuallyHiddenInput = styled('input')({
         clip: 'rect(0 0 0 0)',
@@ -70,7 +70,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
 
     if(!selectedCaseFile) {
         selectedCaseFile = {
-            id: -1,
+            id: 0,
             caseNumber: '', 
             name: '', 
             description: '', 
@@ -93,11 +93,11 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
     const MOHExternalIdentifier = workflowMOH ? workflowMOH.externalIdentifier : undefined;
     const LNSExternalIdentifier = workflowLNS ? workflowLNS.externalIdentifier : undefined;
 
-    const entryDocumentMOH = selectedCaseFile.documents ? selectedCaseFile.documents.find(d => d.path.includes('/MOH/Entry/')) : undefined;
-    const entryDocumentLNS = selectedCaseFile.documents ? selectedCaseFile.documents.find(d => d.path.includes('/LNS/Entry/')) : undefined;
+    const entryDocumentMOH = selectedCaseFile.documents ? selectedCaseFile.documents.find(d => d.path.includes('/wf1/entry-documents/')) : undefined;
+    const entryDocumentLNS = selectedCaseFile.documents ? selectedCaseFile.documents.find(d => d.path.includes('/wf2/entry-documents/')) : undefined;
 
-    const [entryDateMOH, setEntryDateMOH] = useState<moment.Moment>(workflowMOH ? moment(workflowMOH.createdDate) : moment());
-    const [entryDateLNS, setEntryDateLNS] = useState<moment.Moment>(workflowLNS ? moment(workflowLNS.createdDate) : moment());
+    const [entryDateMOH, setEntryDateMOH] = useState<moment.Moment>(workflowMOH ? moment(workflowMOH.startDate) : moment());
+    const [entryDateLNS, setEntryDateLNS] = useState<moment.Moment>(workflowLNS ? moment(workflowLNS.startDate) : moment());
 
     const [documentLNS, setDocumentLNS] = useState<File | null>(entryDocumentMOH ? new File([], entryDocumentMOH.name) : null);
     const [documentMOH, setDocumentMOH] = useState<File | null>(entryDocumentLNS ? new File([], entryDocumentLNS.name) : null);
@@ -116,8 +116,8 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
 
     // Form Schema definition
     const formSchema = z.object({
-        supplierName: z.string(),
-        name: z.string(),       
+        supplierName: z.string().min(1, t("errorMessages.requieredField")),
+        name: z.string().min(1, t("errorMessages.requieredField")),       
         MOHEntry: z.string(),
         MOHKey: z.string(),
         LNSEntry: z.string(),
@@ -145,9 +145,11 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
         }
     };
 
+
+
     // For Submit Logic
     const onSubmit: SubmitHandler<CaseFileFormType> = async (formData) => {
-
+               
         const selectedSupplierTemp = suppliersList.find(s => s.label === formData.supplierName);
 
         const workflowMOHTemp: CaseFileWorkflow = {
@@ -161,8 +163,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             workflowStatusId: workflowMOH ? workflowMOH.workflowStatusId : 1,
             workflowStatusName: workflowMOH ? workflowMOH.workflowStatusName : '',
             externalIdentifier: formData.MOHEntry + '|' + formData.MOHKey,
-            startDate: entryDateMOH.toDate(),
-            createdDate: entryDateMOH.toDate(),
+            startDate: entryDateMOH.startOf('day').toDate(),            
             endDate: null
         }
 
@@ -170,32 +171,34 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             id: workflowLNS ? workflowLNS.id : 0,
             caseFileId: workflowLNS ? workflowLNS.caseFileId : 0,
             caseFileName: workflowLNS ? workflowLNS.caseFileName : '',
-            workflowId: workflowLNS ? workflowLNS.workflowId : 1,
+            workflowId: workflowLNS ? workflowLNS.workflowId : 2,
             workflowName: workflowLNS ? workflowLNS.workflowName : '',
             workflowCode: workflowLNS ? workflowLNS.workflowCode : '',
             workflowColor: workflowMOH ? workflowMOH.workflowColor : '',
             workflowStatusId: workflowLNS ? workflowLNS.workflowStatusId : 1,
             workflowStatusName: workflowLNS ? workflowLNS.workflowStatusName : '',
             externalIdentifier: formData.LNSEntry + '|' + formData.LNSKey,
-            startDate: entryDateLNS.toDate(),
-            createdDate: entryDateLNS.toDate(),
+            startDate: entryDateLNS.startOf('day').toDate(),            
             endDate: null
         }
         
-        const entryDocumentMOH: Document = {
-            id: 0,
-            caseFileId: 0,
+        const workflowIdMOH = workflowsList.find(w => w.code.toLowerCase().includes('moh'))?.id;
+        const workflowIdLNS = workflowsList.find(w => w.code.toLowerCase().includes('lns'))?.id;
+
+        const entryDocumentToSaveMOH: Document = {
+            id: entryDocumentMOH ? entryDocumentMOH.id : 0,
+            caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
             name: documentMOH ? documentMOH.name : '',
-            path: 'MOH',
+            path: 'wf' + workflowIdMOH + '',
             contentType: documentMOH ? documentMOH.type : '',
             size: documentMOH ? documentMOH.size : 0
         }
 
-        const entryDocumentLNS: Document = {
-            id: 0,
-            caseFileId: 0,
+        const entryDocumentToSaveLNS: Document = {
+            id: entryDocumentLNS ? entryDocumentLNS.id : 0,
+            caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
             name: documentLNS ? documentLNS.name : '',
-            path: 'LNS',
+            path: 'wf' + workflowIdLNS + '',
             contentType: documentLNS ? documentLNS.type : '',
             size: documentLNS ? documentLNS.size : 0
         }
@@ -210,39 +213,84 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             supplierLastName: '',
             isActive: true,
             isDeleted: false,
-            workflows: [workflowMOHTemp, workflowLNSTemp],
+            workflows: [],
             tasks: [],
-            documents: [entryDocumentMOH, entryDocumentLNS],            
+            documents: [],            
             totalCount: 0
         }
 
-        try {
-            if (mode === "add") {
-                const caseFileResponse = await caseFilesService.add(caseFileToSave);
-                // todo save and upload document                
-                enqueueSnackbar("Expediente creado.", { variant: "success" });
-
-            } else {
-                const caseFileResponse = await caseFilesService.edit(caseFileToSave);
-                // todo save and upload document
-                enqueueSnackbar("Expediente actualizado.", { variant: "success" });
-            }           
-            onClose(true);
-
-        } catch (error: any) {
-             if (error.response?.data) {
-            enqueueSnackbar(error.response.data, { variant: "error" });
-          } else {
-            enqueueSnackbar(error.response.data, { variant: "error" });
-          }
+        // Include workflows
+        if(enableSectionMOH) {
+            caseFileToSave.workflows.push(workflowMOHTemp);
         }
+
+        if(enableSectionLNS) {
+            caseFileToSave.workflows.push(workflowLNSTemp);
+        }
+
+        // Include documents
+        if(enableSectionMOH && documentMOH && documentMOH.size > 0) {
+            caseFileToSave.documents.push(entryDocumentToSaveMOH);
+        }
+
+        if(enableSectionLNS && documentLNS && documentLNS.size > 0) {
+            caseFileToSave.documents.push(entryDocumentToSaveLNS);
+        }
+
+        console.log(caseFileToSave);
+
+        // // Add/edit api calls
+        // try {
+        //     if (mode === "add") {
+        //         const caseFileResponse = await caseFilesService.add(caseFileToSave);
+
+        //         if(caseFileResponse.statusText === 'OK') {
+                    
+        //             // upload documents
+        //             caseFileResponse.data.documents.forEach(async (d: Document) => {
+
+        //                 let uploadUrl = await documentsService.getUploadUrl(d.id);
+
+        //                 try{
+        //                     if(d.path.includes('wf'+workflowIdMOH) && documentMOH && documentMOH.size > 0){
+        //                         documentsService.upload(documentMOH, uploadUrl.data);
+        //                     }
+        //                     else if(d.path.includes('wf'+workflowIdLNS) && documentLNS && documentLNS.size > 0){
+        //                         documentsService.upload(documentLNS, uploadUrl.data);
+        //                     }
+        //                 }
+        //                 catch(error){
+        //                     console.error('Error al gargar el archivo:', error);
+        //                 }
+        //             });
+
+        //             enqueueSnackbar("Expediente creado.", { variant: "success" });                    
+        //         }
+        //         else {
+        //             enqueueSnackbar('Ocurrió un error al obtener los valores de la lista.', { variant: 'error' });
+        //         }
+
+        //     } else {
+        //         const caseFileResponse = await caseFilesService.edit(caseFileToSave);
+        //         // todo save and upload document
+        //         enqueueSnackbar("Expediente actualizado.", { variant: "success" });
+        //     }           
+        //     onClose(true);
+
+        // } catch (error: any) {
+        //      if (error.response?.data) {
+        //     enqueueSnackbar(error.response.data, { variant: "error" });
+        //   } else {
+        //     enqueueSnackbar(error.response.data, { variant: "error" });
+        //   }
+        // }
     }
    
     return (
         <form onSubmit={handleSubmit(onSubmit, (errors) => {
             console.log("Errores del formulario:", errors);
         })}>
-            <DialogTitle>Datos del expediente</DialogTitle>
+            <DialogTitle>Formulario de ingreso</DialogTitle>
             <DialogContent>
                 <Box sx={{ mt: 1, mb: 2, fontSize: 12, color: '#666' }}>
                     Los campos marcados con (*) son obligatorios.
@@ -259,6 +307,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <Autocomplete
+                                disabled = { mode==='edit'}
                                 disablePortal
                                 id="suppliersList"
                                 options={suppliersList}
@@ -282,22 +331,34 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                                 type='text'
                                 inputProps={{ maxLength: 500 }}
                                 {...register("name")}
+                                error = { errors.name?.message ? true : false }
+                                helperText= { errors.name?.message }
                             />
                         </Grid>
                     </Grid>                    
                 </Paper>
                 
                 <Typography variant="subtitle1">
-                    Ministry of Health (MOH)
-                </Typography>
+                    <FormControlLabel
+                        label="Ministerio de Salud (MOH)"
+                        checked={enableSectionMOH}
+                        control={<Checkbox checked={enableSectionMOH} onChange={
+                            (event: React.ChangeEvent<HTMLInputElement>) => { 
+                                setEnableSectionMOH(event.target.checked);
+                            }
+                        } />
+                    }
+                    />
+                </Typography>               
 
-                <Paper
+                <Paper                    
                     variant="outlined"
                     sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
                 >                    
-                    <Grid container spacing={2}>                        
+                    <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
+                                disabled = {!enableSectionMOH}
                                 label="Número de Entrada SIAD"                            
                                 fullWidth
                                 type='number'
@@ -307,6 +368,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
+                                disabled = {!enableSectionMOH}
                                 label="Llave"                            
                                 fullWidth
                                 type='text'
@@ -317,6 +379,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                         <Grid item xs={12} sm={6}>
                             <LocalizationProvider dateAdapter={AdapterMoment}>
                                 <DatePicker
+                                    disabled = {!enableSectionMOH}
                                     views={['year', 'month', 'day']}
                                     label="* Fecha de ingreso"
                                     name="entryDate"
@@ -328,6 +391,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Button
+                                disabled = {!enableSectionMOH}
                                 component="label"
                                 role={undefined}
                                 variant="outlined"
@@ -355,7 +419,16 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                 </Paper>
 
                 <Typography variant="subtitle1">
-                    Laboratorio Nacional de Salud (LNS)
+                    <FormControlLabel
+                        label="Laboratorio Nacional de Salud (LNS)"
+                        checked={enableSectionLNS}
+                        control={<Checkbox checked={enableSectionLNS} onChange={
+                            (event: React.ChangeEvent<HTMLInputElement>) => { 
+                                setEnableSectionLNS(event.target.checked);
+                            }
+                        } />
+                    }
+                    />
                 </Typography>
 
                 <Paper
@@ -365,6 +438,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
+                                disabled = {!enableSectionLNS}
                                 label="Número de Entrada SIAD"                            
                                 fullWidth
                                 type='number'
@@ -374,6 +448,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
+                                disabled = {!enableSectionLNS}
                                 label="Llave"                            
                                 fullWidth
                                 type='text'
@@ -384,6 +459,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                         <Grid item xs={12} sm={6}>
                             <LocalizationProvider dateAdapter={AdapterMoment}>
                                 <DatePicker
+                                    disabled = {!enableSectionLNS}
                                     views={['year', 'month', 'day']}
                                     label="* Fecha de ingreso"
                                     name="entryDate"
@@ -395,6 +471,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Button
+                                disabled = {!enableSectionLNS}
                                 component="label"
                                 role={undefined}
                                 variant="outlined"
@@ -423,11 +500,11 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
 
             </DialogContent>
             <DialogActions>
-                <Button variant="outlined" onClick={() => { onClose(false) }}>
+                <Button variant="text" onClick={() => { onClose(false) }}>
                     Cancelar
                 </Button>
                 <Button variant="contained" type="submit" disableElevation disabled={isSubmitting}>
-                    {isSubmitting ? "Guardando..." : mode === 'add' ? 'Ingresar' : 'Actualizar'}
+                    {isSubmitting ? "Guardando..." : mode === 'add' ? 'Ingresar expediente' : 'Actualizar expediente'}
                 </Button>
             </DialogActions>
         </form>

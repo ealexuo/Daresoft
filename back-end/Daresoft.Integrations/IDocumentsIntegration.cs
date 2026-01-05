@@ -7,6 +7,7 @@ namespace Daresoft.Integrations
     public interface IDocumentsIntegration
     {
         string GetReadURL(string documentPath);
+        string GetUploadURL(string documentPath);
         //Task<DocumentModel> CreateAsync(DocumentModel document, int currentUserId);
         //Task<DocumentModel> UpdateAsync(DocumentModel document, int currentUserId);
         //Task<List<DocumentModel>> GetAllAsync(int offset, int fetch, string searchText);

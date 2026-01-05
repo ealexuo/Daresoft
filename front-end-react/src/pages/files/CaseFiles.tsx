@@ -33,6 +33,8 @@ import { documentsService } from '../../services/settings/documentsService';
 import { Document } from '../../types/Document';
 import ViewDocumentDialog from '../../dialogs/ViewDocumentDialog';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
+import { workflowsService } from '../../services/settings/workflowsService';
+import { Workflow } from '../../types/Workflow';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -123,6 +125,8 @@ export default function CaseFiles() {
   const [suppliersList, setSupliersList] = useState<AutoCompleteData[]>([]);
 
   const [documentURL, setDocumentURL] = useState<string>('');
+
+  const [workflowsList, setWorkflowsList] = useState<Workflow[]>([]);
   
 
   const generateCollapsableContent = (tasks: Task[]) => {
@@ -226,7 +230,10 @@ export default function CaseFiles() {
           //sx={{ borderColor: w.workflowColor, color: w.workflowColor }}          
           variant='outlined'
           onClick={() => handleOpenViewDocumentDialog(w, documents)}
-          icon={<ArticleOutlinedIcon />}
+          icon={          
+            documents.find(d => d.caseFileId === w.caseFileId && d.path.includes('/entry-documents/')) ?
+              <ArticleOutlinedIcon /> : <></>
+          }
         />) 
       )}</Stack>);    
   }
@@ -418,6 +425,32 @@ export default function CaseFiles() {
       }
   }, [enqueueSnackbar]);
 
+  const fetchWorklows = useCallback(async () => {
+      try {
+          setLoading(true);
+          
+          const offset = 1;
+          const fetch = 10000;
+          const searchText = '';
+
+          const response = await workflowsService.getAll(offset, fetch, searchText);
+
+          if(response.statusText === 'OK') {               
+              setWorkflowsList(response.data);
+              setLoading(false);
+
+              console.log(response.data);
+          }
+          else {
+              enqueueSnackbar('Ocurrió un error al obtener la lista de procesos.', { variant: 'error' });
+          }        
+      }
+      catch(error: any){
+          enqueueSnackbar('Ocurrió un error al obtener la lista de procesos. Detalles: ' + error.message, { variant: 'error' });
+          setLoading(false);
+      }
+  }, [enqueueSnackbar]);
+
   /** Handle Functions Section */
 
   const handlePageChange = (event: unknown, newPage: number) => {
@@ -504,12 +537,13 @@ export default function CaseFiles() {
   // Document viewer dialog
   const handleOpenViewDocumentDialog = async (workflow: CaseFileWorkflow, documents: Document[]) => {
 
-    const pathContent = 'wf-' + workflow.workflowCode.toLowerCase() + '/entry-documents/';
+    const pathContent = 'wf' + workflow.workflowId + '/entry-documents/';
     const documentTemp = documents.find(d => d.caseFileId === workflow.caseFileId && d.path.includes(pathContent));
-    const response = await documentsService.get(documentTemp ? documentTemp.id: 0);
-  
-    setDocumentURL(response.data);
 
+    if(! documentTemp) return;
+
+    const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
+    setDocumentURL(response.data);
     setOpenViewDocumentDialog(true);
   }
 
@@ -535,22 +569,27 @@ export default function CaseFiles() {
       setLoading(true);
 
       try {
-        const response = await caseFilesService.delete(selectedCaseFile.id); 
 
-        if (response.statusText === "OK") {
-          setLoading(false);
-          fetchCaseFiles(currentPage, rowsPerPage, searchText);
-          enqueueSnackbar('Usuario eliminado.', { variant: "success" });
-        } else {
-          enqueueSnackbar('Ocurrió un error al eliminar al usuario.', { variant: "error" });
+        if(selectedCaseFile) {
+          const response = await caseFilesService.delete(selectedCaseFile.id); 
+
+          if (response.statusText === "OK") {
+            setLoading(false);
+            fetchCaseFiles(currentPage, rowsPerPage, searchText);
+            enqueueSnackbar('Expediente eliminado.', { variant: "success" });
+          } else {
+            enqueueSnackbar('Ocurrió un error al eliminar el expediente.', { variant: "error" });
+          }
         }
+        
       } catch (error: any) {
-        enqueueSnackbar('Ocurrió un Error al eliminar al usuario. Detalles: ' + error.message, { variant: "error" });
-        setLoading(false);
+        enqueueSnackbar('Ocurrió un error al eliminar el expediente. Detalles: ' + error.message, { variant: "error" });
       }
-
+      finally {
+        setLoading(false);
+        setOpenCaseFileDeleteDialog(false);
+      }
     }
-    setOpenCaseFileDeleteDialog(false);
   } 
 
   /** Defined Objects Section */
@@ -593,8 +632,9 @@ export default function CaseFiles() {
     setColumns(columnsInit);
     fetchCaseFiles(currentPage, rowsPerPage, searchText);
     fetchSuppliers();
+    fetchWorklows();
 
-  }, [currentPage, rowsPerPage, searchText, fetchCaseFiles, fetchSuppliers]);
+  }, [currentPage, rowsPerPage, searchText, fetchCaseFiles, fetchSuppliers, fetchWorklows]);
 
   /** Return Section */
   return (
@@ -632,6 +672,7 @@ export default function CaseFiles() {
           mode = {selectedCaseFile && selectedCaseFile.id > -1 ? 'edit' : 'add'}
           selectedCaseFile = {selectedCaseFile}
           suppliersList={suppliersList}
+          workflowsList={workflowsList}
           onClose = {handleCloseCaseFileAddEditDialogFromAction}
         />        
       </Dialog>

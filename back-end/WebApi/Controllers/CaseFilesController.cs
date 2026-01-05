@@ -119,7 +119,6 @@ namespace WebApi.Controllers
             {
                 var identity = HttpContext.User.Identity as ClaimsIdentity;
                 int currentUserId = 0;
-                string companyName = "arael_test";
 
                 if (identity != null)
                 {
@@ -131,9 +130,11 @@ namespace WebApi.Controllers
                 for (int i = 0; i < caseFile.Documents.Count; i++)
                 {
                     caseFile.Documents[i].CaseFileId = createdCaseFile.Id;
-                    caseFile.Documents[i].Path = "CF" + createdCaseFile.Id + "/" + caseFile.Documents[i].Path + "/Entry/" + caseFile.Documents[i].Name;
+                    caseFile.Documents[i].Path = "/cf" + createdCaseFile.Id + "/" + caseFile.Documents[i].Path + "/entry-documents/" + caseFile.Documents[i].Name;
                     caseFile.Documents[i] = await _documentsService.CreateAsync(caseFile.Documents[i], currentUserId);
-                }           
+
+                    createdCaseFile.Documents.Add(caseFile.Documents[i]);
+                }
 
                 return Ok(createdCaseFile);
             }
@@ -155,15 +156,15 @@ namespace WebApi.Controllers
         {
             try
             {
-                //var identity = HttpContext.User.Identity as ClaimsIdentity;
-                //int currentUserId = 0;
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                int currentUserId = 0;
 
-                //if (identity != null)
-                //{
-                //    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
-                //}
+                if (identity != null)
+                {
+                    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
+                }
 
-                //var result = await _caseFilesService.DeleteAsync(contactId, currentUserId);
+                var result = await _caseFilesService.DeleteAsync(contactId, currentUserId);
 
                 return Ok();
             }
