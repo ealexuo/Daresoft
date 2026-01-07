@@ -10,7 +10,7 @@ import Dialog from '@mui/material/Dialog';
 import { useSnackbar } from 'notistack';
 import AlertDialog from '../../components/AlertDialog';
 import { User } from '../../types/User';
-import { Alert, Box, Checkbox, Chip, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
+import { Alert, Box, Checkbox, Chip, IconButton, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
 import { CaseFile } from '../../types/CaseFile';
 import { caseFilesService } from '../../services/settings/caseFilesService';
 import { Task } from '../../types/Task';
@@ -35,6 +35,10 @@ import ViewDocumentDialog from '../../dialogs/ViewDocumentDialog';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import { workflowsService } from '../../services/settings/workflowsService';
 import { Workflow } from '../../types/Workflow';
+import DescriptionIcon from '@mui/icons-material/Description';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { tasksService } from '../../services/settings/tasksService';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -129,6 +133,9 @@ export default function CaseFiles() {
   const [workflowsList, setWorkflowsList] = useState<Workflow[]>([]);
   
 
+  const [openMarkTaskAsCompletedDialog, setOpenMarkTaskAsCompletedDialog] = useState<boolean>(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
   const generateCollapsableContent = (tasks: Task[]) => {
 
     const distinctWorkflows: any[] = tasks.reduce((accumulator: any, currentItem: any) => {
@@ -145,68 +152,70 @@ export default function CaseFiles() {
 
       let tasksTemp = tasks.filter(t => t.workflowId === workflowId);
       
-      let component = <Box key={workflowId} sx={{ margin: 3, maxWidth: 500 }}>
-        <Typography variant="h6" gutterBottom component="div">
-          Notas de reparo
-        </Typography>
-        <Table size="small" aria-label="purchases">
-          <TableHead>
-            <TableRow>
-              <TableCell><b>Proceso</b></TableCell>
-              <TableCell style={{ minWidth: 300 }}><b>Descripción</b></TableCell>
-              <TableCell style={{ minWidth: 150 }}><b>Revisor</b></TableCell>
-              <TableCell style={{ minWidth: 150 }}><b>Fecha límite</b></TableCell>
-              <TableCell><b>Completada</b></TableCell>
-              <TableCell style={{ minWidth: 150 }}><b>Fecha finalización</b></TableCell>
-              <TableCell style={{ minWidth: 200 }}><b>Acciones</b></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {tasksTemp.map((task) => (
-              <TableRow hover key={task.id}>
-                <TableCell component="th" scope="row">
-                  <div style={{ display: "inline" }}>
-                    <div
-                        style={{
-                          display: "inline-block",
-                          float: "left",
-                          width: "2mm",
-                          height: "5mm",
-                          backgroundColor:  task.workflowId === 1 ? '#ffc300' : '#a7db18',
-                        }}
-                    ></div>
-                    <div style={{ display: "inlineBlock", marginLeft: "21px" }}>
-                      {task.workflowId === 1 ? 'MOH' : 'LNS'}
-                    </div>
-                  </div>                  
-                </TableCell>                
-                <TableCell>{task.description}</TableCell>                
-                <TableCell>{task.reviewer}</TableCell>
-                <TableCell>{task.dueDate.toLocaleDateString('es-ES')}</TableCell>
-                <TableCell><Checkbox checked={task.isCompleted} disabled={true} /></TableCell>
-                <TableCell>{task.completedDate ? task.completedDate.toLocaleDateString('es-ES') : ''}</TableCell>
-                <TableCell>
-                  <IconButton>
-                    <Tooltip title="Ver documento" arrow placement="top-start">
-                      <PreviewIcon />
-                    </Tooltip>
-                  </IconButton>
-                  <IconButton>
-                    <Tooltip title="Editar" arrow placement="top-start">
-                      <EditIcon />
-                    </Tooltip>
-                  </IconButton>
-                  <IconButton>
-                    <Tooltip title="Eliminar" arrow placement="top-start">
-                      <DeleteIcon />
-                    </Tooltip>
-                  </IconButton>                                    
-                </TableCell>
+      let component =       
+      <>
+        <Box key={workflowId} sx={{ margin: 3, width: '100%' }} >
+          <Alert severity="info" icon={<DescriptionOutlinedIcon fontSize="inherit" />}>
+            {'Notas de Reparo - ' + (tasksTemp[0] ? tasksTemp[0].workflowCode : '')}
+          </Alert>
+          <Table size="small" aria-label="purchases">
+            <TableHead>
+              <TableRow>
+                <TableCell style={{ minWidth: 10 }}><b>No.</b></TableCell>
+                <TableCell style={{ minWidth: 300 }}><b>Descripción</b></TableCell>
+                <TableCell style={{ minWidth: 150 }}><b>Revisor</b></TableCell>
+                <TableCell style={{ minWidth: 150 }}><b>Fecha de ingreso</b></TableCell>
+                <TableCell style={{ minWidth: 150 }}><b>Fecha límite</b></TableCell>
+                <TableCell><b>Completada</b></TableCell>
+                <TableCell style={{ minWidth: 150 }}><b>Fecha finalización</b></TableCell>
+                <TableCell style={{ minWidth: 200 }}><b>Acciones</b></TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Box>;     
+            </TableHead>
+            <TableBody>
+              {tasksTemp.map((task) => (
+                <TableRow hover key={task.id}>
+                  <TableCell>{task.priority}</TableCell>                     
+                  <TableCell>{task.description}</TableCell>
+                  <TableCell>{task.reviewer}</TableCell>
+                  <TableCell>
+                    <Chip size='small' color='default' label={task.entryDate.toLocaleDateString('es-ES')}/>
+                  </TableCell>
+                  <TableCell>{generateTasksDueDateContent(task.dueDate)}</TableCell>
+                  <TableCell><Checkbox checked={task.isCompleted} disabled={true} /></TableCell>
+                  <TableCell>
+                    {task.completedDate ?  <Chip size='small' color='default' label={task.completedDate.toLocaleDateString('es-ES')}/> : ''}
+                  </TableCell>
+                  <TableCell>
+                    <IconButton>
+                      <Tooltip title="Ver documento" arrow placement="top-start">
+                        <ArticleOutlinedIcon />
+                      </Tooltip>
+                    </IconButton>
+                    <IconButton onClick={() => handleOpenMarkTaskAsCompletedDialog(task)}>
+                      <Tooltip title="Marcar como completada" arrow placement="top-start">
+                        <CheckCircleOutlineIcon />
+                      </Tooltip>
+                    </IconButton>
+                    <IconButton onClick={() => handleOpenCaseFileNoteAddEditDialog(task)}>
+                      <Tooltip title="Editar" arrow placement="top-start">
+                        <EditIcon />
+                      </Tooltip>
+                    </IconButton>
+                    <IconButton>
+                      <Tooltip title="Eliminar" arrow placement="top-start">
+                        <DeleteIcon />
+                      </Tooltip>
+                    </IconButton>                                    
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>        
+      </>      
+      ;  
+      
+      
 
       componentsList.push(component);
     });   
@@ -283,15 +292,41 @@ export default function CaseFiles() {
     ); 
   }
 
-  const generateTasksDueDateContent = (tasks: Task[]) => {
+  const generateTasksDueDateContent = (dueDate: Date) => {
+
+    let safeDate = new Date();
+    safeDate.setMonth(safeDate.getMonth() + 1);
+    
+    let dangerDate = new Date();
+    dangerDate.setDate(dangerDate.getDay() + 15);
+
+    let component: React.ReactNode;
+
+    if(dueDate > safeDate){
+      component = <Chip size='small' label={dueDate.toLocaleDateString('es-GT')} sx={{ backgroundColor: theme.palette.info.light, color: theme.palette.info.contrastText }}/>;
+    }
+    else if(dueDate <= safeDate && dueDate >= dangerDate){
+      component = <Chip size='small' label={dueDate.toLocaleDateString('es-GT')} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
+    }
+    else {
+      component = <Chip size='small' label={dueDate.toLocaleDateString('es-GT')} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>;
+    }
+
+    return(
+      <>{component}</>
+    ); 
+  }
+
+
+  const generateTasksDueDateByWorkflowContent = (tasks: Task[]) => {
 
     if(!tasks || tasks.length === 0) return (<></>);
 
     let safeDate = new Date();
-    safeDate.setDate(safeDate.getDate() - 30);
-
+    safeDate.setMonth(safeDate.getMonth() + 1);
+    
     let dangerDate = new Date();
-    dangerDate.setDate(dangerDate.getDate() - 15);
+    dangerDate.setDate(dangerDate.getDay() + 15);
 
     const distinctWorkflows: any[] = tasks.reduce((accumulator: any, currentItem: any) => {
       const value = currentItem.workflowId;
@@ -313,10 +348,10 @@ export default function CaseFiles() {
 
       if(latestTask?.dueDate) {
 
-        if(latestTask.dueDate <= safeDate){
-          component = <Chip key={workflowId} size='small' label={message} />;
+        if(latestTask.dueDate > safeDate){
+          component = <Chip key={workflowId} size='small' label={message} sx={{ backgroundColor: theme.palette.info.light, color: theme.palette.info.contrastText }}/>;
         }
-        else if(latestTask.dueDate > safeDate && latestTask.dueDate < dangerDate){
+        else if(latestTask.dueDate <= safeDate && latestTask.dueDate >= dangerDate){
           component = <Chip key={workflowId} size='small' label={message} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
         }
         else {
@@ -356,7 +391,8 @@ export default function CaseFiles() {
           const caseNumberTemp = item.supplierName.replace(' ', '') + '-' + item.id + '-' + year;
 
           item.tasks = item.tasks.map(t => {
-            t.dueDate = new Date(t.dueDate);
+            t.entryDate = new Date(t.entryDate);
+            t.dueDate = new Date(t.dueDate);            
             t.completedDate = t.completedDate ? new Date(t.completedDate) : null;
             return t
           });
@@ -372,7 +408,7 @@ export default function CaseFiles() {
             workflowMOH ? workflowMOH.workflowStatusName : workflowLNS ? workflowLNS.workflowStatusName : 'Sin estado',
             generateWorkflowListContent(item.workflows, item.documents),
             generateTasksCountContent(item.tasks),
-            generateTasksDueDateContent(item.tasks),
+            generateTasksDueDateByWorkflowContent(item.tasks),
             
             // Colapsable Content at the end of the array
             generateCollapsableContent(item.tasks), 
@@ -438,8 +474,6 @@ export default function CaseFiles() {
           if(response.statusText === 'OK') {               
               setWorkflowsList(response.data);
               setLoading(false);
-
-              console.log(response.data);
           }
           else {
               enqueueSnackbar('Ocurrió un error al obtener la lista de procesos.', { variant: 'error' });
@@ -549,6 +583,50 @@ export default function CaseFiles() {
 
   const handleCloseViewDocumentDialog = () => {    
     setOpenViewDocumentDialog(false);
+  }
+
+  // Mark Task As Completed dialog
+  const handleOpenMarkTaskAsCompletedDialog = async (task: Task) => {
+    setSelectedTask(task);
+    setOpenMarkTaskAsCompletedDialog(true);
+  }
+
+  const handleCloseMarkTaskAsCompletedDialog = () => {
+    setOpenMarkTaskAsCompletedDialog(false);
+  }
+
+  const handleCloseMarkTaskAsCompletedDialogFromAction = async (actionResult: boolean = false) => {
+    if(actionResult) { 
+
+      setLoading(true);
+
+      try {
+
+        if(selectedTask) {
+
+          selectedTask.isCompleted = true;
+          selectedTask.completedDate = new Date();
+          selectedTask.documents = []; 
+          
+          const response = await tasksService.edit(selectedTask); 
+
+          if (response.statusText === "OK") {
+            setLoading(false);
+            fetchCaseFiles(currentPage, rowsPerPage, searchText);
+            enqueueSnackbar('Tarea completada.', { variant: "success" });
+          } else {
+            enqueueSnackbar('Ocurrió un error al completar la tarea.', { variant: "error" });
+          }
+        }
+        
+      } catch (error: any) {
+        enqueueSnackbar('Ocurrió un error al eliminar el expediente. Detalles: ' + error.message, { variant: "error" });
+      }
+      finally {
+        setLoading(false);
+        setOpenMarkTaskAsCompletedDialog(false);
+      }
+    }    
   }
 
   // CaseFile Delete Alert dialog
@@ -695,6 +773,7 @@ export default function CaseFiles() {
       >
         <CaseFileNoteAddEditDialog         
           onClose = {handleCloseCaseFileNoteAddEditDialogFromAction}
+          workflowsList={workflowsList}
           selectedCaseFile = {selectedCaseFile}
         />
       </Dialog>
@@ -722,6 +801,19 @@ export default function CaseFiles() {
           onClose = {handleCloseCaseFileDeleteDialogFromAction}
         />
       </Dialog>
+
+      <Dialog
+          open={openMarkTaskAsCompletedDialog}
+          onClose={handleCloseMarkTaskAsCompletedDialog}
+          maxWidth={"sm"}
+        >
+          <AlertDialog
+            color = {'primary'}
+            title = {'Completar tarea'}
+            message = {'Marcar la tarea como completada ?'}
+            onClose = {handleCloseMarkTaskAsCompletedDialogFromAction}
+          />
+        </Dialog>
           
     </>
   );

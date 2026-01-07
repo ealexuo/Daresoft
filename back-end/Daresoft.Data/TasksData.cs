@@ -37,6 +37,7 @@ namespace Daresoft.Data
                     ,Description
                     ,AssignedToUserId
                     ,Priority
+                    ,EntryDate
                     ,DueDate
                     ,Reviewer
                     ,IsCompleted
@@ -54,6 +55,7 @@ namespace Daresoft.Data
                     ,@Description
                     ,@AssignedToUserId
                     ,@Priority
+                    ,@EntryDate
                     ,@DueDate
                     ,@Reviewer
                     ,@IsCompleted
@@ -75,6 +77,7 @@ namespace Daresoft.Data
                         task.Description,
                         task.AssignedToUserId,
                         task.Priority,
+                        task.EntryDate,
                         task.DueDate,
                         task.Reviewer,
                         task.IsCompleted,
@@ -110,6 +113,7 @@ namespace Daresoft.Data
 	                ,AssignedToUserId 
 	                ,Priority
 	                ,DueDate
+                    ,EntryDate
 	                ,IsCompleted
 	                ,CompletedDate
                     ,COUNT(*) OVER () TotalCount
@@ -153,6 +157,7 @@ namespace Daresoft.Data
 	                ,ta.Description
 	                ,ta.AssignedToUserId 
 	                ,ta.Priority
+                    ,ta.EntryDate
 	                ,ta.DueDate
                     ,ta.Reviewer
 	                ,ta.IsCompleted
@@ -187,6 +192,7 @@ namespace Daresoft.Data
 	                ,Description
 	                ,AssignedToUserId 
 	                ,Priority
+                    ,EntryDate
 	                ,DueDate
 	                ,IsCompleted
 	                ,CompletedDate
@@ -202,9 +208,51 @@ namespace Daresoft.Data
             }
         }
 
-        public Task<TaskModel> UpdateAsync(TaskModel task, int currentUserId)
+        public async Task<TaskModel> UpdateAsync(TaskModel task, int currentUserId)
         {
-            throw new NotImplementedException();
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string updateDocumentDataSql = @"            
+                UPDATE Task set
+                    CaseFileId = @CaseFileId
+                    ,WorkflowId = @WorkflowId
+                    ,Name = @Name
+                    ,Description = @Description
+                    ,AssignedToUserId = @AssignedToUserId
+                    ,Priority = @Priority
+                    ,EntryDate = @EntryDate
+                    ,DueDate = @DueDate
+                    ,Reviewer = @Reviewer
+                    ,IsCompleted = @IsCompleted
+                    ,CompletedDate = @CompletedDate
+                    ,LastModifiedDate = GETUTCDATE()
+                    ,UpdatedByUserId = @UpdatedByUserId
+                WHERE Id = @Id
+                ";
+
+                using (var trx = connection.BeginTransaction())
+                {
+                    await connection.ExecuteAsync(updateDocumentDataSql, new
+                    {
+                        task.Id,
+                        task.CaseFileId,
+                        task.WorkflowId,
+                        task.Name,
+                        task.Description,
+                        task.AssignedToUserId,
+                        task.Priority,
+                        task.EntryDate,
+                        task.DueDate,
+                        task.Reviewer,
+                        task.IsCompleted,
+                        task.CompletedDate,
+                        UpdatedByUserId = currentUserId
+                    }, trx);
+
+                    trx.Commit();
+                }
+            }
+            return await GetByIdAsync(task.Id);
         }
     }
 }

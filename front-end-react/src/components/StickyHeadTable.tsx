@@ -279,7 +279,7 @@ export function StickyHeadTable({
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
                           <Collapse in={openIndex === index} timeout="auto" unmountOnExit>
                             {row[row.length-1]}
                           </Collapse>

@@ -9,8 +9,6 @@ import { useForm, SubmitHandler, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useSnackbar } from 'notistack'
-import { Proceso } from '../types/Proceso'
-import { Origen } from '../types/Origen'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -19,9 +17,11 @@ import moment from 'moment'
 import { useTranslation } from 'react-i18next';
 import { Task } from '../types/Task'
 import { tasksService } from '../services/settings/tasksService'
+import { Workflow } from '../types/Workflow'
 
 type DialogProps = {
     selectedCaseFile: CaseFile | undefined,
+    workflowsList: Workflow[],
     onClose: (refresh: boolean) => void    
 }
 
@@ -37,7 +37,7 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }: DialogProps) {
+export default function CaseFileNoteAddEditDialog({ selectedCaseFile, workflowsList, onClose }: DialogProps) {
 
     const [t] = useTranslation();    
     const { enqueueSnackbar } = useSnackbar()
@@ -78,11 +78,12 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }:
             name: '',
             description: formData.description,
             assignedToUserId: null,
-            priority: 0,
+            priority: selectedCaseFile && selectedCaseFile.tasks ? selectedCaseFile.tasks.filter(t => t.workflowId === workflowId).length + 1 : 1,
+            entryDate: entryDate.toDate(),
             dueDate: dueDateTemp.toDate(),
             isCompleted: false,
             completedDate: null,
-            reviewer: '',
+            reviewer: formData.reviewer,
             documents: [{
                 id: 0,
                 caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
@@ -135,8 +136,15 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }:
                             aria-label="Workflow"
                             fullWidth
                             >
-                            <ToggleButton value={1}>Ministry of Health (MOH)</ToggleButton>
-                            <ToggleButton value={2}>Laboratorio Nacional de Salud (LNS)</ToggleButton>
+                            {
+                                workflowsList.map(w => (
+                                    <ToggleButton
+                                        value={w.id}
+                                    >
+                                        {`${w.name} (${w.code})`}
+                                    </ToggleButton>)
+                                )
+                            }                            
                         </ToggleButtonGroup>
                     </Grid>                 
                     <Grid item xs={12} sm={6}>
@@ -152,7 +160,8 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }:
                         <TextField
                             label="Revisor"                            
                             fullWidth
-                            type='text'                                                      
+                            type='text'
+                            {...register('reviewer')}                                                  
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -210,7 +219,7 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, onClose }:
                     Cancelar
                 </Button>
                 <Button variant="contained" type="submit" disableElevation disabled={isSubmitting}>
-                    {isSubmitting ? "Guardando..." : "Crear"}
+                    {isSubmitting ? "Guardando..." : "Agregar nota"}
                 </Button>
             </DialogActions>
         </form>

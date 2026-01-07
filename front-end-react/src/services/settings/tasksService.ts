@@ -16,9 +16,9 @@ export const tasksService = {
   add: async (task: Task): Promise<any> => {    
     return await axiosService.post(BASE_PATH, task);
   },
-  // edit: async (caseFile: CaseFile): Promise<any> => {
-  //   return await axiosService.put(BASE_PATH, caseFile);
-  // },
+  edit: async (task: Task): Promise<any> => {
+    return await axiosService.put(BASE_PATH, task);
+  },
   get: async (taskId: number): Promise<any> => {
     return await axiosService.get(BASE_PATH + taskId);
   },

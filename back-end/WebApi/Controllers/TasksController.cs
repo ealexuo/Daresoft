@@ -78,19 +78,19 @@ namespace WebApi.Controllers
 
         [Authorize]
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] CaseFileModel caseFile)
+        public async Task<IActionResult> Update([FromBody] TaskModel task)
         {
             try
             {
-                //var identity = HttpContext.User.Identity as ClaimsIdentity;
-                //int currentUserId = 0;
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                int currentUserId = 0;
 
-                //if (identity != null)
-                //{
-                //    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
-                //}
+                if (identity != null)
+                {
+                    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
+                }
 
-                //var updatedUser = await _caseFilesService.UpdateAsync(caseFile, currentUserId);
+                var updatedUser = await _tasksService.UpdateAsync(task, currentUserId);
 
                 return Ok();
             }
@@ -122,7 +122,7 @@ namespace WebApi.Controllers
 
                 for (int i = 0; i < task.Documents.Count; i++)
                 {                                        
-                    task.Documents[i].Path = "CF" + task.CaseFileId + "/" + workflow.Code + "/Tasks/" + createdTask.Id + "/" + task.Documents[i].Name;
+                    task.Documents[i].Path = "cf" + task.CaseFileId + "/wf" + workflow.Id + "/tasks/" + createdTask.Id + "/" + task.Documents[i].Name;
                     task.Documents[i] = await _documentsService.CreateAsync(task.Documents[i], currentUserId);
                 }
 

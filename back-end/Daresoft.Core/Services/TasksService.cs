@@ -42,9 +42,9 @@ namespace Daresoft.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<TaskModel> UpdateAsync(TaskModel task, int currentUserId)
+        public async Task<TaskModel> UpdateAsync(TaskModel task, int currentUserId)
         {
-            throw new NotImplementedException();
+            return await _tasksData.UpdateAsync(task, currentUserId);
         }
     }
 }

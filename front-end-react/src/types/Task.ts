@@ -11,6 +11,7 @@ export type Task = {
     description: string;
     assignedToUserId: number | null;
     priority: number;
+    entryDate: Date;
     dueDate: Date;
     reviewer: string;
     isCompleted: boolean;
