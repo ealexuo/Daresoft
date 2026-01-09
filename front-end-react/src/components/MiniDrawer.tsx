@@ -33,7 +33,7 @@ import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 
 const drawerWidth = 240;
 
-const brandName = 'Arael'
+const brandName = 'ARAEL'
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
@@ -218,16 +218,28 @@ export default function MiniDrawer() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h5" noWrap component="div">
+          <Typography variant="h6"
+            noWrap
+            component="a"
+            href="#app-bar-with-responsive-menu"
+            sx={{
+              mr: 2,
+              display: { xs: 'none', md: 'flex' },
+              fontFamily: 'monospace',
+              fontWeight: 700,
+              letterSpacing: '.3rem',
+              color: 'inherit',
+              textDecoration: 'none',
+            }}>
             {brandName}
           </Typography>
 
           <Box sx={{ flexGrow: 0, position:'absolute', right:'21px'}}>
-            <Tooltip title="Open settings">
+            {/* <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/avatar-2.jpg" />
               </IconButton>
-            </Tooltip>
+            </Tooltip> */}
             <Menu
               sx={{ mt: '45px' }}
               id="menu-appbar"

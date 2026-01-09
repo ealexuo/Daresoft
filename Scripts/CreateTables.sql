@@ -191,64 +191,64 @@ CREATE TABLE dbo.CaseFileWorkflow
 );
 
 /* CaseFile Workflow History */
-CREATE TABLE dbo.CaseFileWorkflowHistory
-(
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    CaseFileWorkflowId INT NOT NULL,    
-	WorkFlowStatusId INT NOT NULL,
-    StartDate DATETIME NOT NULL,
-    EndDate DATETIME NULL,
-	Notes NVARCHAR(MAX),
-	CreatedDate DATETIME NOT NULL,
-	LastModifiedDate DATETIME NOT NULL,	
-	CreatedByUserId INT NOT NULL,
-	UpdatedByUserId INT NOT NULL
+--CREATE TABLE dbo.CaseFileWorkflowHistory
+--(
+--    Id INT IDENTITY(1,1) PRIMARY KEY,
+--    CaseFileWorkflowId INT NOT NULL,    
+--	WorkFlowStatusId INT NOT NULL,
+--    StartDate DATETIME NOT NULL,
+--    EndDate DATETIME NULL,
+--	Notes NVARCHAR(MAX),
+--	CreatedDate DATETIME NOT NULL,
+--	LastModifiedDate DATETIME NOT NULL,	
+--	CreatedByUserId INT NOT NULL,
+--	UpdatedByUserId INT NOT NULL
 
-	CONSTRAINT FK_CaseFileWorkflowHistory_CaseFileWorkflow
-        FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id),
+--	CONSTRAINT FK_CaseFileWorkflowHistory_CaseFileWorkflow
+--        FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id),
 
-	CONSTRAINT FK_CaseFileWorkflow_WorkflowStatus
-        FOREIGN KEY (WorkflowStatusId) REFERENCES dbo.WorkflowStatus(Id)
-);
+--	CONSTRAINT FK_CaseFileWorkflow_WorkflowStatus
+--        FOREIGN KEY (WorkflowStatusId) REFERENCES dbo.WorkflowStatus(Id)
+--);
 
 
-/* CaseFile Progress */
-CREATE TABLE dbo.CaseFileWorkflowProgress
-(
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    CaseFileWorkflowId INT NOT NULL,
-    StepId INT NOT NULL,
-    StatusId INT NOT NULL,
-    CreatedDate DATETIME NOT NULL,
-	LastModifiedDate DATETIME NOT NULL DEFAULT SYSDATETIME(),	
-	CreatedByUserId INT NOT NULL,
-	UpdatedByUserId INT NOT NULL
+--/* CaseFile Progress */
+--CREATE TABLE dbo.CaseFileWorkflowProgress
+--(
+--    Id INT IDENTITY(1,1) PRIMARY KEY,
+--    CaseFileWorkflowId INT NOT NULL,
+--    StepId INT NOT NULL,
+--    StatusId INT NOT NULL,
+--    CreatedDate DATETIME NOT NULL,
+--	LastModifiedDate DATETIME NOT NULL DEFAULT SYSDATETIME(),	
+--	CreatedByUserId INT NOT NULL,
+--	UpdatedByUserId INT NOT NULL
 
-    CONSTRAINT FK_Progress_CaseFileWorkflow
-        FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id),
+--    CONSTRAINT FK_Progress_CaseFileWorkflow
+--        FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id),
 
-    CONSTRAINT FK_Progress_Step
-        FOREIGN KEY (StepId) REFERENCES dbo.WorkflowStep(Id),
+--    CONSTRAINT FK_Progress_Step
+--        FOREIGN KEY (StepId) REFERENCES dbo.WorkflowStep(Id),
 
-    CONSTRAINT FK_Progress_Status
-        FOREIGN KEY (StatusId) REFERENCES dbo.Status(Id)
-);
+--    CONSTRAINT FK_Progress_Status
+--        FOREIGN KEY (StatusId) REFERENCES dbo.Status(Id)
+--);
 
 /* CaseFile Workflow History */
-CREATE TABLE dbo.CaseFileWorkflowHistory
-(
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    CaseFileWorkflowId INT NOT NULL,
-    StepId INT NOT NULL,
-    StatusId INT NOT NULL,    
-	CreatedDate DATETIME NOT NULL DEFAULT SYSDATETIME(),
-	LastModifiedDate DATETIME NOT NULL DEFAULT SYSDATETIME(),	
-	CreatedByUserId INT NOT NULL,
-	UpdatedByUserId INT NOT NULL
+--CREATE TABLE dbo.CaseFileWorkflowHistory
+--(
+--    Id INT IDENTITY(1,1) PRIMARY KEY,
+--    CaseFileWorkflowId INT NOT NULL,
+--    StepId INT NOT NULL,
+--    StatusId INT NOT NULL,    
+--	CreatedDate DATETIME NOT NULL DEFAULT SYSDATETIME(),
+--	LastModifiedDate DATETIME NOT NULL DEFAULT SYSDATETIME(),	
+--	CreatedByUserId INT NOT NULL,
+--	UpdatedByUserId INT NOT NULL
 
-    CONSTRAINT FK_History_CaseFileWorkflow
-        FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id)
-);
+--    CONSTRAINT FK_History_CaseFileWorkflow
+--        FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id)
+--);
 
 
 /* ----------------------------------------
@@ -269,12 +269,13 @@ CREATE TABLE dbo.Task
     AssignedToUserId INT NULL,
 
     Priority TINYINT NOT NULL,   -- 1=Low, 2=Medium, 3=High
-    DueDate DATETIME NULL,
+	EntryDate DATE NOT NULL,
+    DueDate DATE NULL,
 
 	Reviewer NVARCHAR(255) NULL,
 
     IsCompleted BIT NOT NULL DEFAULT 0,
-    CompletedDate DATETIME NULL,
+    CompletedDate DATE NULL,
 
 	CreatedDate DATETIME NOT NULL,
 	LastModifiedDate DATETIME NOT NULL,	

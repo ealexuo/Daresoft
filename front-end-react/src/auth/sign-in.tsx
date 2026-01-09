@@ -75,7 +75,9 @@ export default function SignIn() {
           sm={4}
           md={7}
           sx={{
-            backgroundImage: 'url(https://plus.unsplash.com/premium_photo-1663047392930-7c1c31d7b785?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)',
+            //backgroundImage: 'url(https://plus.unsplash.com/premium_photo-1663047392930-7c1c31d7b785?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)',
+            //backgroundImage: 'url(https://img.freepik.com/premium-vector/medicine-healthcare-concept-doctor-make-medical-research-hospital-illness-treatment-diagnosis-making-vector-isometric-illustration_277904-1314.jpg)',
+            backgroundImage: 'url(https://vipanygroup.com/wp-content/uploads/2020/09/pharmaceutical-production_1477877297-scaled.jpg)',
             backgroundRepeat: 'no-repeat',
             backgroundColor: (t) =>
               t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
