@@ -237,8 +237,6 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             caseFileToSave.documents.push(entryDocumentToSaveLNS);
         }
 
-        console.log(caseFileToSave);
-
         // Add/edit api calls
         try {
             if (mode === "add") {

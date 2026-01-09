@@ -90,7 +90,15 @@ namespace WebApi.Controllers
                     currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
                 }
 
-                var updatedUser = await _tasksService.UpdateAsync(task, currentUserId);
+                var updatedTask = await _tasksService.UpdateAsync(task, currentUserId);
+
+                for (int i = 0; i < task.Documents.Count; i++)
+                {
+                    task.Documents[i].Path = "/case-files/" + task.CaseFileId + "/workflows/" + task.WorkflowId + "/tasks/" + updatedTask.Id + "/" + task.Documents[i].Name;
+                    task.Documents[i] = await _documentsService.CreateAsync(task.Documents[i], currentUserId);
+
+                    updatedTask.Documents.Add(task.Documents[i]);
+                }
 
                 return Ok();
             }
@@ -116,14 +124,13 @@ namespace WebApi.Controllers
                 }
 
                 var createdTask = await _tasksService.CreateAsync(task, currentUserId);
-                var workflowsList = await _workflowsService.GetAllAsync();
-
-                var workflow = workflowsList.Find(w => w.Id == task.WorkflowId);
 
                 for (int i = 0; i < task.Documents.Count; i++)
                 {                                        
-                    task.Documents[i].Path = "cf" + task.CaseFileId + "/wf" + workflow.Id + "/tasks/" + createdTask.Id + "/" + task.Documents[i].Name;
+                    task.Documents[i].Path = "/case-files/" + task.CaseFileId + "/workflows/" + task.WorkflowId + "/tasks/" + createdTask.Id + "/" + task.Documents[i].Name;
                     task.Documents[i] = await _documentsService.CreateAsync(task.Documents[i], currentUserId);
+
+                    createdTask.Documents.Add(task.Documents[i]);
                 }
 
                 return Ok(createdTask);
@@ -141,20 +148,20 @@ namespace WebApi.Controllers
         }
 
         [Authorize]
-        [HttpDelete("{contactId}")]
-        public async Task<IActionResult> Delete(int contactId)
+        [HttpDelete("{taskId}")]
+        public async Task<IActionResult> Delete(int taskId)
         {
             try
             {
-                //var identity = HttpContext.User.Identity as ClaimsIdentity;
-                //int currentUserId = 0;
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                int currentUserId = 0;
 
-                //if (identity != null)
-                //{
-                //    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
-                //}
+                if (identity != null)
+                {
+                    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
+                }
 
-                //var result = await _caseFilesService.DeleteAsync(contactId, currentUserId);
+                var result = await _tasksService.DeleteAsync(taskId, currentUserId);
 
                 return Ok();
             }

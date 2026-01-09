@@ -93,9 +93,23 @@ namespace Daresoft.Data
             return await GetByIdAsync(taskId);
         }
 
-        public Task<bool> DeleteAsync(int task, int currentUserId)
+        public async Task<bool> DeleteAsync(int taskId, int currentUserId)
         {
-            throw new NotImplementedException();
+            int result = 0;
+
+            //Hard delete
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string hardDeleteTaskSql = @"DELETE Task WHERE Id = @Id";
+                
+                using (var trx = connection.BeginTransaction())
+                {
+                    result = await connection.ExecuteAsync(hardDeleteTaskSql, new { Id = taskId }, trx);
+                    trx.Commit();
+                }
+            }
+
+            return result == 1;
         }
 
         public async Task<List<TaskModel>> GetAllAsync(int offset, int fetch, string searchText)
@@ -173,7 +187,14 @@ namespace Daresoft.Data
                     CaseFileIds = caseFileIds
                 });
 
-                return result.ToList();
+                var taskResult = result.ToList();
+
+                foreach(var task in taskResult)
+                {
+                    task.Documents = new List<DocumentModel>();
+                }
+
+                return taskResult;
             }
         }
 
@@ -203,6 +224,9 @@ namespace Daresoft.Data
                 {
                     TaskId = taskId
                 });
+
+                var taskResult = result.FirstOrDefault();
+                taskResult.Documents = new List<DocumentModel>();
 
                 return result.FirstOrDefault();
             }

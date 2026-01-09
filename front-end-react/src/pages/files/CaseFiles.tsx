@@ -134,7 +134,10 @@ export default function CaseFiles() {
   
 
   const [openMarkTaskAsCompletedDialog, setOpenMarkTaskAsCompletedDialog] = useState<boolean>(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+
+  const [openDeleteTaskDialog, setOpenDeleteTaskDialog] = useState<boolean>(false);
+
 
   const generateCollapsableContent = (tasks: Task[]) => {
 
@@ -178,15 +181,15 @@ export default function CaseFiles() {
                   <TableCell>{task.description}</TableCell>
                   <TableCell>{task.reviewer}</TableCell>
                   <TableCell>
-                    <Chip size='small' color='default' label={task.entryDate.toLocaleDateString('es-ES')}/>
+                    <Chip size='small' color='default' label={task.entryDate.toLocaleDateString('en-GB')}/>
                   </TableCell>
                   <TableCell>{generateTasksDueDateContent(task.dueDate)}</TableCell>
                   <TableCell><Checkbox checked={task.isCompleted} disabled={true} /></TableCell>
                   <TableCell>
-                    {task.completedDate ?  <Chip size='small' color='default' label={task.completedDate.toLocaleDateString('es-ES')}/> : ''}
+                    {task.completedDate ?  <Chip size='small' color='default' label={task.completedDate.toLocaleDateString('en-GB')}/> : ''}
                   </TableCell>
                   <TableCell>
-                    <IconButton>
+                    <IconButton onClick={() => handleOpenViewTaskDocumentDialog(task)}>
                       <Tooltip title="Ver documento" arrow placement="top-start">
                         <ArticleOutlinedIcon />
                       </Tooltip>
@@ -196,12 +199,12 @@ export default function CaseFiles() {
                         <CheckCircleOutlineIcon />
                       </Tooltip>
                     </IconButton>
-                    <IconButton onClick={() => handleOpenCaseFileNoteAddEditDialog(task)}>
+                    <IconButton onClick={() => handleOpenCaseFileNoteEditDialog(task)}>
                       <Tooltip title="Editar" arrow placement="top-start">
                         <EditIcon />
                       </Tooltip>
                     </IconButton>
-                    <IconButton>
+                    <IconButton onClick={() => handleOpenDeleteTaskDialog(task)}>
                       <Tooltip title="Eliminar" arrow placement="top-start">
                         <DeleteIcon />
                       </Tooltip>
@@ -303,13 +306,13 @@ export default function CaseFiles() {
     let component: React.ReactNode;
 
     if(dueDate > safeDate){
-      component = <Chip size='small' label={dueDate.toLocaleDateString('es-GT')} sx={{ backgroundColor: theme.palette.info.light, color: theme.palette.info.contrastText }}/>;
+      component = <Chip size='small' label={dueDate.toLocaleDateString('en-GB')} color='default'/>;
     }
     else if(dueDate <= safeDate && dueDate >= dangerDate){
-      component = <Chip size='small' label={dueDate.toLocaleDateString('es-GT')} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
+      component = <Chip size='small' label={dueDate.toLocaleDateString('en-GB')} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
     }
     else {
-      component = <Chip size='small' label={dueDate.toLocaleDateString('es-GT')} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>;
+      component = <Chip size='small' label={dueDate.toLocaleDateString('en-GB')} sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}/>;
     }
 
     return(
@@ -343,13 +346,13 @@ export default function CaseFiles() {
       let tasksTemp = tasks.filter(t => t.workflowId === workflowId);
       let latestTask =  tasksTemp.at(-1);
 
-      let message = latestTask?.workflowCode + ' | ' + latestTask?.dueDate.toLocaleDateString('es-GT');
+      let message = latestTask?.workflowCode + ' | ' + latestTask?.dueDate.toLocaleDateString('en-GB');
       let component;
 
       if(latestTask?.dueDate) {
 
         if(latestTask.dueDate > safeDate){
-          component = <Chip key={workflowId} size='small' label={message} sx={{ backgroundColor: theme.palette.info.light, color: theme.palette.info.contrastText }}/>;
+          component = <Chip key={workflowId} size='small' label={message} color='default'/>;
         }
         else if(latestTask.dueDate <= safeDate && latestTask.dueDate >= dangerDate){
           component = <Chip key={workflowId} size='small' label={message} sx={{ backgroundColor: theme.palette.warning.light, color: theme.palette.warning.contrastText }}/>;
@@ -550,10 +553,17 @@ export default function CaseFiles() {
     }    
   }
 
-  const handleOpenCaseFileNoteAddEditDialog = async (caseFile: any) => {
+  const handleOpenCaseFileNoteAddDialog = async (caseFile: any) => {
     const caseFileTemp = caseFilesList.find(c => c.id === (caseFile && caseFile[0] ? caseFile[0] : 0));
-      
+    
+    setSelectedTask(null);
     setSelectedCaseFile(caseFileTemp);
+    setOpenCaseFileNoteAddEditDialog(true);
+  }
+
+  const handleOpenCaseFileNoteEditDialog = async (task: any) => {
+    setSelectedCaseFile(null);    
+    setSelectedTask(task);    
     setOpenCaseFileNoteAddEditDialog(true);
   }
 
@@ -568,7 +578,7 @@ export default function CaseFiles() {
     setOpenCaseFileNoteAddEditDialog(false);
   }
 
-  // Document viewer dialog
+  // Document viewer dialog - CaseFile Entry Document
   const handleOpenViewDocumentDialog = async (workflow: CaseFileWorkflow, documents: Document[]) => {
 
     const pathContent = 'wf' + workflow.workflowId + '/entry-documents/';
@@ -578,6 +588,20 @@ export default function CaseFiles() {
 
     const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
     setDocumentURL(response.data);
+    setOpenViewDocumentDialog(true);
+  }
+
+  // Document viewer dialog - Task Document
+  const handleOpenViewTaskDocumentDialog = async (task: Task) => {
+        
+    const documentTemp = task.documents && task.documents.length > 0 ? task.documents[0] : null;
+    if(! documentTemp) return;
+    
+    const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
+    
+    console.log('View Task Document', response);
+
+    setDocumentURL(response.data);    
     setOpenViewDocumentDialog(true);
   }
 
@@ -670,6 +694,44 @@ export default function CaseFiles() {
     }
   } 
 
+  // Delete task dialog
+  const handleOpenDeleteTaskDialog = async (task: Task) => {
+    setSelectedTask(task);
+    setOpenDeleteTaskDialog(true);
+  }
+
+  const handleCloseDeleteTaskDialog = () => {
+    setOpenDeleteTaskDialog(false);
+  }
+
+  const handleCloseDeleteTaskDialogFromAction = async (actionResult: boolean = false) => {
+    
+    if(actionResult) {
+      try {
+        setLoading(true);
+
+        const result = await tasksService.delete(selectedTask.id);
+
+        if(result.statusText === 'OK'){
+          enqueueSnackbar('Nota eliminada.', { variant: 'success' });
+          fetchCaseFiles(currentPage, rowsPerPage, searchText);
+        }
+        else {
+          enqueueSnackbar('Ocurrió un error al eliminar la nota.', { variant: 'error' });
+        }
+      }
+      catch(error: any){
+        enqueueSnackbar('Ocurrió un error al eliminar la nota. Detalles: ' + error.message, { variant: 'error' });
+      }
+      finally{
+        setLoading(false);
+        setOpenDeleteTaskDialog(false);
+      }
+    }
+
+  }
+
+
   /** Defined Objects Section */
   const actionList: ItemActionListType =
   [    
@@ -678,7 +740,7 @@ export default function CaseFiles() {
       icon: <Tooltip title="Nueva nota" arrow placement="top-start">
               <NoteAddOutlined />
             </Tooltip>,
-      callBack: handleOpenCaseFileNoteAddEditDialog, 
+      callBack: handleOpenCaseFileNoteAddDialog, 
     },    
     { 
       name: 'siad',
@@ -771,10 +833,12 @@ export default function CaseFiles() {
         onClose={handleCloseCaseFileNoteAddEditDialog}
         maxWidth={"md"}        
       >
-        <CaseFileNoteAddEditDialog         
+        <CaseFileNoteAddEditDialog 
+          mode = {selectedCaseFile ? 'add' : selectedTask ? 'edit' : 'add'}        
           onClose = {handleCloseCaseFileNoteAddEditDialogFromAction}
           workflowsList={workflowsList}
           selectedCaseFile = {selectedCaseFile}
+          selectedTask = {selectedTask}
         />
       </Dialog>
 
@@ -812,6 +876,19 @@ export default function CaseFiles() {
             title = {'Completar tarea'}
             message = {'Marcar la tarea como completada ?'}
             onClose = {handleCloseMarkTaskAsCompletedDialogFromAction}
+          />
+        </Dialog>
+
+        <Dialog
+          open={openDeleteTaskDialog}
+          onClose={handleCloseDeleteTaskDialog}
+          maxWidth={"sm"}
+        >
+          <AlertDialog
+            color = {'error'}
+            title = {'Eliminar nota'}
+            message = {'Está seguro que desea eliminar la nota seleccionada ?'}
+            onClose = {handleCloseDeleteTaskDialogFromAction}
           />
         </Dialog>
           

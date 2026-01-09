@@ -22,9 +22,9 @@ namespace Daresoft.Core.Services
             return await _tasksData.CreateAsync(task, currentUserId);
         }
 
-        public Task<bool> DeleteAsync(int taskId, int currentUserId)
+        public async Task<bool> DeleteAsync(int taskId, int currentUserId)
         {
-            throw new NotImplementedException();
+            return await _tasksData.DeleteAsync(taskId, currentUserId);
         }
 
         public Task<List<TaskModel>> GetAllAsync(int offset, int fetch, string searchText)

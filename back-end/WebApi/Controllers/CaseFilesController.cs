@@ -52,9 +52,17 @@ namespace WebApi.Controllers
 
                 foreach (var caseFile in caseFilesList)
                 {
-                    caseFile.Tasks = tasksList.Where(t => t.CaseFileId == caseFile.Id).ToList();
                     caseFile.Documents = documentsList.Where(d => d.CaseFileId == caseFile.Id).ToList();
                     caseFile.Workflows = workflowsList.Where(w => w.CaseFileId == caseFile.Id).ToList();
+                    caseFile.Tasks = tasksList.Where(t => t.CaseFileId == caseFile.Id).ToList();
+                    
+                    foreach(var task in caseFile.Tasks)
+                    {
+                        var document = caseFile.Documents.Where(d => d.Path.Contains("/tasks/" + task.Id)).FirstOrDefault();
+                        
+                        if(document != null)
+                            task.Documents.Add(document);
+                    }
                 }
 
                 return Ok(new

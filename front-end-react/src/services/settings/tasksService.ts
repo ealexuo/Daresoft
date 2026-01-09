@@ -22,7 +22,7 @@ export const tasksService = {
   get: async (taskId: number): Promise<any> => {
     return await axiosService.get(BASE_PATH + taskId);
   },
-  // delete: async (caseFileId: number): Promise<any> => {
-  //   return await axiosService.delete(BASE_PATH + caseFileId);
-  // }
+  delete: async (taskId: number): Promise<any> => {
+    return await axiosService.delete(BASE_PATH + taskId);
+  }
 };

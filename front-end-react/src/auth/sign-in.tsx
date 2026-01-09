@@ -48,7 +48,7 @@ export default function SignIn() {
 
       if (response?.data?.token) {
         localStorage.setItem('paperly-token', response.data.token);
-        navigate('/dashboard');
+        navigate('/caseFiles');
       } else {
         localStorage.removeItem('paperly-token');
         console.log("There was an error when processing the request.");
@@ -61,7 +61,7 @@ export default function SignIn() {
 
   useEffect(()=>{
     if(localStorage.getItem('paperly-token') != null) {
-      navigate('/dashboard');
+      navigate('/caseFiles');
     } 
   });
 
@@ -97,7 +97,7 @@ export default function SignIn() {
               <LockOutlinedIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-              Sign in
+              Bienvenido
             </Typography>
             <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
               <TextField
@@ -130,21 +130,21 @@ export default function SignIn() {
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
               >
-                Sign In
+                Ingresar
               </Button>
               <Grid container>
                 <Grid item xs>
-                  <Link href="#" variant="body2">
+                  {/* <Link href="#" variant="body2">
                     ¿Olvidaste tu contraseña?
-                  </Link>
+                  </Link> */}
                 </Grid>
                 <Grid item>
-                  <Link href="#" variant="body2">
+                  {/* <Link href="#" variant="body2">
                     {"¿No tienes una cuenta? Regístrate"}
-                  </Link>
+                  </Link> */}
                 </Grid>
               </Grid>
-              <Copyright sx={{ mt: 5 }} />
+              {/* <Copyright sx={{ mt: 5 }} /> */}
             </Box>
           </Box>
         </Grid>

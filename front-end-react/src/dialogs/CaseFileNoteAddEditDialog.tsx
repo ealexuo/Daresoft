@@ -18,11 +18,16 @@ import { useTranslation } from 'react-i18next';
 import { Task } from '../types/Task'
 import { tasksService } from '../services/settings/tasksService'
 import { Workflow } from '../types/Workflow'
+import { documentsService } from '../services/settings/documentsService'
+import { Document } from '../types/Document'
+
 
 type DialogProps = {
-    selectedCaseFile: CaseFile | undefined,
+    mode: 'add' | 'edit',
+    selectedCaseFile?: CaseFile,
+    selectedTask?: Task,
     workflowsList: Workflow[],
-    onClose: (refresh: boolean) => void    
+    onClose: (refresh: boolean) => void
 }
 
 const VisuallyHiddenInput = styled('input')({
@@ -37,13 +42,11 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-export default function CaseFileNoteAddEditDialog({ selectedCaseFile, workflowsList, onClose }: DialogProps) {
+export default function CaseFileNoteAddEditDialog({ mode, selectedCaseFile, selectedTask, workflowsList, onClose }: DialogProps) {
 
     const [t] = useTranslation();    
     const { enqueueSnackbar } = useSnackbar()
-    const [document, setDocument] = useState<File | null>(null);
-    const [entryDate, setEntryDate] = useState<moment.Moment>(moment());
-    const [workflowId, setWorkflowId] = useState<number>(1);
+    const [document, setDocument] = useState<File | null>(selectedTask?.documents && selectedTask.documents.length > 0 ? new File([], selectedTask.documents[0].name) : null);
 
     const formSchema = z.object({
         reviewer: z.string(),        
@@ -51,30 +54,52 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, workflowsL
         months: z.number(),
     });
 
+    const diffInMonths = (date1: Date, date2: Date) => {
+        const d1 = new Date(date1);
+        const d2 = new Date(date2);
+
+        return (
+            (d2.getFullYear() - d1.getFullYear()) * 12 +
+            (d2.getMonth() - d1.getMonth())
+        );
+    }
+
     // Form Schema Type
     type NoteFormType = z.infer<typeof formSchema>;
+
+    let months = 3;
+
+    if (selectedTask) {
+        months = diffInMonths(selectedTask.entryDate, selectedTask.dueDate);
+        selectedTask.entryDate = new Date(selectedTask.entryDate);
+    }
+
+    const [workflowId, setWorkflowId] = useState<number>(selectedTask ? selectedTask.workflowId : 1);
+    const [entryDate, setEntryDate] = useState<moment.Moment>(selectedTask ? moment(selectedTask.entryDate ) : moment());
 
     const { control, register, handleSubmit, formState: { errors, isSubmitting } } = useForm<NoteFormType>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            reviewer: '',
-            description: '',
-            months: 3
+            reviewer: selectedTask ? selectedTask.reviewer : '',
+            description: selectedTask ? selectedTask.description : '',
+            months: months
         }
     })
 
-    const onSubmit: SubmitHandler<NoteFormType> = async (formData) => {
+    const onSubmitNewTask = async (formData: NoteFormType) => {
 
-        let dueDateTemp = entryDate;
+        let dueDateTemp = moment(entryDate);
         dueDateTemp.add(formData.months, 'months');
+
+        const workflowTemp = workflowsList.find(w => w.id === workflowId);
 
         const taskToSave: Task = {
             id: 0,
             caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
-            workflowId: workflowId,
-            workflowName: '',
-            workflowCode: '',
-            workflowColor: null,
+            workflowId: workflowTemp ? workflowTemp.id : 0,
+            workflowName: workflowTemp ? workflowTemp.name : '',
+            workflowCode: workflowTemp ? workflowTemp.code : '',
+            workflowColor: workflowTemp ? workflowTemp.color : null,
             name: '',
             description: formData.description,
             assignedToUserId: null,
@@ -95,12 +120,112 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, workflowsL
         } 
 
         try {            
-            await tasksService.add(taskToSave);
-            enqueueSnackbar("Nota creada", { variant: "success" })
-            onClose(true)
+            const taskResponse = await tasksService.add(taskToSave);
+
+            if(taskResponse.statusText === "OK" && document){
+                
+                // upload documents
+                taskResponse.data.documents.forEach(async (d: Document) => {
+
+                    let uploadUrl = await documentsService.getUploadUrl(d.id);
+
+                    try{
+                        documentsService.upload(document, uploadUrl.data);
+                    }
+                    catch(error){
+                        console.error('Error al gargar el archivo:', error);
+                    }
+                });
+
+                enqueueSnackbar("Nota creada", { variant: "success" })
+            }
+            
         } catch (error) {
             enqueueSnackbar("Error al crear la nota", { variant: "error" })
+        } finally {
+            onClose(true);
         }
+        
+    };
+
+    const onSubmitEditTask = async (formData: NoteFormType) => {
+        
+        let dueDateTemp = moment(entryDate);
+        dueDateTemp.add(formData.months, 'months');
+
+        const documentTemp = selectedTask?.documents && selectedTask.documents.length > 0 ? selectedTask.documents[0] : null;
+
+        const documentToSave: Document = {
+            id: documentTemp ? documentTemp.id : 0,
+            caseFileId: selectedTask ? selectedTask.caseFileId : 0,
+            name: document ? document.name : '',
+            path: '',
+            contentType: document ? document.type : '',
+            size: document ? document.size : 0
+        }
+
+        const taskToSave: Task = {
+            id: selectedTask ? selectedTask.id : 0,
+            caseFileId: selectedTask ? selectedTask.caseFileId : 0,
+            workflowId: selectedTask ? selectedTask.workflowId : 0,
+            workflowName: selectedTask ? selectedTask.workflowName : '',
+            workflowCode: selectedTask ? selectedTask.workflowCode : '',
+            workflowColor: selectedTask ? selectedTask.workflowColor : null,
+            name: '',
+            description: formData.description,
+            assignedToUserId: null,
+            priority: selectedTask ? selectedTask.priority : 1,
+            entryDate: entryDate.toDate(),
+            dueDate: dueDateTemp.toDate(),
+            isCompleted: false,
+            completedDate: null,
+            reviewer: formData.reviewer,
+            documents: [],
+        }
+        
+        // Include documents
+        if(document && document.size > 0) {
+            taskToSave.documents.push(documentToSave);
+        }
+
+        try {            
+            const taskResponse = await tasksService.edit(taskToSave);
+
+            if(taskResponse.statusText === "OK" && document){
+                
+                // upload documents
+                taskResponse.data.documents.forEach(async (d: Document) => {
+
+                    let uploadUrl = await documentsService.getUploadUrl(d.id);
+
+                    try{
+                        documentsService.upload(document, uploadUrl.data);
+                    }
+                    catch(error){
+                        console.error('Error al gargar el archivo:', error);
+                    }
+                });
+
+                enqueueSnackbar("Nota actualizada", { variant: "success" })
+            }
+            
+        } catch (error) {
+            enqueueSnackbar("Error al actualizar la nota", { variant: "error" })
+        } finally {
+            onClose(true);
+        }
+    };
+        
+    const onSubmit: SubmitHandler<NoteFormType> = async (formData) => {
+        
+        if(mode === 'add' && selectedCaseFile){
+            await onSubmitNewTask(formData);
+        }
+
+        if(mode === 'edit' && selectedTask){
+            await onSubmitEditTask(formData);
+        }
+
     }
 
     const handleToggleButtonChange = (
@@ -153,6 +278,8 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, workflowsL
                             views={['year', 'month', 'day']}
                             label={'* Fecha de recepción'}
                             slotProps={{ textField: { fullWidth: true } }}
+                            value={entryDate}
+                            onChange={(newDate) => setEntryDate(newDate || moment())}
                             />
                         </LocalizationProvider>                    
                     </Grid>
@@ -219,7 +346,7 @@ export default function CaseFileNoteAddEditDialog({ selectedCaseFile, workflowsL
                     Cancelar
                 </Button>
                 <Button variant="contained" type="submit" disableElevation disabled={isSubmitting}>
-                    {isSubmitting ? "Guardando..." : "Agregar nota"}
+                    {isSubmitting ? "Guardando..." : mode === "add" ? "Agregar nota" : "Editar nota"}
                 </Button>
             </DialogActions>
         </form>
