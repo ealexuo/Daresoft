@@ -7,8 +7,8 @@ export type Contact = {
     lastName: string; 
     otherName: string;
     title: string;
-    homeAddressLine1: string;
-    homeAddressLine2: string;
+    homeAddressLine1?: string;
+    homeAddressLine2?: string;
     homeCity: string;
     homeState: string;
     homePostalCode: string;

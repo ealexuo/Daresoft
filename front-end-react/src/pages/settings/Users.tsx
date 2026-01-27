@@ -155,8 +155,8 @@ export default function Users() {
     setCurrentPage(0);
   };
 
-  const handleSearchTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(event.target.value);
+  const handleSearchTextChange = (text: string) => {
+    setSearchText(text);
   };
 
   // User Add/Edit dialog

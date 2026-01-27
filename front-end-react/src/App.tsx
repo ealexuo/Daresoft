@@ -16,8 +16,6 @@ import UserProfile from './pages/settings/UserProfile';
 import Themes from './pages/settings/Themes';
 import Languages from './pages/settings/Languages';
 import { SnackbarProvider } from 'notistack';
-import Origins from './pages/settings/Origins';
-import AdministrativeUnits from './pages/settings/AdministrativeUnits';
 import defaultTheme from './themes/default';
 import FileDetails from './pages/files/FileDetails';
 import CaseFiles from './pages/files/CaseFiles';
@@ -55,9 +53,7 @@ function App() {
 
                 {/* Workflow Setting Section */}
                 <Route path="settings/workflows" element={<Workflows />} />
-                <Route path="settings/origins" element={<Origins />} />
-                <Route path="settings/administrative-units" element={<AdministrativeUnits />} />
-
+                
                 {/* Themes Setting Section */}
                 <Route path="settings/themes" element={<Themes selectedTheme = {selectedTheme} setSelectedTheme = {setSelectedTheme}/>} />
                 

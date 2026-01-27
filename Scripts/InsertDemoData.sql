@@ -250,9 +250,10 @@ VALUES
 INSERT INTO WorkflowStatus (Name, Description)
 VALUES
 ('Ingresado', 'Ingresado'),
-('En Proceso','En Proceso'), 
+('En proceso','En proceso'), 
+('En revisión proveedor','En revisión proveedor'), 
 ('Rechazado', 'Rechazado'),
-('Finalizado', 'Finalizado');
+('Aprobado', 'Aprobado');
 
 INSERT INTO CaseFileWorkflow (CaseFileId, WorkflowId, WorkFlowStatusId, StartDate, EndDate, ExternalIdentifier, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
 VALUES 

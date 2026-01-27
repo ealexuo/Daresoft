@@ -499,8 +499,8 @@ export default function CaseFiles() {
     setCurrentPage(0);
   };
 
-  const handleSearchTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(event.target.value);
+  const handleSearchTextChange = (text: string) => {
+    setSearchText(text);
   };
 
   // CaseFile Add/Edit dialog

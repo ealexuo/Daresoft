@@ -12,6 +12,7 @@ import { Tooltip } from '@mui/material';
 import { Contact } from '../../types/Contact';
 import { contactsService } from '../../services/settings/contactsService';
 import SupplierAddEditDialog from '../../dialogs/SupplierAddEditDialog';
+import { countries } from '../../enums/Countries';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -19,27 +20,22 @@ const columnsInit: TableColumnType[] = [
     label: "Id", 
     minWidth: 50,
     hidden: true
-  },  
+  }, 
+  {
+    id: "Company", 
+    label: "Empresa", 
+    minWidth: 150 
+  },
   { 
     id: "Name", 
     label: "Nombre", 
     minWidth: 100 
   },
   { 
-    id: "MiddleName", 
-    label: "Segundo Nombre", 
-    minWidth: 100 
-  },  
-  { 
     id: "LastName", 
     label: "Apellido", 
     minWidth: 100 
   },  
-  { 
-    id: "OtherName", 
-    label: "Segundo Apellido", 
-    minWidth: 100 
-  },
   { 
     id: "Country", 
     label: "País", 
@@ -47,11 +43,6 @@ const columnsInit: TableColumnType[] = [
   },
   {
     id: "WorkEmail",
-    label: "Correo Electrónico",
-    minWidth: 100,    
-  },
-  {
-    id: "WorkAddress",
     label: "Correo Electrónico",
     minWidth: 100,    
   },
@@ -73,7 +64,7 @@ const columnsInit: TableColumnType[] = [
   {
     id: "Actions",
     label: "Acciones",
-    minWidth: 100,    
+    minWidth: 150,    
   }
 ];
 
@@ -146,15 +137,14 @@ export default function Suppliers() {
         }
 
         response.data.contactsList.forEach((item: any) => {
+          const countryName = item.countryId ? countries.find(c => c.id === item.countryId)?.name : '';
           rowsTemp.push([
             item.id,
+            item.companyName,
             item.name,
-            item.middleName,
             item.lastName,
-            item.otherName,
-            item.country,
+            countryName,
             item.workEmail,
-            item.workAddress,
             item.workPhone,
             item.workPhoneExt,
             item.mobilePhone,
@@ -187,8 +177,8 @@ export default function Suppliers() {
     setCurrentPage(0);
   };
 
-  const handleSearchTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(event.target.value);
+  const handleSearchTextChange = (text: string) => {
+    setSearchText(text);
   };
 
   // Supplier Add/Edit dialog
@@ -300,8 +290,10 @@ export default function Suppliers() {
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
               onSearchTextChange={handleSearchTextChange}
+              searchTextValue={searchText}
               onAddActionClick={handleOpenSupplierAddEditDialog}
               itemActionList={actionList}
+              isCollapsible={false}
             ></StickyHeadTable>
           )
         }

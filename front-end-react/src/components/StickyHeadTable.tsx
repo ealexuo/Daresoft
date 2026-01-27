@@ -7,18 +7,13 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Toolbar from '@mui/material/Toolbar';
-import Tooltip from '@mui/material/Tooltip';
 import AddIcon from '@mui/icons-material/Add';
-import Fab from '@mui/material/Fab';
-import SearchIcon from '@mui/icons-material/Search';
-import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
-import Checkbox from '@mui/material/Checkbox';
 import { useNavigate } from 'react-router-dom';
-import { alpha, Button, Collapse, InputBase, styled } from '@mui/material';
+import { Button, Collapse, useTheme } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { DebouncedInput } from './DebouncedInput';
 
 export type ItemActionType = {
   name: string;
@@ -49,9 +44,11 @@ type TableProps<T> = {
   totalRows: number,
   currentPage: number,
   rowsPerPage: number,
+  searchTextValue?: string,
   onPageChange: (event: unknown, page: number) => void,
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void,
-  onSearchTextChange: (event: React.ChangeEvent<HTMLInputElement>) => void,
+  onSearchTextChange: (value: string) => void,
+  
   onAddActionClick: (item: any) => void,
   onEditItemClick?: (item: any) => void, // no utilizar esta propiedad, se eliminará mas adelante
   buttons?: { // no utilizar esta propiedad, se eliminará mas adelante
@@ -63,72 +60,6 @@ type TableProps<T> = {
   hideSearch?: boolean,
   hidePagination?: boolean,
   isCollapsible?: boolean
-}
-
-function DebounceTextField({ handleDebounce, debounceTimeout }: any) {
-
-  const Search = styled('div')(({ theme }) => ({
-    position: 'relative',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: alpha(theme.palette.common.black, 0.01),
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.common.black, 0.05),
-    },
-    marginRight: theme.spacing(2),
-    paddingLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(0),
-      width: 'auto',
-    },
-  }));
-
-  const SearchIconWrapper = styled('div')(({ theme }) => ({
-    color: 'gray',
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }));
-
-  const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: 'inherit',
-    '& .MuiInputBase-input': {
-      padding: theme.spacing(1, 1, 1, 0),
-      // vertical padding + font size from searchIcon
-      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-      transition: theme.transitions.create('width'),
-      width: '100%',
-      [theme.breakpoints.up('md')]: {
-        width: '20ch',
-      },
-    },
-  }));
-
-  const timerRef = React.useRef<ReturnType<typeof setTimeout>>();
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      handleDebounce(event);
-    }, debounceTimeout);
-  };
-
-  return (
-    <Search>
-      <SearchIconWrapper>
-        <SearchIcon />
-      </SearchIconWrapper>
-      <StyledInputBase
-        placeholder="Buscar…"
-        inputProps={{ 'aria-label': 'buscar' }}
-        onChange={handleChange}
-      />
-    </Search>
-  );
 }
 
 function validaHexa(value: string) {
@@ -144,6 +75,7 @@ export function StickyHeadTable({
   currentPage,
   rowsPerPage,
   totalRows,
+  searchTextValue,
   onPageChange,
   onRowsPerPageChange,
   onSearchTextChange,
@@ -157,57 +89,28 @@ export function StickyHeadTable({
 }: TableProps<string | number | boolean | React.ReactNode | any>) {
 
   const navigate = useNavigate();
-
   const [openIndex, setOpenIndex] = React.useState(-1);
-
-  const tasks:any [] = [
-      {
-        date: '2020-01-05',
-        customerId: '11091700',
-        amount: 3,
-      },
-      {
-        date: '2020-01-02',
-        customerId: 'Anonymous',
-        amount: 1,
-      },
-    ]
-
-  /*
-  {row.map((item, index) => {
-    return (
-      ( columns[index].hidden ? (<></>) :
-        typeof item === "object" 
-        ? ''
-        : (<TableCell align={columns[index].align} key={index}>
-        {typeof item === "boolean" 
-        ? ( <Checkbox checked={item} disabled={true} />) 
-        : ( validaHexa(item) 
-          ? (<div style={{ width: "8mm", height: "8mm", backgroundColor: item }}></div>)
-          : ( typeof item === "object" 
-              ? ''
-              : item)
-        )}
-      </TableCell>))                      
-    );
-
-  })}
-  */
+  const theme = useTheme();  
 
   return (
     <>
-      <Toolbar style={{ paddingLeft: "0px", justifyContent: hideSearch ? "flex-end" : "space-between" }}> 
+      <Toolbar style={{ paddingLeft: "0px", justifyContent: hideSearch ? "flex-end" : "space-between", height: "64px" }}> 
         {
           hideSearch ? (<></>) : 
           (
-            <DebounceTextField
-              handleDebounce={onSearchTextChange}
-              debounceTimeout={1000}
-            >
-            </DebounceTextField>
+            <DebouncedInput
+              value={searchTextValue??''}
+              onChange={onSearchTextChange}
+              delay={1000}
+            />
           )
         }        
-        <Button disableElevation onClick={() => { onAddActionClick(null); }}>
+        <Button 
+          disableElevation onClick={() => { onAddActionClick(null); }}
+          sx={{
+            borderRadius: theme.shape.borderRadius,
+          }}
+          >
           <AddIcon fontSize="small" /> {addActionText ? addActionText : 'Add New'}	
         </Button>
       </Toolbar>
@@ -278,13 +181,19 @@ export function StickyHeadTable({
                         }
                         </TableCell>
                       </TableRow>
-                      <TableRow>
-                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
-                          <Collapse in={openIndex === index} timeout="auto" unmountOnExit>
-                            {row[row.length-1]}
-                          </Collapse>
-                        </TableCell>
-                      </TableRow>                        
+                      <>
+                      { 
+                        isCollapsible && (
+                          <TableRow>
+                          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+                            <Collapse in={openIndex === index} timeout="auto" unmountOnExit>
+                              {row[row.length-1]}
+                            </Collapse>
+                          </TableCell>
+                        </TableRow>                        
+                        )
+                      }
+                      </>                      
                     </>
                   );
                 })}

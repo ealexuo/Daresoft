@@ -13,7 +13,8 @@ import {
   Grid,
   TextField,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Autocomplete
 } from '@mui/material';
 import { useState } from 'react';
 
@@ -28,9 +29,8 @@ import { useSnackbar } from 'notistack';
 
 // Services and Types
 import { Contact } from '../types/Contact';
-import { ColorPicker } from 'primereact/colorpicker';
-import { usersService } from '../services/settings/usersService';
 import { contactsService } from '../services/settings/contactsService';
+import { countries } from '../enums/Countries';
 
 type DialogProps = {
   mode: 'add' | 'edit',
@@ -43,6 +43,7 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
   const [loading, setLoading] = useState<boolean>(false);
   const [t] = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
+  const [selectedCountry, setSelectedCountry] = useState<{ label: string; value: string }>({ label: countries[68].name, value: countries[68].code }); 
 
   // Form Schema definition
   const formSchema = z.object({      
@@ -72,10 +73,10 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
       workPhoneExt: z.string(),
       mobilePhone: z.string(),
       companyId: z.number().int(),
+      companyName: z.string().min(1, t("errorMessages.requieredField")),
       contactTypeId: z.number().int(),
       notes: z.string(),
       preferredAddress: z.number().int(),
-      companyName: z.string(),
       website: z.string(),
       isSupplier: z.boolean()
   });
@@ -84,14 +85,15 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
   type SupplierFormType = z.infer<typeof formSchema>;
 
   // Form Hook
-  const { register, handleSubmit, watch, formState: {errors, isSubmitting} } = useForm<SupplierFormType>({
+  const { register, handleSubmit, formState: {errors, isSubmitting} } = useForm<SupplierFormType>({
       defaultValues: selectedSupplier,
       resolver: zodResolver(formSchema),
   });
     
   const onSubmit: SubmitHandler<SupplierFormType> = async (formData) => {
 
-    const supplierToSave: Contact = { ...formData };
+    let supplierToSave: Contact = { ...formData };
+    supplierToSave.countryId = countries.find(c => c.code === selectedCountry.value)?.id ?? 69; // default Guatemala
 
     try {
       setLoading(true);
@@ -117,14 +119,25 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
     }
   };
 
+  React.useEffect(() => {
+    if (mode === 'edit' && selectedSupplier) {
+      const country = countries.find(c => c.id === selectedSupplier.countryId);   
+      if (country) {
+        setSelectedCountry({ label: country.name, value: country.code });
+      }
+    }
+  }, [mode, selectedSupplier]);
+
   return (
     
     <Box sx={{ my: 3 }}
       component="form"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, (errors) => {
+        console.log("Form errors: ", errors);
+      })}
     >
       <DialogTitle>
-        {mode === 'add' ? "Agregar Proveedor" : "Editar Proveedor"}        
+        {mode === 'add' ? "Nuevo Proveedor" : "Editar Proveedor"}        
       </DialogTitle>
       <DialogContent>
 
@@ -218,6 +231,43 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
                 />
               </Grid>
 
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  {...register('companyName')}
+                  label="* Empresa/Compañía"
+                  fullWidth
+                  size="small"
+                  error={!!errors.companyName}
+                  helperText={errors.companyName?.message as string | undefined}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  disableClearable
+                  options={countries.map((country) => ({ label: country.name, value: country.code }))}
+                  getOptionLabel={(option) => option.label}
+                  isOptionEqualToValue={(option: any, value: any) => option.value === value.value}
+                  value={selectedCountry}
+                  onChange={(event, newValue) => {
+                      setSelectedCountry(newValue ? newValue : { label: countries[68].name, value: countries[68].code });
+                  }}
+                  renderOption={(props, option) => (
+                      <li {...props} key={option.value}>                                                        
+                          {option.label}
+                      </li>
+                  )}
+                  renderInput={(params) => (
+                      <TextField
+                              {...params}
+                              label="País"
+                              fullWidth
+                              size="small"
+                          />   
+                  )}
+                />
+              </Grid>             
+
             </Grid>
           </Paper>
         </Box>
@@ -231,5 +281,6 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
           </Button>
       </DialogActions>      
     </Box>
+    
   );
 }

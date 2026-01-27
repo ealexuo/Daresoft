@@ -38,6 +38,8 @@ namespace Daresoft.Data
                     ,WorkPhone
                     ,WorkPhoneExt
                     ,MobilePhone
+                    ,CountryId
+                    ,CompanyName
                     ,IsSupplier
                     ,IsDeleted
                     ,CreatedDate
@@ -56,6 +58,8 @@ namespace Daresoft.Data
                     ,@WorkPhone
                     ,@WorkPhoneExt
                     ,@MobilePhone
+                    ,@CountryId
+                    ,@CompanyName
                     ,@IsSupplier
                     ,@IsDeleted
                     ,GETUTCDATE()
@@ -77,6 +81,8 @@ namespace Daresoft.Data
                         contact.WorkPhone,
                         contact.WorkPhoneExt,
                         contact.MobilePhone,
+                        contact.CountryId,
+                        contact.CompanyName,
                         contact.ContactTypeId,
                         contact.IsSupplier,
                         IsDeleted = false,                        
@@ -144,6 +150,7 @@ namespace Daresoft.Data
                     ,co.WorkPhoneExt
                     ,co.MobilePhone
                     ,co.CompanyId
+                    ,co.CompanyName
                     ,co.ContactTypeId
                     ,co.Notes
                     ,co.PreferredAddress
@@ -162,7 +169,7 @@ namespace Daresoft.Data
                 AND 
                 (
                     @SearchText = '*'
-                    OR CONCAT(co.Name,' ' ,co.MiddleName , ' ' , co.LastName, ' ' , co.OtherName) LIKE '%' + @SearchText + '%'
+                    OR CONCAT(co.Name,' ' ,co.MiddleName , ' ' , co.LastName, ' ' , co.OtherName , ' ' , co.CompanyName) LIKE '%' + @SearchText + '%'
                 )
                 ORDER BY UPPER(Name) 
                 OFFSET (@Offset-1)*@Fetch ROWS
