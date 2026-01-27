@@ -4,7 +4,6 @@ import * as React from 'react';
 import { 
   DialogContent,
   DialogTitle,
-  DialogContentText,
   Box,
   DialogActions,
   Button,
@@ -12,8 +11,6 @@ import {
   Paper,
   Grid,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Autocomplete
 } from '@mui/material';
 import { useState } from 'react';
@@ -40,7 +37,6 @@ type DialogProps = {
 
 export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose }: DialogProps) {
   
-  const [loading, setLoading] = useState<boolean>(false);
   const [t] = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
   const [selectedCountry, setSelectedCountry] = useState<{ label: string; value: string }>({ label: countries[68].name, value: countries[68].code }); 
@@ -48,36 +44,17 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
   // Form Schema definition
   const formSchema = z.object({      
       id: z.number().int(),
-      salutation: z.string(),      
       name: z.string().min(1, t("errorMessages.requieredField")),
       middleName: z.string(),
       lastName: z.string().min(1, t("errorMessages.requieredField")),
       otherName: z.string(),
-      title: z.string(),
-      homeAddressLine1: z.string(),
-      homeAddressLine2: z.string(),
-      homeCity: z.string(),
-      homeState: z.string(),
-      homePostalCode: z.string(),
       countryId: z.number().int(),
-      workAddressLine1: z.string(),
-      workAddressLine2: z.string(),
-      workCity: z.string(),
-      workState: z.string(),
-      workPostalCode: z.string(),
-      workCountry: z.string(),
       workEmail: z.string().email(t("errorMessages.invalidEmail")).min(1, t("errorMessages.requieredField")),
-      homeEmail: z.string(),
-      homePhone: z.string(),
       workPhone: z.string(),
       workPhoneExt: z.string(),
       mobilePhone: z.string(),
-      companyId: z.number().int(),
       companyName: z.string().min(1, t("errorMessages.requieredField")),
       contactTypeId: z.number().int(),
-      notes: z.string(),
-      preferredAddress: z.number().int(),
-      website: z.string(),
       isSupplier: z.boolean()
   });
 
@@ -96,8 +73,6 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
     supplierToSave.countryId = countries.find(c => c.code === selectedCountry.value)?.id ?? 69; // default Guatemala
 
     try {
-      setLoading(true);
-
       try {        
         if (mode === 'add') {
           await contactsService.add(supplierToSave); 
@@ -114,9 +89,7 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
       onClose(true);
     } catch (error) {
       enqueueSnackbar('Error al guardar proveedor.', { variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   React.useEffect(() => {
@@ -140,6 +113,10 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
         {mode === 'add' ? "Nuevo Proveedor" : "Editar Proveedor"}        
       </DialogTitle>
       <DialogContent>
+
+        <Box sx={{ mt: 1, mb: 2, fontSize: 12, color: '#666' }}>
+            Los campos marcados con (*) son obligatorios.
+        </Box>
 
         <Box sx={{ my: 3 }}>
          

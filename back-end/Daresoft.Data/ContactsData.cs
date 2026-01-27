@@ -252,6 +252,8 @@ namespace Daresoft.Data
                     ,WorkPhone = @WorkPhone
                     ,WorkPhoneExt = @WorkPhoneExt
                     ,MobilePhone = @MobilePhone
+                    ,CountryId = @CountryId
+                    ,CompanyName = @CompanyName
                     ,LastModifiedDate = GETUTCDATE()
                     ,UpdatedByUserId = @CurrentUserId
                 WHERE Id = @Id";        
@@ -270,6 +272,8 @@ namespace Daresoft.Data
                         contact.WorkPhone,
                         contact.WorkPhoneExt,
                         contact.MobilePhone,
+                        contact.CountryId,
+                        contact.CompanyName,
                         CurrentUserId = currentUserId
                     }, trx);                    
 
