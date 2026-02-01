@@ -232,13 +232,13 @@ VALUES
 
 
 /* Insert corresponding user profiles */
-INSERT INTO UserProfile (UserName, PasswordHash, ContactId, Color, ProfilePicture, ProfilePictureContentType, IsActive, IsPasswordChangeRequired, IsDeleted, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
+INSERT INTO UserProfile (UserName, PasswordHash, ContactId, Color, ProfilePicture, ProfilePictureContentType, RoleId, IsActive, IsPasswordChangeRequired, IsDeleted, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
 VALUES 
-('eurizar', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 1, '#0078D4', NULL, NULL, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('sjohnson', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 2, '#107C10', NULL, NULL, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('rwilliams', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 3, '#DA3B01', NULL, NULL, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('jbrown', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 4, '#EF6950', NULL, NULL, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('dlee', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 5, '#6B69D6', NULL, NULL, 1, 0, 0, GETDATE(), GETDATE(), 1, 1);
+('eurizar', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 1, '#0078D4', NULL, NULL, 1, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('sjohnson', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 2, '#107C10', NULL, NULL, 2, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('rwilliams', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 3, '#DA3B01', NULL, NULL, 2, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('jbrown', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 4, '#EF6950', NULL, NULL, 2, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
+('dlee', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 5, '#6B69D6', NULL, NULL, 2, 1, 0, 0, GETDATE(), GETDATE(), 1, 1);
 
 
 INSERT INTO Workflow (Name, Code, Description, IsActive, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)

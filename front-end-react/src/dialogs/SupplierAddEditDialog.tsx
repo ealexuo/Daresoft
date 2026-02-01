@@ -103,25 +103,64 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
 
   return (
     
-    <Box sx={{ my: 3 }}
+    <Box sx={{ my: 0 }}
       component="form"
-      onSubmit={handleSubmit(onSubmit, (errors) => {
-        console.log("Form errors: ", errors);
-      })}
+      onSubmit={handleSubmit(onSubmit, error => console.log('Form error', error))}
     >
-      <DialogTitle>
-        {mode === 'add' ? "Nuevo Proveedor" : "Editar Proveedor"}        
-      </DialogTitle>
+      <DialogTitle>{mode === 'add' ? "Nuevo Proveedor" : "Editar Proveedor"}</DialogTitle>
       <DialogContent>
-
-        <Box sx={{ mt: 1, mb: 2, fontSize: 12, color: '#666' }}>
+        <Box sx={{ my: 0 }}>         
+          <Box sx={{ mt: 0, mb: 1, fontSize: 12, color: '#666' }}>
             Los campos marcados con (*) son obligatorios.
-        </Box>
-
-        <Box sx={{ my: 3 }}>
-         
+          </Box>
           <Typography variant="subtitle1">
-            Información general
+            Información de empresa
+          </Typography>
+          <Paper
+            variant="outlined"
+            sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
+          >
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  {...register('companyName')}
+                  label="* Empresa/Compañía"
+                  fullWidth
+                  size="small"
+                  error={!!errors.companyName}
+                  helperText={errors.companyName?.message as string | undefined}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  disableClearable
+                  options={countries.map((country) => ({ label: country.name, value: country.code }))}
+                  getOptionLabel={(option) => option.label}
+                  isOptionEqualToValue={(option: any, value: any) => option.value === value.value}
+                  value={selectedCountry}
+                  onChange={(event, newValue) => {
+                      setSelectedCountry(newValue ? newValue : { label: countries[68].name, value: countries[68].code });
+                  }}
+                  renderOption={(props, option) => (
+                      <li {...props} key={option.value}>                                                        
+                          {option.label}
+                      </li>
+                  )}
+                  renderInput={(params) => (
+                      <TextField
+                              {...params}
+                              label="País"
+                              fullWidth
+                              size="small"
+                          />   
+                  )}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
+
+          <Typography variant="subtitle1">
+            Información de contacto
           </Typography>
 
           <Paper
@@ -206,44 +245,7 @@ export default function SupplierAddEditDialog({ mode, selectedSupplier, onClose 
                   fullWidth
                   size="small"
                 />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('companyName')}
-                  label="* Empresa/Compañía"
-                  fullWidth
-                  size="small"
-                  error={!!errors.companyName}
-                  helperText={errors.companyName?.message as string | undefined}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Autocomplete
-                  disableClearable
-                  options={countries.map((country) => ({ label: country.name, value: country.code }))}
-                  getOptionLabel={(option) => option.label}
-                  isOptionEqualToValue={(option: any, value: any) => option.value === value.value}
-                  value={selectedCountry}
-                  onChange={(event, newValue) => {
-                      setSelectedCountry(newValue ? newValue : { label: countries[68].name, value: countries[68].code });
-                  }}
-                  renderOption={(props, option) => (
-                      <li {...props} key={option.value}>                                                        
-                          {option.label}
-                      </li>
-                  )}
-                  renderInput={(params) => (
-                      <TextField
-                              {...params}
-                              label="País"
-                              fullWidth
-                              size="small"
-                          />   
-                  )}
-                />
-              </Grid>             
+              </Grid>                        
 
             </Grid>
           </Paper>

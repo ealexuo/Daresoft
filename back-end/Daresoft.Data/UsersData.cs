@@ -73,6 +73,7 @@ namespace Daresoft.Data
                     ,PasswordHash
                     ,ContactId
                     ,IsActive
+                    ,RoleId
                     ,IsDeleted
                     ,Color
                     ,ProfilePicture
@@ -88,6 +89,7 @@ namespace Daresoft.Data
                     ,@PasswordHash
                     ,@ContactId
                     ,@IsActive
+                    ,@RoleId
                     ,@IsDeleted
                     ,@Color
                     ,@ProfilePicture
@@ -128,6 +130,7 @@ namespace Daresoft.Data
                         user.Color,
                         user.ProfilePicture,
                         user.IsPasswordChangeRequired,
+                        user.RoleId,
                         PasswordHash = user.Password,
                         CreatedByUserId = currentUserId,
                         UpdatedByUserId = currentUserId
@@ -188,6 +191,7 @@ namespace Daresoft.Data
                 UPDATE UserProfile
                 SET                         
 	                IsActive = @IsActive
+                    ,RoleId = @RoleId
 	                ,IsDeleted = @IsDeleted
 	                ,Color = @Color
                     ,ProfilePicture = @ProfilePicture
@@ -219,6 +223,7 @@ namespace Daresoft.Data
                     {
                         user.Id,
                         user.IsActive,
+                        user.RoleId,
                         user.IsDeleted,
                         user.Color,
                         user.ProfilePicture,
@@ -254,6 +259,7 @@ namespace Daresoft.Data
                     ,co.WorkPhoneExt
                     ,co.MobilePhone
 	                ,usrp.IsActive
+                    ,usrp.RoleId
 	                ,usrp.IsDeleted
 	                ,usrp.Color
                     ,usrp.ProfilePicture

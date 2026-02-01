@@ -92,6 +92,7 @@ CREATE TABLE UserProfile (
     Color NVARCHAR(7) NULL,
     ProfilePicture NVARCHAR(MAX) NULL,
     ProfilePictureContentType NVARCHAR(10) NULL,
+	RoleId TINYINT NOT NULL DEFAULT 2,
     IsActive BIT NOT NULL,
 	IsPasswordChangeRequired BIT NOT NULL,
 	IsDeleted BIT NOT NULL,

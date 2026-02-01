@@ -10,7 +10,7 @@ import Dialog from '@mui/material/Dialog';
 import { useSnackbar } from 'notistack';
 import AlertDialog from '../../components/AlertDialog';
 import { User } from '../../types/User';
-import { Tooltip } from '@mui/material';
+import { Tooltip, Checkbox } from '@mui/material';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -48,12 +48,12 @@ const columnsInit: TableColumnType[] = [
     id: "WorkEmail",
     label: "Correo Electrónico",
     minWidth: 100,    
-  },
-  {
-    id: "IsActive",
-    label: "Activo",
-    minWidth: 100,    
   },  
+  {
+    id: "IsAdmin",
+    label: "Administrador",
+    minWidth: 15, 
+  },
   {
     id: "Actions",
     label: "Acciones",
@@ -78,6 +78,7 @@ const emptyUserObject: User = {
   profilePicture: '',
   profilePictureContentType: '',
   isDeleted: false,
+  roleId: 2,
   isActive: true,
   isPasswordChangeRequired: false,
   password: '',
@@ -125,7 +126,7 @@ export default function Users() {
             item.lastName,
             item.otherName,
             item.workEmail,
-            item.isActive,
+            (<Checkbox checked={item.roleId === 1} disabled={true} />),
           ]);
         });
         
@@ -295,7 +296,7 @@ export default function Users() {
         <AlertDialog
           color = {'error'}
           title = {'Eliminar usuario'}
-          message = {'Está seguro que desea eliminar el usuario seleccionado ?'}
+          message = {'Está seguro que desea eliminar el usuario ' + selectedUser?.userName + ' ?'}
           onClose = {handleCloseUserDeleteDialogFromAction}
         />
       </Dialog>

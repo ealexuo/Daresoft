@@ -8,6 +8,10 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree'
 
 export default function Settings() {
 
+  const [showUserManagement, setShowUserManagement] = React.useState<boolean>(true);
+  const [showWorkflowManagement, setShowWorkflowManagement] = React.useState<boolean>(false);
+  const [showAppearanceManagement, setShowAppearanceManagement] = React.useState<boolean>(false);
+
   const usersActions = [
     {
       name: 'Gestión de Usuarios',
@@ -50,29 +54,34 @@ export default function Settings() {
   return (
     <Page title='Configuración'>
       <Grid container spacing={2} className="center">
-        <Grid item>
-          <ActionsCard
-            heading="Usuarios"
-            actions={usersActions}
-            icon={<GroupIcon/>}
-          ></ActionsCard>
-        </Grid>
-        <Grid item>
-          <ActionsCard
-            heading="Procesos"
-            actions={workflowActions}
-            icon={<AccountTreeIcon/>}
-          ></ActionsCard>
-        </Grid> 
-        <Grid item>
-          <ActionsCard
-            heading="Apariencia"
-            actions={appearanceActions}
-            icon={<BrushIcon/>}
-          ></ActionsCard>
-        </Grid>        
+        {showUserManagement && (
+          <Grid item>
+            <ActionsCard
+              heading="Usuarios"
+              actions={usersActions}
+              icon={<GroupIcon/>}
+            ></ActionsCard>
+          </Grid>
+        )}
+        {showWorkflowManagement && (
+          <Grid item>
+            <ActionsCard
+              heading="Procesos"
+              actions={workflowActions}
+              icon={<AccountTreeIcon/>}
+            ></ActionsCard>
+          </Grid> 
+        )}
+        {showAppearanceManagement && (
+          <Grid item>
+            <ActionsCard
+              heading="Apariencia"
+              actions={appearanceActions}
+              icon={<BrushIcon/>}
+            ></ActionsCard>
+          </Grid>        
+        )}
       </Grid>
     </Page>
-
   );
 }

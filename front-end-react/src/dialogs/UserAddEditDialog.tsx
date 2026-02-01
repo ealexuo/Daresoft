@@ -30,6 +30,7 @@ import { useSnackbar } from 'notistack';
 import { User } from '../types/User';
 import { ColorPicker } from 'primereact/colorpicker';
 import { usersService } from '../services/settings/usersService';
+import { error } from 'console';
 
 type DialogProps = {
   mode: 'add' | 'edit',
@@ -66,10 +67,18 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
       profilePicture: z.string().nullable(),
       profilePictureContentType: z.string().nullable(),
       isDeleted: z.boolean(),
-      isActive: z.boolean(),
+      isAdmin: z.boolean(),
       isPasswordChangeRequired: z.boolean(),
       password: z.string().min(1, t("errorMessages.requieredField")),
       passwordConfirm: z.string().min(1, t("errorMessages.requieredField"))
+  }).superRefine((data, ctx) => {
+    if (data.password !== data.passwordConfirm) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Los passwords no coinciden",
+        path: ["passwordConfirm"],
+      });
+    }
   });
 
   // Form Schema Type
@@ -77,16 +86,19 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
 
   // Form Hook
   const { register, handleSubmit, watch, formState: {errors, isSubmitting} } = useForm<UserFormType>({
-      defaultValues: selectedUser,
+      defaultValues: { ...selectedUser, isAdmin: selectedUser?.roleId === 1 },
       resolver: zodResolver(formSchema),
   });
     
-  // Watch the color schema property to be shown in the textfield
-  //const selectedColor = watch('color', selectedUser?.color);
-    
   const onSubmit: SubmitHandler<UserFormType> = async (formData) => {
 
-    const userToSave: User = { ...formData };
+    const roleId = formData.isAdmin ? 1 : 2;
+
+    const userToSave: User = { 
+      ...formData,
+      isActive: true,
+      roleId: roleId
+    };
 
     try {
       setLoading(true);
@@ -115,15 +127,16 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
 
   return (
     
-    <Box sx={{ my: 3 }}
+    <Box sx={{ my: 0 }}
       component="form"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, error => console.log('Form error', error))}
     >
-      <DialogTitle>{"User Profile"}</DialogTitle>
+      <DialogTitle>{mode === 'add' ? "Nuevo usuario" : "Editar usuario"}</DialogTitle>      
       <DialogContent>
-        <DialogContentText>Add or Edit User Profile</DialogContentText>
-
-        <Box sx={{ my: 3 }}>
+        <Box sx={{ my: 0 }}>          
+          <Box sx={{ mt: 0, mb: 1, fontSize: 12, color: '#666' }}>
+            Los campos marcados con (*) son obligatorios.
+          </Box>
           <Typography variant="subtitle1">
             Información de usuario
           </Typography>
@@ -135,7 +148,7 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
               <Grid item xs={12} sm={6}>
                 <TextField
                   {...register('userName')}
-                  label="Nombre de usuario"
+                  label="* Nombre de usuario"
                   fullWidth
                   size="small"
                   disabled={mode === 'edit'}
@@ -146,40 +159,34 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControlLabel
-                  control={<Checkbox {...register('isActive')} defaultChecked={selectedUser?.isActive} />}
-                  label="Activo"
+                  control={<Checkbox {...register('isAdmin')} defaultChecked={selectedUser?.roleId === 1} />}
+                  label="Administrador"
                 />
               </Grid>
-              {
-                mode === 'add' ? (
-                  <>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        {...register('password')}
-                        type='password'
-                        label="* Password"
-                        fullWidth
-                        size="small"
-                        defaultValue={selectedUser?.password || ''}
-                        error={!!errors.password}
-                        helperText={errors.password?.message as string | undefined}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        {...register('passwordConfirm')}
-                        type='password'
-                        label="* Confirmar Password"
-                        fullWidth
-                        size="small"
-                        defaultValue={selectedUser?.passwordConfirm || ''}
-                        error={!!errors.passwordConfirm}
-                        helperText={errors.passwordConfirm?.message as string | undefined}
-                      />
-                    </Grid>
-                  </>                  
-                ):(<></>)
-              }    
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  {...register('password')}
+                  type='password'
+                  label="* Password"
+                  fullWidth
+                  size="small"
+                  defaultValue={selectedUser?.password || ''}
+                  error={!!errors.password}
+                  helperText={errors.password?.message as string | undefined}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  {...register('passwordConfirm')}
+                  type='password'
+                  label="* Confirmar Password"
+                  fullWidth
+                  size="small"
+                  defaultValue={selectedUser?.passwordConfirm || ''}
+                  error={!!errors.passwordConfirm}
+                  helperText={errors.passwordConfirm?.message as string | undefined}
+                />
+              </Grid>
             </Grid>
           </Paper>
           
@@ -245,7 +252,7 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
               <Grid item xs={12} sm={6}>
                 <TextField
                   {...register('workEmail')}
-                  label="* Correo Laboral"
+                  label="* Correo electrónico"
                   fullWidth
                   size="small"
                   error={!!errors.workEmail}
@@ -270,9 +277,9 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
                   size="small"
                 />
               </Grid>
-
             </Grid>
           </Paper>
+
         </Box>
       </DialogContent>
       <DialogActions>

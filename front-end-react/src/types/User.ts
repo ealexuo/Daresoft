@@ -16,6 +16,7 @@ export type User = {
     profilePictureContentType: string | null;
     isDeleted: boolean;
     isActive: boolean;
+    roleId: number;
     isPasswordChangeRequired: boolean;
     password: string;
     passwordConfirm: string;

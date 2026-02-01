@@ -300,7 +300,7 @@ export default function Suppliers() {
         <AlertDialog
           color = {'error'}
           title = {'Eliminar proveedor'}
-          message = {'Está seguro que desea eliminar el proveedor seleccionado ?'}
+          message = {'Está seguro que desea eliminar el proveedor ' + (selectedSupplier ? selectedSupplier.name : '') + '?'}
           onClose = {handleCloseSupplierDeleteDialogFromAction}
         />
       </Dialog>
