@@ -35,6 +35,7 @@ namespace Daresoft.Data
                     ,Name
                     ,Description
                     ,SupplierContactId
+                    ,Url
                     ,IsActive
                     ,IsDeleted                    
                     ,CreatedDate
@@ -48,6 +49,7 @@ namespace Daresoft.Data
                     ,@Name
                     ,@Description
                     ,@SupplierContactId
+                    ,@Url
                     ,@IsActive
                     ,@IsDeleted
                     ,GETUTCDATE()
@@ -94,6 +96,7 @@ namespace Daresoft.Data
                         caseFile.Name,
                         caseFile.Description,
                         caseFile.SupplierContactId,
+                        caseFile.Url,
                         caseFile.IsActive,
                         caseFile.IsDeleted,
                         CreatedByUserId = currentUserId,
@@ -160,6 +163,7 @@ namespace Daresoft.Data
 	                ,cf.CaseNumber
 	                ,cf.Name
 	                ,cf.Description
+                    ,cf.Url
 	                ,co.Id SupplierContactId
 	                ,co.Name AS SupplierName
 	                ,co.LastName AS SupplierLastName
@@ -200,6 +204,7 @@ namespace Daresoft.Data
 	                ,cf.CaseNumber
 	                ,cf.Name
 	                ,cf.Description
+                    ,cf.Url
 	                ,co.Id SupplierContactId
 	                ,co.Name AS SupplierName
 	                ,co.LastName AS SupplierLastName
@@ -233,6 +238,7 @@ namespace Daresoft.Data
                 SET CaseNumber = @CaseNumber
                     ,Name = @Name
                     ,Description = @Description
+                    ,Url = @Url
                     ,SupplierContactId = @SupplierContactId
                     ,IsActive = @IsActive
                     ,IsDeleted = @IsDeleted
@@ -260,6 +266,7 @@ namespace Daresoft.Data
                         caseFile.CaseNumber,
                         caseFile.Name,
                         caseFile.Description,
+                        caseFile.Url,
                         caseFile.SupplierContactId,
                         caseFile.IsActive,
                         caseFile.IsDeleted,                        

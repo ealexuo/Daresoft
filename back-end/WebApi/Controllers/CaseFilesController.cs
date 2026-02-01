@@ -147,7 +147,7 @@ namespace WebApi.Controllers
                 for (int i = 0; i < caseFile.Documents.Count; i++)
                 {
                     caseFile.Documents[i].CaseFileId = createdCaseFile.Id;
-                    caseFile.Documents[i].Path = "/cf" + createdCaseFile.Id + "/" + caseFile.Documents[i].Path + "/entry-documents/" + caseFile.Documents[i].Name;
+                    caseFile.Documents[i].Path = "/case-files/" + createdCaseFile.Id + "/workflows/" + caseFile.Documents[i].Path + "/entry-documents/" + caseFile.Documents[i].Name;
                     caseFile.Documents[i] = await _documentsService.CreateAsync(caseFile.Documents[i], currentUserId);
 
                     createdCaseFile.Documents.Add(caseFile.Documents[i]);

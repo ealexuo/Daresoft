@@ -10,6 +10,7 @@ namespace Daresoft.Core.Models
         public string CaseNumber { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
+        public string? Url { get; set; }
         public int? SupplierContactId { get; set; }
         public string SupplierName { get; set; }
         public string SupplierLastName { get; set; }

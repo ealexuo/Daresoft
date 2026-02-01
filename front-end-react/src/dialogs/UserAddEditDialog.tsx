@@ -4,7 +4,6 @@ import * as React from 'react';
 import { 
   DialogContent,
   DialogTitle,
-  DialogContentText,
   Box,
   DialogActions,
   Button,
@@ -15,7 +14,6 @@ import {
   FormControlLabel,
   Checkbox
 } from '@mui/material';
-import { useState } from 'react';
 
 // React Form Dependencies
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -28,9 +26,7 @@ import { useSnackbar } from 'notistack';
 
 // Services and Types
 import { User } from '../types/User';
-import { ColorPicker } from 'primereact/colorpicker';
 import { usersService } from '../services/settings/usersService';
-import { error } from 'console';
 
 type DialogProps = {
   mode: 'add' | 'edit',
@@ -40,7 +36,6 @@ type DialogProps = {
 
 export default function UserAddEditDialog({ mode, selectedUser, onClose }: DialogProps) {
   
-  const [loading, setLoading] = useState<boolean>(false);
   const [t] = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -85,7 +80,7 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
   type UserFormType = z.infer<typeof formSchema>;
 
   // Form Hook
-  const { register, handleSubmit, watch, formState: {errors, isSubmitting} } = useForm<UserFormType>({
+  const { register, handleSubmit, formState: {errors, isSubmitting} } = useForm<UserFormType>({
       defaultValues: { ...selectedUser, isAdmin: selectedUser?.roleId === 1 },
       resolver: zodResolver(formSchema),
   });
@@ -101,8 +96,6 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
     };
 
     try {
-      setLoading(true);
-
       try {        
         if (mode === 'add') {
           await usersService.add(userToSave); 
@@ -120,9 +113,7 @@ export default function UserAddEditDialog({ mode, selectedUser, onClose }: Dialo
       onClose(true);
     } catch (error) {
       enqueueSnackbar('Error al guardar usuario.', { variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   return (

@@ -8,6 +8,7 @@ export type CaseFile = {
     caseNumber: string; 
     name: string; 
     description: string; 
+    url?: string;
     supplierContactId: number;
     supplierName: string;
     supplierLastName: string;

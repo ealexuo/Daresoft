@@ -23,7 +23,7 @@ import { contactsService } from '../../services/settings/contactsService';
 import { Contact } from '../../types/Contact';
 import { AutoCompleteData } from '../../types/AutoCompleteData';
 import EditNoteIcon from '@mui/icons-material/EditNote';
-import { EditNote, NoteAdd, NoteAddOutlined } from '@mui/icons-material';
+import { EditNote, NoteAdd, NoteAddOutlined, Work } from '@mui/icons-material';
 import CaseFileNoteAddEditDialog from '../../dialogs/CaseFileNoteAddEditDialog';
 import PreviewIcon from '@mui/icons-material/Preview';
 import { CaseFileWorkflow } from '../../types/CaseFileWorkflow';
@@ -39,6 +39,9 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { tasksService } from '../../services/settings/tasksService';
+import Workflows from '../settings/Workflows';
+import { WorkflowType } from '../../enums/WorkflowType';
+import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -85,23 +88,22 @@ const columnsInit: TableColumnType[] = [
 ];
 
 // Empty CaseFile object
-// const emptyCaseFileObject: CaseFile = {
-//   id: -1,
-//   caseNumber: '',
-//   name: '',
-//   description: '',
-//   supplierId: -1,
-//   supplierName: '',
-//   supplierLastName: '',
-//   workflowId: -1,
-//   workflowName: '',
-//   statusId: -1,
-//   statusName: '',
-//   isActive: true,
-//   isDeleted: false,
-//   tasks: [],
-//   totalCount: 0,  
-// };
+const emptyCaseFile = {
+    id: 0,
+    caseNumber: '', 
+    name: '', 
+    description: '', 
+    supplierContactId: -1,
+    supplierName: '',
+    supplierLastName: '',
+    isActive: true,
+    isDeleted: false,
+    workflows: [],
+    tasks: [],
+    documents: [],
+    createdDate: new Date(),
+    totalCount: 0
+}
 
 export default function CaseFiles() {
 
@@ -129,6 +131,7 @@ export default function CaseFiles() {
   const [suppliersList, setSupliersList] = useState<AutoCompleteData[]>([]);
 
   const [documentURL, setDocumentURL] = useState<string>('');
+  const [documentTitle, setDocumentTitle] = useState<string>('');
 
   const [workflowsList, setWorkflowsList] = useState<Workflow[]>([]);
   
@@ -399,10 +402,9 @@ export default function CaseFiles() {
             t.completedDate = t.completedDate ? new Date(t.completedDate) : null;
             return t
           });
-
                  
-          const workflowMOH = item.workflows ? item.workflows.find(w => w.workflowId === 2) : undefined;
-          const workflowLNS = item.workflows ? item.workflows.find(w => w.workflowId === 1) : undefined;
+          const workflowMOH = item.workflows ? item.workflows.find(w => w.workflowId === WorkflowType.MOH) : undefined;
+          const workflowLNS = item.workflows ? item.workflows.find(w => w.workflowId === WorkflowType.LNS) : undefined;
 
           rowsTemp.push([
             item.id,
@@ -448,7 +450,7 @@ export default function CaseFiles() {
               setSupliersList(
                   response.data.contactsList.map((s: Contact) => {
                       return { 
-                          id: s.id, label: s.name + (s.lastName === '' ? s.lastName : ' ' + s.lastName)
+                          id: s.id, label: s.companyName
                       }
                   })              
               );
@@ -505,7 +507,7 @@ export default function CaseFiles() {
 
   // CaseFile Add/Edit dialog
   const handleOpenCaseFileAddEditDialog = () => {
-    setSelectedCaseFile(undefined);
+    setSelectedCaseFile(emptyCaseFile);
     setOpenCaseFileAddEditDialog(true);
   }
 
@@ -527,6 +529,14 @@ export default function CaseFiles() {
     setOpenSIADSearchDialog(false);
   }
 
+  // Documents Link dialog
+  const handleOpenDocumentsLinkDialog = async (caseFile: any) => {
+    const caseFileTemp = caseFilesList.find(c => c.id === (caseFile && caseFile[0] ? caseFile[0] : 0));
+    if(caseFileTemp) {
+      window.open(caseFileTemp.url, '_blank');
+    }
+  }
+  
   const handleCloseCaseFileAddEditDialogFromAction = (refreshCaseFilesList: boolean = false) => {
     if(refreshCaseFilesList) {
       fetchCaseFiles(currentPage, rowsPerPage, searchText);
@@ -581,13 +591,14 @@ export default function CaseFiles() {
   // Document viewer dialog - CaseFile Entry Document
   const handleOpenViewDocumentDialog = async (workflow: CaseFileWorkflow, documents: Document[]) => {
 
-    const pathContent = 'wf' + workflow.workflowId + '/entry-documents/';
+    const pathContent = '/workflows/' + workflow.workflowId + '/entry-documents/';
     const documentTemp = documents.find(d => d.caseFileId === workflow.caseFileId && d.path.includes(pathContent));
 
     if(! documentTemp) return;
 
     const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
     setDocumentURL(response.data);
+    setDocumentTitle('Documento: ' + documentTemp.name);
     setOpenViewDocumentDialog(true);
   }
 
@@ -750,6 +761,13 @@ export default function CaseFiles() {
       callBack: handleOpenSIADSearchDialog, 
     },
     { 
+      name: 'documentsLink',
+      icon: <Tooltip title="Google Drive folder" arrow placement="top-start">
+              <FolderOpenOutlinedIcon />
+            </Tooltip>,
+      callBack: handleOpenDocumentsLinkDialog, 
+    },
+    { 
       name: 'edit',
       icon: <Tooltip title="Editar" arrow placement="top-start">
               <EditIcon />
@@ -809,7 +827,7 @@ export default function CaseFiles() {
         maxWidth={"md"}        
       >
         <CaseFileAddEditDialog 
-          mode = {selectedCaseFile && selectedCaseFile.id > -1 ? 'edit' : 'add'}
+          mode = {selectedCaseFile && selectedCaseFile.id > 0 ? 'edit' : 'add'}
           selectedCaseFile = {selectedCaseFile}
           suppliersList={suppliersList}
           workflowsList={workflowsList}
@@ -848,6 +866,7 @@ export default function CaseFiles() {
         maxWidth={"lg"}        
       >
         <ViewDocumentDialog
+          title={documentTitle}
           documentURL={documentURL}      
           onClose = {handleCloseViewDocumentDialog}
         />

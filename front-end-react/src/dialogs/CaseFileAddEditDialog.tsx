@@ -32,7 +32,7 @@ import { Workflow } from '../types/Workflow'
 
 type DialogProps = {
     mode: 'add'|'edit',
-    selectedCaseFile: CaseFile | undefined,
+    selectedCaseFile: CaseFile,
     suppliersList: AutoCompleteData[],
     workflowsList: Workflow[],
     onClose: (refresh: boolean) => void    
@@ -62,29 +62,11 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
         supplierName: string,
         supplierContactId: number;
         name: string,
+        url: string,
         MOHEntry: string,
         MOHKey: string,
         LNSEntry: string,
         LNSKey: string,   
-    }
-
-    if(!selectedCaseFile) {
-        selectedCaseFile = {
-            id: 0,
-            caseNumber: '', 
-            name: '', 
-            description: '', 
-            supplierContactId: -1,
-            supplierName: '',
-            supplierLastName: '',
-            isActive: true,
-            isDeleted: false,
-            workflows: [],
-            tasks: [],
-            documents: [],
-            createdDate: new Date(),
-            totalCount: 0
-        }
     }
     
     const workflowMOH = selectedCaseFile.workflows ? selectedCaseFile.workflows.find(w => w.workflowId === 2) : undefined;
@@ -93,8 +75,8 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
     const MOHExternalIdentifier = workflowMOH ? workflowMOH.externalIdentifier : undefined;
     const LNSExternalIdentifier = workflowLNS ? workflowLNS.externalIdentifier : undefined;
 
-    const entryDocumentMOH = selectedCaseFile.documents ? selectedCaseFile.documents.find(d => d.path.includes('/wf1/entry-documents/')) : undefined;
-    const entryDocumentLNS = selectedCaseFile.documents ? selectedCaseFile.documents.find(d => d.path.includes('/wf2/entry-documents/')) : undefined;
+    const entryDocumentMOH = selectedCaseFile.documents ? selectedCaseFile.documents.find(d => d.path.includes('/workflows/1/entry-documents/')) : undefined;
+    const entryDocumentLNS = selectedCaseFile.documents ? selectedCaseFile.documents.find(d => d.path.includes('/workflows/2/entry-documents/')) : undefined;
 
     const [entryDateMOH, setEntryDateMOH] = useState<moment.Moment>(workflowMOH ? moment(workflowMOH.startDate) : moment());
     const [entryDateLNS, setEntryDateLNS] = useState<moment.Moment>(workflowLNS ? moment(workflowLNS.startDate) : moment());
@@ -108,6 +90,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
         supplierName: suppliersList.find(s => s.id === selectedCaseFile?.supplierContactId)?.label ?? '',
         supplierContactId: selectedCaseFile.supplierContactId,
         name: selectedCaseFile.name,
+        url: selectedCaseFile.url ?? '',
         MOHEntry: MOHExternalIdentifier ? MOHExternalIdentifier.split('|')[0] : '',
         MOHKey: MOHExternalIdentifier ? MOHExternalIdentifier.split('|')[1] : '',
         LNSEntry: LNSExternalIdentifier ? LNSExternalIdentifier.split('|')[0] : '',
@@ -118,6 +101,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
     const formSchema = z.object({
         supplierName: z.string().min(1, t("errorMessages.requieredField")),
         name: z.string().min(1, t("errorMessages.requieredField")),       
+        url: z.string(),
         MOHEntry: z.string(),
         MOHKey: z.string(),
         LNSEntry: z.string(),
@@ -174,7 +158,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             workflowId: workflowLNS ? workflowLNS.workflowId : 2,
             workflowName: workflowLNS ? workflowLNS.workflowName : '',
             workflowCode: workflowLNS ? workflowLNS.workflowCode : '',
-            workflowColor: workflowMOH ? workflowMOH.workflowColor : '',
+            workflowColor: workflowLNS ? workflowLNS.workflowColor : '',
             workflowStatusId: workflowLNS ? workflowLNS.workflowStatusId : 1,
             workflowStatusName: workflowLNS ? workflowLNS.workflowStatusName : '',
             externalIdentifier: formData.LNSEntry + '|' + formData.LNSKey,
@@ -189,7 +173,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             id: entryDocumentMOH ? entryDocumentMOH.id : 0,
             caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
             name: documentMOH ? documentMOH.name : '',
-            path: 'wf' + workflowIdMOH + '',
+            path: workflowIdMOH ? workflowIdMOH.toString() : '',
             contentType: documentMOH ? documentMOH.type : '',
             size: documentMOH ? documentMOH.size : 0
         }
@@ -198,7 +182,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             id: entryDocumentLNS ? entryDocumentLNS.id : 0,
             caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
             name: documentLNS ? documentLNS.name : '',
-            path: 'wf' + workflowIdLNS + '',
+            path: workflowIdLNS ? workflowIdLNS.toString() : '',
             contentType: documentLNS ? documentLNS.type : '',
             size: documentLNS ? documentLNS.size : 0
         }
@@ -207,7 +191,9 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             id: selectedCaseFile ? selectedCaseFile.id : 0,
             caseNumber: selectedCaseFile ? selectedCaseFile.caseNumber : '',
             name: formData.name,
+            url: formData.url,
             description: selectedCaseFile ? selectedCaseFile.description : '',
+
             supplierContactId: selectedSupplierTemp ? selectedSupplierTemp.id : 0,
             supplierName: '',
             supplierLastName: '',
@@ -250,15 +236,15 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                         let uploadUrl = await documentsService.getUploadUrl(d.id);
 
                         try{
-                            if(d.path.includes('wf'+workflowIdMOH) && documentMOH && documentMOH.size > 0){
+                            if(d.path.includes('/workflows/'+workflowIdMOH) && documentMOH && documentMOH.size > 0){
                                 documentsService.upload(documentMOH, uploadUrl.data);
                             }
-                            else if(d.path.includes('wf'+workflowIdLNS) && documentLNS && documentLNS.size > 0){
+                            else if(d.path.includes('/workflows/'+workflowIdLNS) && documentLNS && documentLNS.size > 0){
                                 documentsService.upload(documentLNS, uploadUrl.data);
                             }
                         }
                         catch(error){
-                            console.error('Error al gargar el archivo:', error);
+                            console.error('Error al cargar el archivo:', error);
                         }
                     });
 
@@ -310,226 +296,238 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
     }
    
     return (
-        <form onSubmit={handleSubmit(onSubmit, (errors) => {
-            console.log("Errores del formulario:", errors);
-        })}>
-            <DialogTitle>Formulario de ingreso</DialogTitle>
+        <Box sx={{ my: 0 }}
+            component="form"
+            onSubmit={handleSubmit(onSubmit, error => console.log('Form error', error))}
+        >
+            <DialogTitle>{mode === 'add' ? "Ingresar expediente" : "Editar expediente"}</DialogTitle>      
             <DialogContent>
-                <Box sx={{ mt: 1, mb: 2, fontSize: 12, color: '#666' }}>
-                    Los campos marcados con (*) son obligatorios.
-                </Box>
+                <Box sx={{ my: 0 }}>
+                    <Box sx={{ mt: 0, mb: 1, fontSize: 12, color: '#666' }}>
+                        Los campos marcados con (*) son obligatorios.
+                    </Box>
+                    <Typography variant="subtitle1">
+                        Información general
+                    </Typography>
 
-                <Typography variant="subtitle1">
-                    Información general
-                </Typography>
+                    <Paper
+                        variant="outlined"
+                        sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
+                    >
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <Autocomplete
+                                    disabled = { mode==='edit'}
+                                    disablePortal
+                                    id="suppliersList"
+                                    options={suppliersList}
+                                    isOptionEqualToValue={(option: any, value: any) => option.name === value.name}
+                                    defaultValue={suppliersList.find(s => s.id === selectedCaseFile?.supplierContactId)}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="* Proveedor"
+                                            {...register("supplierName")}
+                                            error = { errors.supplierName?.message ? true : false }
+                                            helperText= { errors.supplierName?.message }
+                                        />
+                                    )}                      
+                                />
+                            </Grid>                        
+                            <Grid item xs={12}>
+                                <TextField
+                                    label="* Producto"                            
+                                    fullWidth
+                                    type='text'
+                                    inputProps={{ maxLength: 500 }}
+                                    {...register("name")}
+                                    error = { errors.name?.message ? true : false }
+                                    helperText= { errors.name?.message }
+                                />
+                            </Grid>
+                             <Grid item xs={12}>
+                                <TextField
+                                    label="Link a Google Drive"                            
+                                    fullWidth
+                                    type='text'
+                                    inputProps={{ maxLength: 500 }}
+                                    {...register("url")}
+                                    error = { errors.url?.message ? true : false }
+                                    helperText= { errors.url?.message }
+                                />
+                            </Grid>
+                        </Grid>                    
+                    </Paper>
+                    
+                    <Typography variant="subtitle1">
+                        <FormControlLabel
+                            label="Ministerio de Salud (MOH)"
+                            checked={enableSectionMOH}
+                            control={<Checkbox checked={enableSectionMOH} onChange={
+                                (event: React.ChangeEvent<HTMLInputElement>) => { 
+                                    setEnableSectionMOH(event.target.checked);
+                                }
+                            } />
+                        }
+                        />
+                    </Typography>               
 
-                <Paper
-                    variant="outlined"
-                    sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
-                >
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <Autocomplete
-                                disabled = { mode==='edit'}
-                                disablePortal
-                                id="suppliersList"
-                                options={suppliersList}
-                                isOptionEqualToValue={(option: any, value: any) => option.name === value.name}
-                                defaultValue={suppliersList.find(s => s.id === selectedCaseFile?.supplierContactId)}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="* Proveedor"
-                                        {...register("supplierName")}
-                                        error = { errors.supplierName?.message ? true : false }
-                                        helperText= { errors.supplierName?.message }
-                                    />
-                                )}                      
-                            />
-                        </Grid>                        
-                        <Grid item xs={12}>
-                            <TextField
-                                label="* Producto"                            
-                                fullWidth
-                                type='text'
-                                inputProps={{ maxLength: 500 }}
-                                {...register("name")}
-                                error = { errors.name?.message ? true : false }
-                                helperText= { errors.name?.message }
-                            />
-                        </Grid>
-                    </Grid>                    
-                </Paper>
-                
-                <Typography variant="subtitle1">
-                    <FormControlLabel
-                        label="Ministerio de Salud (MOH)"
-                        checked={enableSectionMOH}
-                        control={<Checkbox checked={enableSectionMOH} onChange={
-                            (event: React.ChangeEvent<HTMLInputElement>) => { 
-                                setEnableSectionMOH(event.target.checked);
-                            }
-                        } />
-                    }
-                    />
-                </Typography>               
-
-                <Paper                    
-                    variant="outlined"
-                    sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
-                >                    
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                disabled = {!enableSectionMOH}
-                                label="Número de Entrada SIAD"                            
-                                fullWidth
-                                type='number'
-                                inputProps={{ maxLength: 500 }}
-                                {...register("MOHEntry")}
-                            />                        
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                disabled = {!enableSectionMOH}
-                                label="Llave"                            
-                                fullWidth
-                                type='text'
-                                inputProps={{ maxLength: 500 }}
-                                {...register("MOHKey")}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <LocalizationProvider dateAdapter={AdapterMoment}>
-                                <DatePicker
+                    <Paper                    
+                        variant="outlined"
+                        sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
+                    >                    
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
                                     disabled = {!enableSectionMOH}
-                                    views={['year', 'month', 'day']}
-                                    label="* Fecha de ingreso"
-                                    name="entryDate"
-                                    value={entryDateMOH}
-                                    slotProps={{ textField: { fullWidth: true } }}
-                                    onChange={(newDate) => setEntryDateMOH(newDate || moment())}                                
+                                    label="Número de Entrada SIAD"                            
+                                    fullWidth
+                                    type='number'
+                                    inputProps={{ maxLength: 500 }}
+                                    {...register("MOHEntry")}
+                                />                        
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    disabled = {!enableSectionMOH}
+                                    label="Llave"                            
+                                    fullWidth
+                                    type='text'
+                                    inputProps={{ maxLength: 500 }}
+                                    {...register("MOHKey")}
                                 />
-                            </LocalizationProvider>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <LocalizationProvider dateAdapter={AdapterMoment}>
+                                    <DatePicker
+                                        disabled = {!enableSectionMOH}
+                                        views={['year', 'month', 'day']}
+                                        label="* Fecha de ingreso"
+                                        name="entryDate"
+                                        value={entryDateMOH}
+                                        slotProps={{ textField: { fullWidth: true } }}
+                                        onChange={(newDate) => setEntryDateMOH(newDate || moment())}                                
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Button
+                                    disabled = {!enableSectionMOH}
+                                    component="label"
+                                    role={undefined}
+                                    variant="outlined"
+                                    tabIndex={-1}
+                                    startIcon={<UploadFileIcon />}                                
+                                    >
+                                    Agregar documento
+                                    <VisuallyHiddenInput
+                                        type="file"
+                                        onChange={handleDocumentChangeMOH}
+                                        multiple
+                                    />
+                                </Button>
+                                {
+                                    documentMOH && (
+                                        <div>
+                                            <p style={{fontSize: '14px', paddingTop: 0, marginTop: 5}}>Documento seleccionado: {documentMOH.name}</p>
+                                            {/* <p>Size: {(document.size / 1024).toFixed(2)} KB</p>
+                                            <p>Type: {document.type}</p> */}
+                                        </div>
+                                    )
+                                }
+                            </Grid>                        
                         </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Button
-                                disabled = {!enableSectionMOH}
-                                component="label"
-                                role={undefined}
-                                variant="outlined"
-                                tabIndex={-1}
-                                startIcon={<UploadFileIcon />}                                
-                                >
-                                Agregar documento
-                                <VisuallyHiddenInput
-                                    type="file"
-                                    onChange={handleDocumentChangeMOH}
-                                    multiple
-                                />
-                            </Button>
-                            {
-                                documentMOH && (
-                                    <div>
-                                        <p style={{fontSize: '14px', paddingTop: 0, marginTop: 5}}>Documento seleccionado: {documentMOH.name}</p>
-                                        {/* <p>Size: {(document.size / 1024).toFixed(2)} KB</p>
-                                        <p>Type: {document.type}</p> */}
-                                    </div>
-                                )
-                            }
-                        </Grid>                        
-                    </Grid>
-                </Paper>
+                    </Paper>
 
-                <Typography variant="subtitle1">
-                    <FormControlLabel
-                        label="Laboratorio Nacional de Salud (LNS)"
-                        checked={enableSectionLNS}
-                        control={<Checkbox checked={enableSectionLNS} onChange={
-                            (event: React.ChangeEvent<HTMLInputElement>) => { 
-                                setEnableSectionLNS(event.target.checked);
-                            }
-                        } />
-                    }
-                    />
-                </Typography>
+                    <Typography variant="subtitle1">
+                        <FormControlLabel
+                            label="Laboratorio Nacional de Salud (LNS)"
+                            checked={enableSectionLNS}
+                            control={<Checkbox checked={enableSectionLNS} onChange={
+                                (event: React.ChangeEvent<HTMLInputElement>) => { 
+                                    setEnableSectionLNS(event.target.checked);
+                                }
+                            } />
+                        }
+                        />
+                    </Typography>
 
-                <Paper
-                    variant="outlined"
-                    sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
-                >
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                disabled = {!enableSectionLNS}
-                                label="Número de Entrada SIAD"                            
-                                fullWidth
-                                type='number'
-                                inputProps={{ maxLength: 500 }}
-                                {...register("LNSEntry")}
-                            />                        
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                disabled = {!enableSectionLNS}
-                                label="Llave"                            
-                                fullWidth
-                                type='text'
-                                inputProps={{ maxLength: 500 }}
-                                {...register("LNSKey")}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <LocalizationProvider dateAdapter={AdapterMoment}>
-                                <DatePicker
+                    <Paper
+                        variant="outlined"
+                        sx={{ my: { xs: 2, md: 2 }, p: { xs: 2, md: 3 } }}
+                    >
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
                                     disabled = {!enableSectionLNS}
-                                    views={['year', 'month', 'day']}
-                                    label="* Fecha de ingreso"
-                                    name="entryDate"
-                                    value={entryDateLNS}
-                                    slotProps={{ textField: { fullWidth: true } }}
-                                    onChange={(newDate) => setEntryDateLNS(newDate || moment())}                                
+                                    label="Número de Entrada SIAD"                            
+                                    fullWidth
+                                    type='number'
+                                    inputProps={{ maxLength: 500 }}
+                                    {...register("LNSEntry")}
+                                />                        
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    disabled = {!enableSectionLNS}
+                                    label="Llave"                            
+                                    fullWidth
+                                    type='text'
+                                    inputProps={{ maxLength: 500 }}
+                                    {...register("LNSKey")}
                                 />
-                            </LocalizationProvider>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <LocalizationProvider dateAdapter={AdapterMoment}>
+                                    <DatePicker
+                                        disabled = {!enableSectionLNS}
+                                        views={['year', 'month', 'day']}
+                                        label="* Fecha de ingreso"
+                                        name="entryDate"
+                                        value={entryDateLNS}
+                                        slotProps={{ textField: { fullWidth: true } }}
+                                        onChange={(newDate) => setEntryDateLNS(newDate || moment())}                                
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Button
+                                    disabled = {!enableSectionLNS}
+                                    component="label"
+                                    role={undefined}
+                                    variant="outlined"
+                                    tabIndex={-1}
+                                    startIcon={<UploadFileIcon />}
+                                    >
+                                    Agregar documento
+                                    <VisuallyHiddenInput
+                                        type="file"
+                                        onChange={handleDocumentChangeLNS}
+                                        multiple
+                                    />
+                                </Button>
+                                {
+                                    documentLNS && (
+                                        <div>
+                                            <p style={{fontSize: '14px', paddingTop: 0, marginTop: 5}}>Documento seleccionado: {documentLNS.name}</p>
+                                            {/* <p>Size: {(document.size / 1024).toFixed(2)} KB</p>
+                                            <p>Type: {document.type}</p> */}
+                                        </div>
+                                    )
+                                }
+                            </Grid> 
                         </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Button
-                                disabled = {!enableSectionLNS}
-                                component="label"
-                                role={undefined}
-                                variant="outlined"
-                                tabIndex={-1}
-                                startIcon={<UploadFileIcon />}
-                                >
-                                Agregar documento
-                                <VisuallyHiddenInput
-                                    type="file"
-                                    onChange={handleDocumentChangeLNS}
-                                    multiple
-                                />
-                            </Button>
-                            {
-                                documentLNS && (
-                                    <div>
-                                        <p style={{fontSize: '14px', paddingTop: 0, marginTop: 5}}>Documento seleccionado: {documentLNS.name}</p>
-                                        {/* <p>Size: {(document.size / 1024).toFixed(2)} KB</p>
-                                        <p>Type: {document.type}</p> */}
-                                    </div>
-                                )
-                            }
-                        </Grid> 
-                    </Grid>
-                </Paper>                
-
+                    </Paper>   
+                </Box>
             </DialogContent>
             <DialogActions>
                 <Button variant="text" onClick={() => { onClose(false) }}>
                     Cancelar
                 </Button>
                 <Button variant="contained" type="submit" disableElevation disabled={isSubmitting}>
-                    {isSubmitting ? "Guardando..." : mode === 'add' ? 'Ingresar expediente' : 'Actualizar expediente'}
+                    {isSubmitting ? "Guardando..." : mode === 'add' ? 'Ingresar expediente' : 'Editar expediente'}
                 </Button>
             </DialogActions>
-        </form>
+        </Box>
     )
 }

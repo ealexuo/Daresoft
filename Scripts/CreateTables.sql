@@ -119,6 +119,7 @@ CREATE TABLE dbo.CaseFile
     CaseNumber NVARCHAR(50) NOT NULL, -- PROV-0001-2025    
     Name NVARCHAR(255) NOT NULL,
     Description NVARCHAR(MAX) NULL,
+	Url NVARCHAR(2048) NULL,
     SupplierContactId INT NULL,
     IsActive BIT NOT NULL DEFAULT 1,
     IsDeleted BIT NOT NULL DEFAULT 0,
