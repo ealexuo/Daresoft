@@ -7,11 +7,9 @@ import {
   Box,
   DialogActions,
   Button,
-  Typography,
   Paper,
   Grid,
   TextField,
-  Autocomplete,
   FormControl,
   InputLabel,
   Select,
@@ -19,19 +17,10 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 
-// React Form Dependencies
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { z } from 'zod'
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useTranslation } from 'react-i18next';
-
 // Toastr Dependencies
 import { useSnackbar } from 'notistack';
 
 // Services and Types
-import { Contact } from '../types/Contact';
-import { contactsService } from '../services/settings/contactsService';
-import { countries } from '../enums/Countries';
 import { CaseFile } from '../types/CaseFile';
 import { caseFilesService } from '../services/settings/caseFilesService';
 
@@ -39,14 +28,6 @@ type DialogProps = {
   selectedCaseFile: CaseFile,
   onClose: (refreshSuppliersList: boolean) => void
 }
-
-// enum CaseFileStatus {
-//   Entered = 1,
-//   InProgress = 2,
-//   Reentered = 3,
-//   Accepted = 4,
-//   Rejected = 5
-// }
 
 const caseFileStatusOptions = [
   { label: 'Sin estado', value: 0},
@@ -59,10 +40,10 @@ const caseFileStatusOptions = [
 
 export default function CaseFileStatusEditDialog({ selectedCaseFile, onClose }: DialogProps) {
   
-  const [t] = useTranslation();
   const { enqueueSnackbar } = useSnackbar();  
   const [selectedStatus, setSelectedStatus] = useState<number>(selectedCaseFile.workflows && selectedCaseFile.workflows.length > 0 ? selectedCaseFile.workflows[0].workflowStatusId : 0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [notes, setNotes] = useState<string>('');
 
   const initialStatus = selectedCaseFile.workflows && selectedCaseFile.workflows.length > 0 ? selectedCaseFile.workflows[0].workflowStatusId : 0;
 
@@ -72,6 +53,8 @@ export default function CaseFileStatusEditDialog({ selectedCaseFile, onClose }: 
 
     workflowsToSave.forEach(w => {
       w.workflowStatusId = selectedStatus;
+      w.notes = notes;
+      
     });
 
     setLoading(true);
@@ -129,6 +112,8 @@ export default function CaseFileStatusEditDialog({ selectedCaseFile, onClose }: 
                   size="small"
                   multiline
                   minRows={4}
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
                 />
               </Grid>
             </Grid>

@@ -1,11 +1,6 @@
 import React, { useState } from 'react'
 import {
-    DialogContent, DialogTitle, DialogActions, Button, Grid, TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Dialog,
+    DialogContent, DialogTitle, DialogActions, Button, Grid, TextField,Dialog,
 } from "@mui/material"
 
 import { CaseFile } from '../types/CaseFile'
@@ -45,6 +40,13 @@ export default function SIADSearchDialog({ onClose, selectedCaseFile }: DialogPr
     }
 
     const handleCloseCaseFileStatusEditDialog = () => {
+        setOpenCaseFileStatusEditDialog(false);
+    }
+
+    const handleCloseCaseFileStatusEditDialogFromAction = (refreshCaseFilesList: boolean = false) => {
+        if(refreshCaseFilesList) {
+            onClose(true);
+        }
         setOpenCaseFileStatusEditDialog(false);
     }
     
@@ -123,7 +125,7 @@ export default function SIADSearchDialog({ onClose, selectedCaseFile }: DialogPr
                 maxWidth={"sm"}        
             >
             <CaseFileStatusEditDialog
-                onClose={onClose} // Pass through the parent onClose function to refresh data if needed
+                onClose={handleCloseCaseFileStatusEditDialogFromAction} 
                 selectedCaseFile={selectedCaseFile}
             />
             </Dialog>

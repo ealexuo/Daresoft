@@ -12,4 +12,5 @@ export type CaseFileWorkflow = {
     externalIdentifier: string;
     startDate: Date;
     endDate: Date | null;
+    notes?: string;
 }

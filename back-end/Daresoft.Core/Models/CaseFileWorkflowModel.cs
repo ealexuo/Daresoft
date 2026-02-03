@@ -16,6 +16,7 @@ namespace Daresoft.Core.Models
         public int WorkflowStatusId { get; set; }
         public string WorkflowStatusName { get; set; }
         public string ExternalIdentifier { get; set; }
+        public string? Notes { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public DateTime CreatedDate { get; set; }

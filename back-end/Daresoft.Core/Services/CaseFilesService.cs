@@ -41,5 +41,10 @@ namespace Daresoft.Core.Services
         {
             return await _caseFilesData.UpdateAsync(caseFile, currentUserId);
         }
+
+        public async Task<bool> UpdateWorkflowAsync(CaseFileWorkflowModel workflow, int currentUserId)
+        {
+            return await _caseFilesData.UpdateWorkflowAsync(workflow, currentUserId);
+        }
     }
 }

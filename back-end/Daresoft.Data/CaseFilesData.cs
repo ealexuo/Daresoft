@@ -293,5 +293,73 @@ namespace Daresoft.Data
             return await GetByIdAsync(caseFile.Id);
 
         }
+
+        public async Task<bool> UpdateWorkflowAsync(CaseFileWorkflowModel workflow, int currentUserId)
+        {
+            int caseFileWorkflowHistoryId = 0;
+            
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string insertCaseFileWorkflowHistoryDataSql = @"            
+                INSERT INTO CaseFileWorkflowHistory
+                (
+                    CaseFileWorkflowId                    
+                    ,WorkflowStatusId
+                    ,StartDate
+                    ,EndDate
+                    ,Notes                    
+                    ,CreatedDate
+                    ,CreatedByUserId
+                    ,LastModifiedDate
+                    ,UpdatedByUserId
+                )
+                OUTPUT INSERTED.Id
+                SELECT 
+	                Id AS CaseFileWorkflowId
+	                ,WorkFlowStatusId
+	                ,StartDate
+	                ,GETDATE()
+	                ,Notes
+	                ,GETUTCDATE()
+	                ,@CurrentUserId
+	                ,GETUTCDATE()
+	                ,@CurrentUserId
+                FROM CaseFileWorkflow
+                WHERE Id = @CaseFileWorkflowId";
+
+                string updateCaseFileWorkflowDataSql = @"            
+                UPDATE CaseFileWorkflow 
+                SET 
+	                WorkFlowStatusId = @WorkflowStatusId
+                    ,Notes = @Notes
+	                ,EndDate = GETDATE()
+	                ,UpdatedByUserId = @CurrentUserId
+                WHERE Id = @CaseFileWorkflowId ";
+
+                using (var trx = connection.BeginTransaction())
+                {
+                    // Insert CaseFile workflow history data
+                    caseFileWorkflowHistoryId = connection.QuerySingle<int>(insertCaseFileWorkflowHistoryDataSql, new
+                    {
+                        CaseFileWorkflowId = workflow.Id,
+                        CurrentUserId = currentUserId
+                    }, trx);
+
+                    // Insert CaseFile workflow history data
+                    await connection.ExecuteAsync(updateCaseFileWorkflowDataSql, new
+                    {
+                        CaseFileWorkflowId = workflow.Id,
+                        WorkflowStatusId = workflow.WorkflowStatusId,
+                        Notes = workflow.Notes,
+                        CurrentUserId = currentUserId
+                        
+                    }, trx);
+
+                    trx.Commit();
+                }
+            }
+
+            return true;
+        }
     }
 }

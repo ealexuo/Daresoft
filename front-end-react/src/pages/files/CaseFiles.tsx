@@ -529,6 +529,13 @@ export default function CaseFiles() {
     setOpenSIADSearchDialog(false);
   }
 
+  const handleCloseSIADSearchDialogFromAction = (refreshCaseFilesList: boolean = false) => {
+    if(refreshCaseFilesList) {
+      fetchCaseFiles(currentPage, rowsPerPage, searchText);
+    }
+    setOpenSIADSearchDialog(false);
+  }
+
   // Documents Link dialog
   const handleOpenDocumentsLinkDialog = async (caseFile: any) => {
     const caseFileTemp = caseFilesList.find(c => c.id === (caseFile && caseFile[0] ? caseFile[0] : 0));
@@ -844,7 +851,7 @@ export default function CaseFiles() {
         maxWidth={"lg"}        
       >
         <SIADSearchDialog          
-          onClose = {handleCloseSIADSearchDialog}
+          onClose = {handleCloseSIADSearchDialogFromAction}
           selectedCaseFile = {selectedCaseFile}
         />        
       </Dialog>

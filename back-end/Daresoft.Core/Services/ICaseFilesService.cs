@@ -11,5 +11,6 @@ namespace Daresoft.Core.Services
         Task<CaseFileModel> UpdateAsync(CaseFileModel contact, int currentUserId);
         Task<List<CaseFileModel>> GetAllAsync(int offset, int fetch, string searchText);
         Task<bool> DeleteAsync(int contactId, int currentUserId);
+        Task<bool> UpdateWorkflowAsync(CaseFileWorkflowModel workflow, int currentUserId);
     }
 }
