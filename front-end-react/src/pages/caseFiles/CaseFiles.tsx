@@ -22,24 +22,20 @@ import SIADSearchDialog from '../../dialogs/SIADSearchDialog';
 import { contactsService } from '../../services/settings/contactsService';
 import { Contact } from '../../types/Contact';
 import { AutoCompleteData } from '../../types/AutoCompleteData';
-import EditNoteIcon from '@mui/icons-material/EditNote';
 import { EditNote, NoteAdd, NoteAddOutlined, Work } from '@mui/icons-material';
 import CaseFileNoteAddEditDialog from '../../dialogs/CaseFileNoteAddEditDialog';
 import PreviewIcon from '@mui/icons-material/Preview';
 import { CaseFileWorkflow } from '../../types/CaseFileWorkflow';
-import DocumentViewer from '../../components/DocumentViewer';
-import ViewEntryDocumentDialog from '../../dialogs/ViewDocumentDialog';
 import { documentsService } from '../../services/settings/documentsService';
 import { Document } from '../../types/Document';
 import ViewDocumentDialog from '../../dialogs/ViewDocumentDialog';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import { workflowsService } from '../../services/settings/workflowsService';
 import { Workflow } from '../../types/Workflow';
-import DescriptionIcon from '@mui/icons-material/Description';
+
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { tasksService } from '../../services/settings/tasksService';
-import Workflows from '../settings/Workflows';
 import { WorkflowType } from '../../enums/WorkflowType';
 import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
 

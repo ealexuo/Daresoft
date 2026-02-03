@@ -53,7 +53,8 @@ export default function CustomizedBreadcrumbs() {
               component="a"              
               label={'Home'}
               icon={<HomeIcon fontSize="small" />}                            
-              onClick={() => navigate('/dashboard')}             
+              // onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/caseFiles')}
             />
         {items.map((item, index) => {
           return (
