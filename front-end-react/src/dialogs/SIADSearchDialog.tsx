@@ -1,16 +1,24 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
     DialogContent, DialogTitle, DialogActions, Button, Grid, TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Dialog,
 } from "@mui/material"
 
 import { CaseFile } from '../types/CaseFile'
+import CaseFileStatusEditDialog from './CaseFileStatusEdit'
 
 type DialogProps = {
     onClose: (refresh: boolean) => void,
-    selectedCaseFile: CaseFile | undefined
+    selectedCaseFile: CaseFile
 }
 
 export default function SIADSearchDialog({ onClose, selectedCaseFile }: DialogProps) {
+
+    const [openCaseFileStatusEditDialog, setOpenCaseFileStatusEditDialog] = useState<boolean>(false);  
 
     let MOHSIAD;
     let MOHKEY;
@@ -30,6 +38,14 @@ export default function SIADSearchDialog({ onClose, selectedCaseFile }: DialogPr
 
         LNSSIAD = LNSExternalIdentifier ? LNSExternalIdentifier.split('|')[0] : '';
         LNSKEY = LNSExternalIdentifier ? LNSExternalIdentifier.split('|')[1] : '';
+    }
+
+    const handleOpenCaseFileStatusEditDialog = () => {
+        setOpenCaseFileStatusEditDialog(true);
+    }
+
+    const handleCloseCaseFileStatusEditDialog = () => {
+        setOpenCaseFileStatusEditDialog(false);
     }
     
     return (
@@ -80,7 +96,7 @@ export default function SIADSearchDialog({ onClose, selectedCaseFile }: DialogPr
                             inputProps={{ maxLength: 100 }}  
                             disabled={true}                          
                         />
-                    </Grid>
+                    </Grid>                    
                     <Grid item xs={12}>
                        <iframe
                             title="Consulta SIAD"
@@ -89,14 +105,28 @@ export default function SIADSearchDialog({ onClose, selectedCaseFile }: DialogPr
                             height="500px"
                             style={{ border: 'none' }}
                         />
-                    </Grid>                    
-                </Grid>
+                    </Grid>                                    
+                </Grid>                
             </DialogContent>
-            <DialogActions>
-                <Button variant="outlined" onClick={() => { onClose(false) }}>
+            <DialogActions style={{ justifyContent: "space-between" }}>                
+                <Button variant="contained" onClick={handleOpenCaseFileStatusEditDialog}>
+                    Actualizar estado del expediente
+                </Button>
+                <Button variant="text" onClick={() => { onClose(false) }}>
                     Cerrar
                 </Button>
             </DialogActions>
+
+            <Dialog
+                open={openCaseFileStatusEditDialog}
+                onClose={handleCloseCaseFileStatusEditDialog}
+                maxWidth={"sm"}        
+            >
+            <CaseFileStatusEditDialog
+                onClose={onClose} // Pass through the parent onClose function to refresh data if needed
+                selectedCaseFile={selectedCaseFile}
+            />
+            </Dialog>
         </>
     )
 }

@@ -1,4 +1,5 @@
 import { CaseFile } from "../../types/CaseFile";
+import { CaseFileWorkflow } from "../../types/CaseFileWorkflow";
 import { Contact } from "../../types/Contact";
 import axiosService from "../axios/axiosService";
 
@@ -25,5 +26,8 @@ export const caseFilesService = {
   // },
   delete: async (caseFileId: number): Promise<any> => {
     return await axiosService.delete(BASE_PATH + caseFileId);
+  },
+  editWorkflows: async (workflows: CaseFileWorkflow[]): Promise<any> => {
+    return await axiosService.put(BASE_PATH  + 'Workflows', workflows);
   }
 };

@@ -673,36 +673,39 @@ export default function CaseFiles() {
   }
 
   const handleCloseCaseFileDeleteDialog = () => {    
+    
+    console.log('Closing CaseFile Delete Dialog');
+    
     setOpenCaseFileDeleteDialog(false);
+
   }
 
   const handleCloseCaseFileDeleteDialogFromAction = async (actionResult: boolean = false) => {
-    if(actionResult) { 
+     
+    setLoading(true);
 
-      setLoading(true);
+    try {
 
-      try {
+      if(actionResult && selectedCaseFile) {
+        const response = await caseFilesService.delete(selectedCaseFile.id); 
 
-        if(selectedCaseFile) {
-          const response = await caseFilesService.delete(selectedCaseFile.id); 
-
-          if (response.statusText === "OK") {
-            setLoading(false);
-            fetchCaseFiles(currentPage, rowsPerPage, searchText);
-            enqueueSnackbar('Expediente eliminado.', { variant: "success" });
-          } else {
-            enqueueSnackbar('Ocurrió un error al eliminar el expediente.', { variant: "error" });
-          }
-        }
-        
-      } catch (error: any) {
-        enqueueSnackbar('Ocurrió un error al eliminar el expediente. Detalles: ' + error.message, { variant: "error" });
+        if (response.statusText === "OK") {
+          setLoading(false);
+          fetchCaseFiles(currentPage, rowsPerPage, searchText);
+          enqueueSnackbar('Expediente eliminado.', { variant: "success" });
+        } else {
+          enqueueSnackbar('Ocurrió un error al eliminar el expediente.', { variant: "error" });
+        }  
       }
-      finally {
-        setLoading(false);
-        setOpenCaseFileDeleteDialog(false);
-      }
+
+    } catch (error: any) {
+      enqueueSnackbar('Ocurrió un error al eliminar el expediente. Detalles: ' + error.message, { variant: "error" });
     }
+    finally {
+      setLoading(false);
+      setOpenCaseFileDeleteDialog(false);
+    }
+    
   } 
 
   // Delete task dialog
@@ -886,30 +889,30 @@ export default function CaseFiles() {
       </Dialog>
 
       <Dialog
-          open={openMarkTaskAsCompletedDialog}
-          onClose={handleCloseMarkTaskAsCompletedDialog}
-          maxWidth={"sm"}
-        >
-          <AlertDialog
-            color = {'primary'}
-            title = {'Completar tarea'}
-            message = {'Marcar la tarea como completada ?'}
-            onClose = {handleCloseMarkTaskAsCompletedDialogFromAction}
-          />
-        </Dialog>
+        open={openMarkTaskAsCompletedDialog}
+        onClose={handleCloseMarkTaskAsCompletedDialog}
+        maxWidth={"sm"}
+      >
+        <AlertDialog
+          color = {'primary'}
+          title = {'Completar tarea'}
+          message = {'Marcar la tarea como completada ?'}
+          onClose = {handleCloseMarkTaskAsCompletedDialogFromAction}
+        />
+      </Dialog>
 
-        <Dialog
-          open={openDeleteTaskDialog}
-          onClose={handleCloseDeleteTaskDialog}
-          maxWidth={"sm"}
-        >
-          <AlertDialog
-            color = {'error'}
-            title = {'Eliminar nota'}
-            message = {'Está seguro que desea eliminar la nota seleccionada ?'}
-            onClose = {handleCloseDeleteTaskDialogFromAction}
-          />
-        </Dialog>
+      <Dialog
+        open={openDeleteTaskDialog}
+        onClose={handleCloseDeleteTaskDialog}
+        maxWidth={"sm"}
+      >
+        <AlertDialog
+          color = {'error'}
+          title = {'Eliminar nota'}
+          message = {'Está seguro que desea eliminar la nota seleccionada ?'}
+          onClose = {handleCloseDeleteTaskDialogFromAction}
+        />
+      </Dialog>
           
     </>
   );

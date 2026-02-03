@@ -191,5 +191,41 @@ namespace WebApi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        /* CaeFile Workflow */
+
+        [Authorize]
+        [HttpPut("Workflows")]
+        public async Task<IActionResult> UpdateWorkflows([FromBody] List<CaseFileWorkflowModel> workflows)
+        {
+            try
+            {
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                int currentUserId = 0;
+
+                if (identity != null)
+                {
+                    currentUserId = Int32.Parse(identity.FindFirst("UserId").Value);
+                }
+
+                //var updatedCaseFile = await _caseFilesService.UpdateAsync(caseFile, currentUserId);
+
+                //for (int i = 0; i < caseFile.Documents.Count; i++)
+                //{
+                //    caseFile.Documents[i].CaseFileId = updatedCaseFile.Id;
+                //    caseFile.Documents[i].Path = "/cf" + updatedCaseFile.Id + "/" + caseFile.Documents[i].Path + "/entry-documents/" + caseFile.Documents[i].Name;
+                //    caseFile.Documents[i] = await _documentsService.UpdateAsync(caseFile.Documents[i], currentUserId);
+
+                //    updatedCaseFile.Documents.Add(caseFile.Documents[i]);
+                //}
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                //ex.ToExceptionless().Submit();
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
