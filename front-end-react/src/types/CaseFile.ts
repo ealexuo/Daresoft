@@ -12,9 +12,13 @@ export type CaseFile = {
     supplierContactId: number;
     supplierName: string;
     supplierLastName: string;
+    statusId?: number;
+    statusName?: string;
     isActive: boolean;
     isDeleted: boolean;
-    workflows: CaseFileWorkflow[];
+    workflow: CaseFileWorkflow | null;
+    templateValues: any[]; // TODO: Define a proper type for template values
+    workflows: CaseFileWorkflow[]; // TODO: This seems redundant with the 'workflow' property. Consider refactoring.
     tasks: Task[];
     documents: Document[];
     createdDate?: Date;

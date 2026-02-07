@@ -68,18 +68,17 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
         LNSEntry: string,
         LNSKey: string,   
     }
-    
-    const workflowMOH = selectedCaseFile.workflows ? selectedCaseFile.workflows.find(w => w.workflowId === 2) : undefined;
-    const workflowLNS = selectedCaseFile.workflows ? selectedCaseFile.workflows.find(w => w.workflowId === 1) : undefined; 
-    
-    const MOHExternalIdentifier = workflowMOH ? workflowMOH.externalIdentifier : undefined;
-    const LNSExternalIdentifier = workflowLNS ? workflowLNS.externalIdentifier : undefined;
-
+          
+   
     const entryDocumentMOH = selectedCaseFile.documents ? selectedCaseFile.documents.find(d => d.path.includes('/workflows/1/entry-documents/')) : undefined;
     const entryDocumentLNS = selectedCaseFile.documents ? selectedCaseFile.documents.find(d => d.path.includes('/workflows/2/entry-documents/')) : undefined;
 
-    const [entryDateMOH, setEntryDateMOH] = useState<moment.Moment>(workflowMOH ? moment(workflowMOH.startDate) : moment());
-    const [entryDateLNS, setEntryDateLNS] = useState<moment.Moment>(workflowLNS ? moment(workflowLNS.startDate) : moment());
+    // const [entryDateMOH, setEntryDateMOH] = useState<moment.Moment>(workflowMOH ? moment(workflowMOH.startDate) : moment());
+    // const [entryDateLNS, setEntryDateLNS] = useState<moment.Moment>(workflowLNS ? moment(workflowLNS.startDate) : moment());
+
+    const [entryDateMOH, setEntryDateMOH] = useState<moment.Moment>(moment());
+    const [entryDateLNS, setEntryDateLNS] = useState<moment.Moment>(moment());
+
 
     const [documentLNS, setDocumentLNS] = useState<File | null>(entryDocumentMOH ? new File([], entryDocumentMOH.name) : null);
     const [documentMOH, setDocumentMOH] = useState<File | null>(entryDocumentLNS ? new File([], entryDocumentLNS.name) : null);
@@ -91,10 +90,10 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
         supplierContactId: selectedCaseFile.supplierContactId,
         name: selectedCaseFile.name,
         url: selectedCaseFile.url ?? '',
-        MOHEntry: MOHExternalIdentifier ? MOHExternalIdentifier.split('|')[0] : '',
-        MOHKey: MOHExternalIdentifier ? MOHExternalIdentifier.split('|')[1] : '',
-        LNSEntry: LNSExternalIdentifier ? LNSExternalIdentifier.split('|')[0] : '',
-        LNSKey: LNSExternalIdentifier ? LNSExternalIdentifier.split('|')[1] : '',
+        MOHEntry: '',
+        MOHKey: '',
+        LNSEntry: '',
+        LNSKey: '',
     };    
 
     // Form Schema definition
@@ -134,46 +133,13 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
     // For Submit Logic
     const onSubmit: SubmitHandler<CaseFileFormType> = async (formData) => {
                
-        const selectedSupplierTemp = suppliersList.find(s => s.label === formData.supplierName);
-
-        const workflowMOHTemp: CaseFileWorkflow = {
-            id: workflowMOH ? workflowMOH.id : 0,
-            caseFileId: workflowMOH ? workflowMOH.caseFileId : 0,
-            caseFileName: workflowMOH ? workflowMOH.caseFileName : '',
-            workflowId: workflowMOH ? workflowMOH.workflowId : 1,
-            workflowName: workflowMOH ? workflowMOH.workflowName : '',
-            workflowCode: workflowMOH ? workflowMOH.workflowCode : '',
-            workflowColor: workflowMOH ? workflowMOH.workflowColor : '',
-            workflowStatusId: workflowMOH ? workflowMOH.workflowStatusId : 1,
-            workflowStatusName: workflowMOH ? workflowMOH.workflowStatusName : '',
-            externalIdentifier: formData.MOHEntry + '|' + formData.MOHKey,
-            startDate: entryDateMOH.startOf('day').toDate(),            
-            endDate: null
-        }
-
-        const workflowLNSTemp: CaseFileWorkflow = {
-            id: workflowLNS ? workflowLNS.id : 0,
-            caseFileId: workflowLNS ? workflowLNS.caseFileId : 0,
-            caseFileName: workflowLNS ? workflowLNS.caseFileName : '',
-            workflowId: workflowLNS ? workflowLNS.workflowId : 2,
-            workflowName: workflowLNS ? workflowLNS.workflowName : '',
-            workflowCode: workflowLNS ? workflowLNS.workflowCode : '',
-            workflowColor: workflowLNS ? workflowLNS.workflowColor : '',
-            workflowStatusId: workflowLNS ? workflowLNS.workflowStatusId : 1,
-            workflowStatusName: workflowLNS ? workflowLNS.workflowStatusName : '',
-            externalIdentifier: formData.LNSEntry + '|' + formData.LNSKey,
-            startDate: entryDateLNS.startOf('day').toDate(),            
-            endDate: null
-        }
-        
-        const workflowIdMOH = workflowsList.find(w => w.code.toLowerCase().includes('moh'))?.id;
-        const workflowIdLNS = workflowsList.find(w => w.code.toLowerCase().includes('lns'))?.id;
+        const selectedSupplierTemp = suppliersList.find(s => s.label === formData.supplierName);        
 
         const entryDocumentToSaveMOH: Document = {
             id: entryDocumentMOH ? entryDocumentMOH.id : 0,
             caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
             name: documentMOH ? documentMOH.name : '',
-            path: workflowIdMOH ? workflowIdMOH.toString() : '',
+            path: '', //workflowIdMOH ? workflowIdMOH.toString() : '',
             contentType: documentMOH ? documentMOH.type : '',
             size: documentMOH ? documentMOH.size : 0
         }
@@ -182,10 +148,125 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             id: entryDocumentLNS ? entryDocumentLNS.id : 0,
             caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
             name: documentLNS ? documentLNS.name : '',
-            path: workflowIdLNS ? workflowIdLNS.toString() : '',
+            path: '', //workflowIdLNS ? workflowIdLNS.toString() : '',
             contentType: documentLNS ? documentLNS.type : '',
             size: documentLNS ? documentLNS.size : 0
         }
+
+
+        let templateValues: any[] = [];
+
+        templateValues.push({ 
+            caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
+            workflowTemplateId: 1,
+            workflowTemplateSectionId: 1,
+            sectionOrder: 1,
+            workflowTemplateSectionFieldId: 1,
+            fieldOrder: 1,
+            workflowTemplateSectionName: 'Ministerio de Salud (MOH)',
+            workflowTemplateSectionFieldName: 'Número de entrada SIAD',
+            workflowTemplateSectionFieldDescription: 'Número de entrada SIAD',
+            type: 2,
+            value: formData.MOHEntry
+        });
+
+        templateValues.push({ 
+            caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
+            workflowTemplateId: 1,
+            workflowTemplateSectionId: 1,
+            sectionOrder: 1,
+            workflowTemplateSectionFieldId: 2,
+            fieldOrder: 2,
+            workflowTemplateSectionName: 'Ministerio de Salud (MOH)',
+            workflowTemplateSectionFieldName: 'Llave',
+            workflowTemplateSectionFieldDescription: 'Llave',
+            type: 1,
+            value: formData.MOHKey
+        });
+
+        templateValues.push({ 
+            caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
+            workflowTemplateId: 1,
+            workflowTemplateSectionId: 1,
+            sectionOrder: 1,
+            workflowTemplateSectionFieldId: 3,
+            fieldOrder: 3,
+            workflowTemplateSectionName: 'Ministerio de Salud (MOH)',
+            workflowTemplateSectionFieldName: 'Fecha de ingreso',
+            workflowTemplateSectionFieldDescription: 'Fecha de ingreso',
+            type: 3,
+            value: entryDateLNS.format("YYYY-MM-DD")
+        });
+
+         templateValues.push({ 
+            caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
+            workflowTemplateId: 1,
+            workflowTemplateSectionId: 1,
+            sectionOrder: 1,
+            workflowTemplateSectionFieldId: 4,
+            fieldOrder: 4,
+            workflowTemplateSectionName: 'Ministerio de Salud (MOH)',
+            workflowTemplateSectionFieldName: 'Documento de ingreso',
+            workflowTemplateSectionFieldDescription: 'Documento de ingreso',
+            type: 3,
+            value: documentMOH ? documentMOH.name : ''
+        });
+
+        templateValues.push({ 
+            caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
+            workflowTemplateId: 1,
+            workflowTemplateSectionId: 2,
+            sectionOrder: 2,
+            workflowTemplateSectionFieldId: 5,
+            fieldOrder: 1,
+            workflowTemplateSectionName: 'Laboratorio Nacional de Salud (LNS)',
+            workflowTemplateSectionFieldName: 'Número de entrada SIAD',
+            workflowTemplateSectionFieldDescription: 'Número de entrada SIAD',
+            type: 2,
+            value: formData.LNSEntry
+        });
+
+        templateValues.push({ 
+            caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
+            workflowTemplateId: 1,
+            workflowTemplateSectionId: 2,
+            sectionOrder: 2,
+            workflowTemplateSectionFieldId: 6,
+            fieldOrder: 2,
+            workflowTemplateSectionName: 'Laboratorio Nacional de Salud (LNS)',
+            workflowTemplateSectionFieldName: 'Llave',
+            workflowTemplateSectionFieldDescription: 'Llave',
+            type: 2,
+            value: formData.LNSKey
+        });
+
+        templateValues.push({ 
+            caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
+            workflowTemplateId: 1,
+            workflowTemplateSectionId: 2,
+            sectionOrder: 2,
+            workflowTemplateSectionFieldId: 7,
+            fieldOrder: 3,
+            workflowTemplateSectionName: 'Laboratorio Nacional de Salud (LNS)',
+            workflowTemplateSectionFieldName: 'Fecha de ingreso',
+            workflowTemplateSectionFieldDescription: 'Fecha de ingreso',
+            type: 3,
+            value: entryDateLNS.format("YYYY-MM-DD")
+        });
+
+        templateValues.push({ 
+            caseFileId: selectedCaseFile ? selectedCaseFile.id : 0,
+            workflowTemplateId: 1,
+            workflowTemplateSectionId: 2,
+            sectionOrder: 2,
+            workflowTemplateSectionFieldId: 8,
+            fieldOrder: 4,
+            workflowTemplateSectionName: 'Laboratorio Nacional de Salud (LNS)',
+            workflowTemplateSectionFieldName: 'Documento de ingreso',
+            workflowTemplateSectionFieldDescription: 'Documento de ingreso',
+            type: 3,
+            value: documentLNS ? documentLNS.name : ''
+        });
 
         const caseFileToSave: CaseFile = {
             id: selectedCaseFile ? selectedCaseFile.id : 0,
@@ -193,26 +274,30 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             name: formData.name,
             url: formData.url,
             description: selectedCaseFile ? selectedCaseFile.description : '',
-
             supplierContactId: selectedSupplierTemp ? selectedSupplierTemp.id : 0,
             supplierName: '',
             supplierLastName: '',
             isActive: true,
             isDeleted: false,
+            workflow: null,
             workflows: [],
+            templateValues: templateValues,
             tasks: [],
             documents: [],            
             totalCount: 0
-        }
+        };
 
-        // Include workflows
-        if(enableSectionMOH) {
-            caseFileToSave.workflows.push(workflowMOHTemp);
-        }
+        console.log('caseFileToSave', caseFileToSave);
 
-        if(enableSectionLNS) {
-            caseFileToSave.workflows.push(workflowLNSTemp);
-        }
+
+        // // Include workflows
+        // if(enableSectionMOH) {
+        //     caseFileToSave.workflows.push(workflowMOHTemp);
+        // }
+
+        // if(enableSectionLNS) {
+        //     caseFileToSave.workflows.push(workflowLNSTemp);
+        // }
 
         // Include documents
         if(enableSectionMOH && documentMOH && documentMOH.size > 0) {
@@ -231,22 +316,22 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                 if(caseFileResponse.statusText === 'OK') {
                     
                     // upload documents
-                    caseFileResponse.data.documents.forEach(async (d: Document) => {
+                    // caseFileResponse.data.documents.forEach(async (d: Document) => {
 
-                        let uploadUrl = await documentsService.getUploadUrl(d.id);
+                    //     let uploadUrl = await documentsService.getUploadUrl(d.id);
 
-                        try{
-                            if(d.path.includes('/workflows/'+workflowIdMOH) && documentMOH && documentMOH.size > 0){
-                                documentsService.upload(documentMOH, uploadUrl.data);
-                            }
-                            else if(d.path.includes('/workflows/'+workflowIdLNS) && documentLNS && documentLNS.size > 0){
-                                documentsService.upload(documentLNS, uploadUrl.data);
-                            }
-                        }
-                        catch(error){
-                            console.error('Error al cargar el archivo:', error);
-                        }
-                    });
+                    //     try{
+                    //         if(d.path.includes('/workflows/'+workflowIdMOH) && documentMOH && documentMOH.size > 0){
+                    //             documentsService.upload(documentMOH, uploadUrl.data);
+                    //         }
+                    //         else if(d.path.includes('/workflows/'+workflowIdLNS) && documentLNS && documentLNS.size > 0){
+                    //             documentsService.upload(documentLNS, uploadUrl.data);
+                    //         }
+                    //     }
+                    //     catch(error){
+                    //         console.error('Error al cargar el archivo:', error);
+                    //     }
+                    // });
 
                     enqueueSnackbar("Expediente creado.", { variant: "success" });                    
                 }
@@ -259,23 +344,23 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
                 
                 if(caseFileResponse.statusText === 'OK') {
                     
-                    // upload documents
-                    caseFileResponse.data.documents.forEach(async (d: Document) => {
+                    // // upload documents
+                    // caseFileResponse.data.documents.forEach(async (d: Document) => {
 
-                        let uploadUrl = await documentsService.getUploadUrl(d.id);
+                    //     let uploadUrl = await documentsService.getUploadUrl(d.id);
 
-                        try{
-                            if(d.path.includes('wf'+workflowIdMOH) && documentMOH && documentMOH.size > 0){
-                                documentsService.upload(documentMOH, uploadUrl.data);
-                            }
-                            else if(d.path.includes('wf'+workflowIdLNS) && documentLNS && documentLNS.size > 0){
-                                documentsService.upload(documentLNS, uploadUrl.data);
-                            }
-                        }
-                        catch(error){
-                            console.error('Error al gargar el archivo:', error);
-                        }
-                    });
+                    //     try{
+                    //         if(d.path.includes('wf'+workflowIdMOH) && documentMOH && documentMOH.size > 0){
+                    //             documentsService.upload(documentMOH, uploadUrl.data);
+                    //         }
+                    //         else if(d.path.includes('wf'+workflowIdLNS) && documentLNS && documentLNS.size > 0){
+                    //             documentsService.upload(documentLNS, uploadUrl.data);
+                    //         }
+                    //     }
+                    //     catch(error){
+                    //         console.error('Error al gargar el archivo:', error);
+                    //     }
+                    // });
 
                     enqueueSnackbar("Expediente actualizado.", { variant: "success" });
                 }

@@ -406,13 +406,13 @@ export default function CaseFiles() {
             item.id,
             item.caseNumber && item.caseNumber !== '' ? item.caseNumber : caseNumberTemp,
             item.name,
-            workflowMOH ? workflowMOH.workflowStatusName : workflowLNS ? workflowLNS.workflowStatusName : 'Sin estado',
-            generateWorkflowListContent(item.workflows, item.documents),
-            generateTasksCountContent(item.tasks),
-            generateTasksDueDateByWorkflowContent(item.tasks),
+            item.statusName ? item.statusName : 'Sin estado',
+            <></>, //generateWorkflowListContent(item.workflows, item.documents),
+            <></>, //generateTasksCountContent(item.tasks),
+            <></>, //generateTasksDueDateByWorkflowContent(item.tasks),
             
             // Colapsable Content at the end of the array
-            generateCollapsableContent(item.tasks), 
+            <></>, //generateCollapsableContent(item.tasks), 
           ]);
         });
         

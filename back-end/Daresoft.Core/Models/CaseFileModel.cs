@@ -14,7 +14,10 @@ namespace Daresoft.Core.Models
         public int? SupplierContactId { get; set; }
         public string SupplierName { get; set; }
         public string SupplierLastName { get; set; }
-        public List<CaseFileWorkflowModel> Workflows { get; set; }
+        public int? StatusId { get; set; }
+        public string? StatusName { get; set; }
+        public CaseFileWorkflowModel? Workflow { get; set; }
+        public List<WorkflowTemplateValuesModel>? WorkflowTemplateValues { get; set; }
         public List<TaskModel> Tasks { get; set; }
         public List<DocumentModel> Documents { get; set; }
         public bool IsActive { get; set; }

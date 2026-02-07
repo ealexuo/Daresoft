@@ -66,8 +66,6 @@ namespace Daresoft.Data
                     ,WorkflowId
                     ,WorkflowStatusId
                     ,StartDate
-                    ,EndDate
-                    ,ExternalIdentifier                    
                     ,CreatedDate
                     ,CreatedByUserId
                     ,LastModifiedDate
@@ -78,14 +76,36 @@ namespace Daresoft.Data
                     @CaseFileId
                     ,@WorkflowId
                     ,@WorkflowStatusId
-                    ,@StartDate
-                    ,@EndDate
-                    ,@ExternalIdentifier
+                    ,GETUTCDATE()
                     ,GETUTCDATE()
                     ,@CreatedByUserId
                     ,GETUTCDATE()
                     ,@UpdatedByUserId
                 )";
+
+                string insertTemplateValue = @"
+                INSERT INTO WorkflowTemplateSectionFieldValue
+                (
+                    CaseFileId, WorkflowTemplateId, WorkflowTemplateSectionId, SectionOrder,
+	                WorkflowTemplateSectionFieldId, FieldOrder, WorkflowTemplateSectionName, 
+	                WorkflowTemplateSectionFieldName, WorkflowTemplateSectionFieldDescription, Type, 
+	                Value
+                )
+                OUTPUT INSERTED.Id
+                VALUES(
+                    @CaseFileId
+                    ,@WorkflowTemplateId
+                    ,@WorkflowTemplateSectionId
+                    ,@SectionOrder
+                    ,@WorkflowTemplateSectionFieldId
+                    ,@FieldOrder
+                    ,@WorkflowTemplateSectionName
+                    ,@WorkflowTemplateSectionFieldName
+                    ,@WorkflowTemplateSectionFieldDescription
+                    ,@Type
+                    ,@Value
+                )
+                ";
 
                 using (var trx = connection.BeginTransaction())
                 {
@@ -104,20 +124,35 @@ namespace Daresoft.Data
                     }, trx);
 
                     // Insert casefileworkflow data
-                    foreach(CaseFileWorkflowModel wf in caseFile.Workflows)
+                    caseFileWorkflowId = connection.QuerySingle<int>(insertCaseFileWorkflowDataSql, new
                     {
-                        caseFileWorkflowId = connection.QuerySingle<int>(insertCaseFileWorkflowDataSql, new
+                        caseFileId,
+                        WorkflowId = 1,
+                        WorkflowStatusId = 1,
+                        CreatedByUserId = currentUserId,
+                        UpdatedByUserId = currentUserId
+                    }, trx);
+
+                    if(caseFile.WorkflowTemplateValues != null)
+                    {
+                        foreach (var value in caseFile.WorkflowTemplateValues)
                         {
-                            caseFileId,
-                            wf.WorkflowId,
-                            wf.WorkflowStatusId,
-                            wf.StartDate, 
-                            wf.EndDate,
-                            wf.ExternalIdentifier,
-                            CreatedByUserId = currentUserId,
-                            UpdatedByUserId = currentUserId
-                        }, trx);
-                    }
+                            connection.QuerySingle<int>(insertTemplateValue, new
+                            {
+                                caseFileId,
+                                value.WorkflowTemplateId,
+                                value.WorkflowTemplateSectionId,
+                                value.SectionOrder,
+                                value.WorkflowTemplateSectionFieldId,
+                                value.FieldOrder,
+                                value.WorkflowTemplateSectionName,
+                                value.WorkflowTemplateSectionFieldName,
+                                value.WorkflowTemplateSectionFieldDescription,
+                                value.Type,
+                                value.Value
+                            }, trx);
+                        }
+                    }                   
 
                     trx.Commit();
                 }
@@ -167,10 +202,14 @@ namespace Daresoft.Data
 	                ,co.Id SupplierContactId
 	                ,co.Name AS SupplierName
 	                ,co.LastName AS SupplierLastName
+                    ,wfs.Id AS StatusId
+                    ,wfs.Name AS StatusName
                     ,cf.CreatedDate
                     ,COUNT(*) OVER () TotalCount
                 FROM CaseFile cf 
                 JOIN Contact co ON co.Id = cf.SupplierContactId
+                LEFT JOIN CaseFileWorkflow cfwf ON cf.Id = cfwf.CaseFileId
+                LEFT JOIN WorkflowStatus wfs ON cfwf.WorkFlowStatusId = wfs.Id
                 WHERE @SearchText = '*'
                     OR cf.Name LIKE '%' + @SearchText + '%'
                     OR CONCAT(co.Name,' ', co.LastName) LIKE '%' + @SearchText + '%'
@@ -211,7 +250,7 @@ namespace Daresoft.Data
                     ,cf.CreatedDate
                 FROM CaseFile cf 
                 JOIN Contact co ON co.Id = cf.SupplierContactId                
-                WHERE cf.Id = @CaseFileId";                
+                WHERE cf.Id = @CaseFileId";
 
                 var result = await connection.QueryAsync<CaseFileModel>(sqlQuery, new
                 {
@@ -219,78 +258,81 @@ namespace Daresoft.Data
                 });
 
                 var createdCaseFile = result.FirstOrDefault();
-                createdCaseFile.Documents = new List<DocumentModel>();
-                createdCaseFile.Workflows = new List<CaseFileWorkflowModel>();
+                createdCaseFile.Documents = new List<DocumentModel>();                
                 createdCaseFile.Tasks = new List<TaskModel>();
 
                 return result.FirstOrDefault();
             }
+
+            throw new NotImplementedException();
         }
 
         public async Task<CaseFileModel> UpdateAsync(CaseFileModel caseFile, int currentUserId)
         {
-            int caseFileWorkflowId = 0;
+            //int caseFileWorkflowId = 0;
 
-            using (var connection = await connectionProvider.OpenAsync())
-            {
-                string updateCaseFileDataSql = @"            
-                UPDATE CaseFile
-                SET CaseNumber = @CaseNumber
-                    ,Name = @Name
-                    ,Description = @Description
-                    ,Url = @Url
-                    ,SupplierContactId = @SupplierContactId
-                    ,IsActive = @IsActive
-                    ,IsDeleted = @IsDeleted
-                    ,LastModifiedDate = GETUTCDATE()
-                    ,UpdatedByUserId = @UpdatedByUserId
-                WHERE Id = @Id
-                ";
+            //using (var connection = await connectionProvider.OpenAsync())
+            //{
+            //    string updateCaseFileDataSql = @"            
+            //    UPDATE CaseFile
+            //    SET CaseNumber = @CaseNumber
+            //        ,Name = @Name
+            //        ,Description = @Description
+            //        ,Url = @Url
+            //        ,SupplierContactId = @SupplierContactId
+            //        ,IsActive = @IsActive
+            //        ,IsDeleted = @IsDeleted
+            //        ,LastModifiedDate = GETUTCDATE()
+            //        ,UpdatedByUserId = @UpdatedByUserId
+            //    WHERE Id = @Id
+            //    ";
 
-                string updateCaseFileWorkflowDataSql = @"            
-                UPDATE CaseFileWorkflow                
-                SET StartDate = @StartDate
-                    ,EndDate = @EndDate
-                    ,ExternalIdentifier = @ExternalIdentifier                    
-                    ,LastModifiedDate = GETUTCDATE()
-                    ,UpdatedByUserId = @UpdatedByUserId
-                WHERE Id = @Id
-                ";
+            //    string updateCaseFileWorkflowDataSql = @"            
+            //    UPDATE CaseFileWorkflow                
+            //    SET StartDate = @StartDate
+            //        ,EndDate = @EndDate
+            //        ,ExternalIdentifier = @ExternalIdentifier                    
+            //        ,LastModifiedDate = GETUTCDATE()
+            //        ,UpdatedByUserId = @UpdatedByUserId
+            //    WHERE Id = @Id
+            //    ";
 
-                using (var trx = connection.BeginTransaction())
-                {
-                    // Update casefile data
-                    await connection.ExecuteAsync(updateCaseFileDataSql, new
-                    {
-                        caseFile.Id,
-                        caseFile.CaseNumber,
-                        caseFile.Name,
-                        caseFile.Description,
-                        caseFile.Url,
-                        caseFile.SupplierContactId,
-                        caseFile.IsActive,
-                        caseFile.IsDeleted,                        
-                        UpdatedByUserId = currentUserId
-                    }, trx);
+            //    using (var trx = connection.BeginTransaction())
+            //    {
+            //        // Update casefile data
+            //        await connection.ExecuteAsync(updateCaseFileDataSql, new
+            //        {
+            //            caseFile.Id,
+            //            caseFile.CaseNumber,
+            //            caseFile.Name,
+            //            caseFile.Description,
+            //            caseFile.Url,
+            //            caseFile.SupplierContactId,
+            //            caseFile.IsActive,
+            //            caseFile.IsDeleted,                        
+            //            UpdatedByUserId = currentUserId
+            //        }, trx);
 
-                    // Insert casefileworkflow data
-                    foreach (CaseFileWorkflowModel wf in caseFile.Workflows)
-                    {
-                        caseFileWorkflowId = await connection.ExecuteAsync(updateCaseFileWorkflowDataSql, new
-                        {
-                            wf.Id,
-                            wf.StartDate,
-                            wf.EndDate,
-                            wf.ExternalIdentifier,
-                            UpdatedByUserId = currentUserId
-                        }, trx);
-                    }
+            //        // Insert casefileworkflow data
+            //        foreach (CaseFileWorkflowModel wf in caseFile.Workflows)
+            //        {
+            //            caseFileWorkflowId = await connection.ExecuteAsync(updateCaseFileWorkflowDataSql, new
+            //            {
+            //                wf.Id,
+            //                wf.StartDate,
+            //                wf.EndDate,
+            //                wf.ExternalIdentifier,
+            //                UpdatedByUserId = currentUserId
+            //            }, trx);
+            //        }
 
-                    trx.Commit();
-                }
-            }
+            //        trx.Commit();
+            //    }
+            //}
 
-            return await GetByIdAsync(caseFile.Id);
+            //return await GetByIdAsync(caseFile.Id);
+
+            throw new NotImplementedException();
 
         }
 
@@ -360,6 +402,41 @@ namespace Daresoft.Data
             }
 
             return true;
+        }
+
+        public async Task<List<WorkflowTemplateValuesModel>> GetTemplateValuesAsync(int caseFileId)
+        {
+            SqlMapper.AddTypeMap(typeof(bool), DbType.Byte);
+
+            using (var connection = await connectionProvider.OpenAsync())
+            {
+                string sqlQuery = @"
+                SELECT 
+                    val.Id
+	                ,val.CaseFileId
+	                ,val.WorkflowTemplateId
+	                ,val.WorkflowTemplateSectionId
+	                ,val.SectionOrder
+	                ,val.WorkflowTemplateSectionFieldId
+	                ,val.FieldOrder
+	                ,val.WorkflowTemplateSectionFieldName
+	                ,val.WorkflowTemplateSectionFieldName
+	                ,val.WorkflowTemplateSectionFieldDescription
+	                ,val.Type 
+	                ,val.Value
+                FROM WorkflowTemplateSectionFieldValue val
+                WHERE CaseFileId = @CaseFileId
+                ORDER BY val.SectionOrder, val.FieldOrder";
+
+                var result = await connection.QueryAsync<WorkflowTemplateValuesModel>(sqlQuery, new
+                {
+                    CaseFileId = caseFileId
+                });
+
+                var resultado = result.ToList();
+
+                return resultado;
+            }
         }
     }
 }

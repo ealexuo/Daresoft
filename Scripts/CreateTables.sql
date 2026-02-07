@@ -174,7 +174,7 @@ CREATE TABLE dbo.CaseFileWorkflow
 	WorkFlowStatusId INT NOT NULL,
     StartDate DATE NOT NULL,
     EndDate DATE NULL,
-    ExternalIdentifier NVARCHAR(100) NULL,
+	Notes NVARCHAR(MAX) NULL,
 	CreatedDate DATETIME NOT NULL,
 	LastModifiedDate DATETIME NOT NULL,	
 	CreatedByUserId INT NOT NULL,
@@ -193,25 +193,25 @@ CREATE TABLE dbo.CaseFileWorkflow
 );
 
 /* CaseFile Workflow History */
---CREATE TABLE dbo.CaseFileWorkflowHistory
---(
---    Id INT IDENTITY(1,1) PRIMARY KEY,
---    CaseFileWorkflowId INT NOT NULL,    
---	WorkFlowStatusId INT NOT NULL,
---    StartDate DATETIME NOT NULL,
---    EndDate DATETIME NULL,
---	Notes NVARCHAR(MAX),
---	CreatedDate DATETIME NOT NULL,
---	LastModifiedDate DATETIME NOT NULL,	
---	CreatedByUserId INT NOT NULL,
---	UpdatedByUserId INT NOT NULL
+CREATE TABLE dbo.CaseFileWorkflowHistory
+(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    CaseFileWorkflowId INT NOT NULL,    
+	WorkFlowStatusId INT NOT NULL,
+    StartDate DATETIME NOT NULL,
+    EndDate DATETIME NULL,
+	Notes NVARCHAR(MAX) NULL,
+	CreatedDate DATETIME NOT NULL,
+	LastModifiedDate DATETIME NOT NULL,	
+	CreatedByUserId INT NOT NULL,
+	UpdatedByUserId INT NOT NULL
 
---	CONSTRAINT FK_CaseFileWorkflowHistory_CaseFileWorkflow
---        FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id),
+	CONSTRAINT FK_CaseFileWorkflowHistory_CaseFileWorkflow
+        FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id),
 
---	CONSTRAINT FK_CaseFileWorkflow_WorkflowStatus
---        FOREIGN KEY (WorkflowStatusId) REFERENCES dbo.WorkflowStatus(Id)
---);
+	CONSTRAINT FK_CaseFileWorkflowHistory_WorkflowStatus
+        FOREIGN KEY (WorkflowStatusId) REFERENCES dbo.WorkflowStatus(Id)
+);
 
 
 --/* CaseFile Progress */
@@ -320,3 +320,155 @@ CREATE TABLE dbo.Document
         FOREIGN KEY (CaseFileId) REFERENCES dbo.CaseFile(Id)
 );
 
+/* Workflow Template Section Fields */
+CREATE TABLE WorkflowFieldType
+(
+    Id INT IDENTITY PRIMARY KEY,    
+    Name NVARCHAR(255) NOT NULL,    
+);
+
+INSERT INTO WorkflowFieldType (Name)
+VALUES('Text'), ('Number'), ('Date'), ('File');
+
+
+/* Workflow Templates */
+CREATE TABLE WorkflowTemplate
+(
+    Id INT IDENTITY PRIMARY KEY,
+	WorkflowId INT NOT NULL REFERENCES Workflow(Id),
+    Name NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX) NOT NULL
+);
+
+INSERT INTO WorkflowTemplate (Name, Description)
+VALUES('Proceso Farmaceuticos', 'Proceso Farmaceuticos');
+
+/* Workflow Template Sections */
+CREATE TABLE WorkflowTemplateSection
+(
+    Id INT IDENTITY PRIMARY KEY,
+    WorkflowTemplateId INT NOT NULL REFERENCES WorkflowTemplate(Id),
+    Name NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX) NOT NULL,
+	[Order] INT NOT NULL
+);
+
+INSERT INTO WorkflowTemplateSection (WorkflowTemplateId, Name, Description, [Order])
+VALUES
+(1, 'Ministerio de Salud (MOH)', 'Ministerio de Salud (MOH)', 1),
+(1, 'Laboratorio Nacional de Salud (LNS)', 'Laboratorio Nacional de Salud (LNS)', 2);
+
+/* Workflow Template Section Fields */
+CREATE TABLE WorkflowTemplateSectionField
+(
+    Id INT IDENTITY PRIMARY KEY,
+    WorkflowTemplateSectionId INT NOT NULL REFERENCES WorkflowTemplateSection(Id),
+    Name NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX) NOT NULL,
+	Type INT NOT NULL REFERENCES WorkflowFieldType(Id),
+	[Order] INT NOT NULL
+);
+
+INSERT INTO WorkflowTemplateSectionField (WorkflowTemplateSectionId, Name, Description, Type, [Order])
+VALUES
+(1, 'Número de entrada SIAD', 'Número de entrada SIAD', 2, 1), -- Number
+(1, 'Llave', 'Llave', 1, 2), -- Text
+(1, 'Fecha de ingreso', 'Fecha de ingreso', 3, 3), -- Date
+(1, 'Documento de ingreso', 'Document de ingreso', 3, 4), -- File
+(2, 'Número de entrada SIAD', 'Número de entrada SIAD', 2, 1), -- Number
+(2, 'Llave', 'Llave', 1, 2), -- Text
+(2, 'Fecha de ingreso', 'Fecha de ingreso', 3, 3), -- Date
+(2, 'Documento de ingreso', 'Document de ingreso', 3, 4); -- File
+
+select * from WorkflowTemplateSectionField
+
+-- drop table WorkflowTemplateSectionField
+
+/* Workflow Template Section Fields */
+CREATE TABLE WorkflowTemplateSectionFieldValue
+(
+    Id INT IDENTITY PRIMARY KEY,
+	CaseFileId INT NOT NULL REFERENCES CaseFile(Id),
+	WorkflowTemplateId INT NOT NULL REFERENCES WorkflowTemplate(Id),
+    WorkflowTemplateSectionId INT NOT NULL REFERENCES WorkflowTemplateSection(Id),
+	SectionOrder INT NOT NULL,
+	WorkflowTemplateSectionFieldId INT NOT NULL REFERENCES WorkflowTemplateSectionField(Id),
+	FieldOrder INT NOT NULL,
+	WorkflowTemplateSectionName NVARCHAR(255) NOT NULL,
+	WorkflowTemplateSectionFieldName NVARCHAR(255) NOT NULL,
+	WorkflowTemplateSectionFieldDescription NVARCHAR(MAX) NULL,
+	Type INT NOT NULL REFERENCES WorkflowFieldType(Id),	
+	Value NVARCHAR(MAX) NULL
+);
+
+-- drop table WorkflowTemplateSectionFieldValue
+select * from WorkflowTemplateSectionFieldValue
+
+
+begin tran
+INSERT INTO WorkflowTemplateSectionFieldValue 
+(
+	CaseFileId, WorkflowTemplateId, WorkflowTemplateSectionId, 
+	WorkflowTemplateSectionFieldId, [Order], WorkflowTemplateSectionName, 
+	WorkflowTemplateSectionFieldName, WorkflowTemplateSectionFieldDescription, Type, 
+	Value
+)
+SELECT 
+	cf.Id AS CaseFileId
+	,wftp.Id AS WorkflowTemplateId
+	,wftps.Id AS WorkflowTemplateSectionId
+	,wftpsf.Id AS WorkflowTemplateSectionFieldId
+	,wftpsf.[Order]
+	,wftps.Name AS WorkflowTemplateSectionName
+	,wftpsf.Name AS WorkflowTemplateSectionFieldName
+	,wftpsf.Description AS WorkflowTemplateSectionFieldDescription
+	,wftpsf.Type
+	,'' -- here goes the value
+FROM CaseFile cf
+JOIN CaseFileWorkflow cfwf ON cf.Id = cfwf.CaseFileId
+JOIN WorkflowTemplate wftp ON cfwf.WorkflowId = wftp.WorkflowId
+JOIN WorkflowTemplateSection wftps ON wftps.WorkflowTemplateId = wftp.Id
+JOIN WorkflowTemplateSectionField wftpsf ON wftpsf.WorkflowTemplateSectionId = wftps.Id
+ORDER BY wftps.[Order], wftpsf.[Order]
+rollback
+
+
+
+
+
+
+select * from Workflow
+UPDATE Workflow set Name = 'Proceso Farmaceuticos', Code = 'PF', Description = 'Proceso Farmaceuticos'
+
+
+select * from WorkflowStatus
+
+/*
+delete from CaseFileWorkflowHistory
+delete from Document
+delete from CaseFileWorkflow
+delete from CaseFile
+*/
+
+select * from CaseFile
+select * from CaseFileWorkflow
+select * from WorkflowTemplateSectionFieldValue
+
+select * from WorkflowTemplate
+
+
+SELECT 
+    val.Id
+	,val.CaseFileId
+	,val.WorkflowTemplateId
+	,val.WorkflowTemplateSectionId
+	,val.WorkflowTemplateSectionFieldId
+	,val.[Order]
+	,val.WorkflowTemplateSectionFieldName
+	,val.WorkflowTemplateSectionFieldName
+	,val.WorkflowTemplateSectionFieldDescription
+	,val.Type 
+	,val.Value
+FROM WorkflowTemplateSectionFieldValue val
+WHERE CaseFileId = 14
+ORDER BY val.WorkflowTemplateSectionId, val.WorkflowTemplateSectionFieldId

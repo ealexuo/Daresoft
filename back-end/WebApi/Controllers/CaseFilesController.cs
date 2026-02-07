@@ -44,18 +44,18 @@ namespace WebApi.Controllers
         {
             try
             {
-                List<CaseFileModel> caseFilesList = await _caseFilesService.GetAllAsync(offset, fetch, searchText);
+                List<CaseFileModel> caseFilesList = await _caseFilesService.GetAllAsync(offset, fetch, searchText);                               
                 List<int> caseFileIds = caseFilesList.Select(cf => cf.Id).ToList();
                 List<TaskModel> tasksList = await _tasksService.GetByCaseFileIdsAsync(caseFileIds);
                 List<DocumentModel> documentsList = await _documentsService.GetByCaseFileIdsAsync(caseFileIds);
                 List<CaseFileWorkflowModel> workflowsList = await _workflowsService.GetByCaseFileIdsAsync(caseFileIds);
 
                 foreach (var caseFile in caseFilesList)
-                {
-                    caseFile.Documents = documentsList.Where(d => d.CaseFileId == caseFile.Id).ToList();
-                    caseFile.Workflows = workflowsList.Where(w => w.CaseFileId == caseFile.Id).ToList();
+                {   
+                    caseFile.Documents = documentsList.Where(d => d.CaseFileId == caseFile.Id).ToList();                    
                     caseFile.Tasks = tasksList.Where(t => t.CaseFileId == caseFile.Id).ToList();
-                    
+                    caseFile.WorkflowTemplateValues = await _caseFilesService.GetTemplateValuesAsync(caseFile.Id);
+                                        
                     foreach(var task in caseFile.Tasks)
                     {
                         var document = caseFile.Documents.Where(d => d.Path.Contains("/tasks/" + task.Id)).FirstOrDefault();

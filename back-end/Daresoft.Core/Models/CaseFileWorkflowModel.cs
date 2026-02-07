@@ -15,8 +15,9 @@ namespace Daresoft.Core.Models
         public string? WorkflowColor { get; set; }
         public int WorkflowStatusId { get; set; }
         public string WorkflowStatusName { get; set; }
-        public string ExternalIdentifier { get; set; }
+        public string ExternalIdentifier { get; set; } /* todo remove this property */
         public string? Notes { get; set; }
+        public WorkflowTemplateModel? WorkflowTemplate { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public DateTime CreatedDate { get; set; }
