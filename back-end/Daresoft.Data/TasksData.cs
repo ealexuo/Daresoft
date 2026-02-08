@@ -36,6 +36,7 @@ namespace Daresoft.Data
                     ,Name
                     ,Description
                     ,AssignedToUserId
+                    ,TaskOwnerName
                     ,Priority
                     ,EntryDate
                     ,DueDate
@@ -54,6 +55,7 @@ namespace Daresoft.Data
                     ,@Name
                     ,@Description
                     ,@AssignedToUserId
+                    ,@TaskOwnerName
                     ,@Priority
                     ,@EntryDate
                     ,@DueDate
@@ -76,6 +78,7 @@ namespace Daresoft.Data
                         task.Name,
                         task.Description,
                         task.AssignedToUserId,
+                        task.TaskOwnerName,
                         task.Priority,
                         task.EntryDate,
                         task.DueDate,
@@ -125,6 +128,7 @@ namespace Daresoft.Data
 	                ,Name
 	                ,Description
 	                ,AssignedToUserId 
+                    ,TaskOwnerName
 	                ,Priority
 	                ,DueDate
                     ,EntryDate
@@ -170,6 +174,7 @@ namespace Daresoft.Data
 	                ,ta.Name
 	                ,ta.Description
 	                ,ta.AssignedToUserId 
+                    ,ta.TaskOwnerName
 	                ,ta.Priority
                     ,ta.EntryDate
 	                ,ta.DueDate
@@ -211,7 +216,8 @@ namespace Daresoft.Data
                     ,WorkflowId
 	                ,Name
 	                ,Description
-	                ,AssignedToUserId 
+	                ,AssignedToUserId
+                    ,TaskOwnerName
 	                ,Priority
                     ,EntryDate
 	                ,DueDate
@@ -243,6 +249,7 @@ namespace Daresoft.Data
                     ,Name = @Name
                     ,Description = @Description
                     ,AssignedToUserId = @AssignedToUserId
+                    ,TaskOwnerName = @TaskOwnerName
                     ,Priority = @Priority
                     ,EntryDate = @EntryDate
                     ,DueDate = @DueDate
@@ -264,6 +271,7 @@ namespace Daresoft.Data
                         task.Name,
                         task.Description,
                         task.AssignedToUserId,
+                        task.TaskOwnerName,
                         task.Priority,
                         task.EntryDate,
                         task.DueDate,

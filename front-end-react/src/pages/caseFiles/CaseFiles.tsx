@@ -800,6 +800,7 @@ export default function CaseFiles() {
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
               onSearchTextChange={handleSearchTextChange}
+              searchTextValue={searchText}
               onAddActionClick={handleOpenCaseFileAddEditDialog}
               itemActionList={actionList}
               isCollapsible={true}

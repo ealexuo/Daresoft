@@ -15,6 +15,7 @@ namespace Daresoft.Core.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public int? AssignedToUserId { get; set; }
+        public string? TaskOwnerName { get; set; }
         public int Priority { get; set; }
         public DateTime EntryDate { get; set; }
         public DateTime DueDate { get; set; }
