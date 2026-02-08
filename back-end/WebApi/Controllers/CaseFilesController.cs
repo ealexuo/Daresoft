@@ -58,10 +58,7 @@ namespace WebApi.Controllers
                     
                     foreach(var task in caseFile.Tasks)
                     {
-                        var document = caseFile.Documents.Where(d => d.Path.Contains("/tasks/" + task.Id)).FirstOrDefault();
-                        
-                        if(document != null)
-                            task.Documents.Add(document);
+                        task.Documents = caseFile.Documents.Where(d => d.Path.Contains("/tasks/" + task.Id)).ToList();
                     }
                 }
 

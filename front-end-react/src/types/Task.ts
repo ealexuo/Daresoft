@@ -10,6 +10,7 @@ export type Task = {
     name: string;
     description: string;
     assignedToUserId: number | null;
+    taskOwnerName: string;
     priority: number;
     entryDate: Date;
     dueDate: Date;

@@ -268,7 +268,8 @@ CREATE TABLE dbo.Task
     Name NVARCHAR(255) NOT NULL,
     Description NVARCHAR(MAX) NULL,
 
-    AssignedToUserId INT NULL,
+    AssignedToUserId INT NULL, -- will use this field to save Local or Supplier for now
+	TaskOwnerName NVARCHAR(100) NULL,
 
     Priority TINYINT NOT NULL,   -- 1=Low, 2=Medium, 3=High
 	EntryDate DATE NOT NULL,

@@ -246,7 +246,6 @@ VALUES
 ('Ministerio de Salud', 'MOH', 'Ministerio de Salud', 1, GETDATE(), GETDATE(), 1, 1),
 ('Laboratorio Nacional de Salud', 'LNS', 'Laboratorio Nacional de Salud', 1, GETDATE(), GETDATE(), 1, 1);
 
-
 INSERT INTO WorkflowStatus (Name, Description)
 VALUES
 ('Ingresado', 'Ingresado'),

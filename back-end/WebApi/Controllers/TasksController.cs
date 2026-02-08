@@ -6,6 +6,7 @@ using System;
 using Microsoft.AspNetCore.Authorization;
 using Daresoft.Core.Models;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 
 namespace WebApi.Controllers
 {
@@ -91,16 +92,44 @@ namespace WebApi.Controllers
                 }
 
                 var updatedTask = await _tasksService.UpdateAsync(task, currentUserId);
+                var currentDocuments = await _documentsService.GetByCaseFileIdsAsync([task.CaseFileId]);
 
-                for (int i = 0; i < task.Documents.Count; i++)
+                if(task.Documents.Count > 0)
                 {
-                    task.Documents[i].Path = "/case-files/" + task.CaseFileId + "/workflows/" + task.WorkflowId + "/tasks/" + updatedTask.Id + "/" + task.Documents[i].Name;
-                    task.Documents[i] = await _documentsService.CreateAsync(task.Documents[i], currentUserId);
+                    // Check completion documents
+                    if (task.Documents[0].Path.Contains("/tasks/" + task.Id + "/completion-document/"))
+                    {
+                        if (currentDocuments.Exists((d) => d.Path.Contains("/tasks/" + task.Id + "/completion-document/")))
+                        {
+                            task.Documents[0] = await _documentsService.UpdateAsync(task.Documents[0], currentUserId);
+                        }
+                        else
+                        {
+                            task.Documents[0] = await _documentsService.CreateAsync(task.Documents[0], currentUserId);
+                        }
+                    }
 
-                    updatedTask.Documents.Add(task.Documents[i]);
+                    // Check for task root document
+                    if (task.Documents[0].Path.IsNullOrEmpty())
+                    {
+                        task.Documents[0].Path = "/case-files/" + task.CaseFileId + "/workflows/" + task.WorkflowId + "/tasks/" + updatedTask.Id + "/" + task.Documents[0].Name;
+
+                        if (currentDocuments.Exists((d) => d.Path.Contains("/tasks/" + task.Id + "/"))){
+                            task.Documents[0] = await _documentsService.UpdateAsync(task.Documents[0], currentUserId);
+                        }
+                        else
+                        {
+                            task.Documents[0] = await _documentsService.CreateAsync(task.Documents[0], currentUserId);
+                        }
+                    }
+
+                    if (task.Documents.Count > 0)
+                    {
+                        updatedTask.Documents.Add(task.Documents[0]);
+                    }
                 }
 
-                return Ok();
+                return Ok(updatedTask);
             }
             catch (Exception ex)
             {

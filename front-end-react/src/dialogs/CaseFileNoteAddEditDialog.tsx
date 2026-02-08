@@ -3,9 +3,13 @@ import {
     DialogContent, DialogTitle, DialogActions, Button, Grid, TextField, Autocomplete, Box,
     ToggleButtonGroup,
     ToggleButton,
-    styled
+    styled,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from "@mui/material"
-import { useForm, SubmitHandler, Controller } from 'react-hook-form'
+import { useForm, SubmitHandler, Controller, set } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useSnackbar } from 'notistack'
@@ -47,11 +51,13 @@ export default function CaseFileNoteAddEditDialog({ mode, selectedCaseFile, sele
     const [t] = useTranslation();    
     const { enqueueSnackbar } = useSnackbar()
     const [document, setDocument] = useState<File | null>(selectedTask?.documents && selectedTask.documents.length > 0 ? new File([], selectedTask.documents[0].name) : null);
+    const [selectedResponsible, setSelectedResponsible] = useState<number>(selectedTask ? (selectedTask.assignedToUserId === null ? 1 : 2) : 1);
 
     const formSchema = z.object({
         reviewer: z.string(),        
         description: z.string().min(1, t("errorMessages.requieredField")),
         months: z.number(),
+        taskOwnerName: z.string()
     });
 
     const diffInMonths = (date1: Date, date2: Date) => {
@@ -82,7 +88,8 @@ export default function CaseFileNoteAddEditDialog({ mode, selectedCaseFile, sele
         defaultValues: {
             reviewer: selectedTask ? selectedTask.reviewer : '',
             description: selectedTask ? selectedTask.description : '',
-            months: months
+            months: months,
+            taskOwnerName: selectedTask ? selectedTask.taskOwnerName : ''
         }
     })
 
@@ -102,7 +109,8 @@ export default function CaseFileNoteAddEditDialog({ mode, selectedCaseFile, sele
             workflowColor: workflowTemp ? workflowTemp.color : null,
             name: '',
             description: formData.description,
-            assignedToUserId: null,
+            assignedToUserId: selectedResponsible === 1 ? null : 0, // null for local, 0 for supplier (as example)
+            taskOwnerName: formData.taskOwnerName,
             priority: selectedCaseFile && selectedCaseFile.tasks ? selectedCaseFile.tasks.filter(t => t.workflowId === workflowId).length + 1 : 1,
             entryDate: entryDate.toDate(),
             dueDate: dueDateTemp.toDate(),
@@ -173,7 +181,8 @@ export default function CaseFileNoteAddEditDialog({ mode, selectedCaseFile, sele
             workflowColor: selectedTask ? selectedTask.workflowColor : null,
             name: '',
             description: formData.description,
-            assignedToUserId: null,
+            assignedToUserId: selectedResponsible === 1 ? null : 0, // null for local, 0 for supplier (as example),
+            taskOwnerName: formData.taskOwnerName,
             priority: selectedTask ? selectedTask.priority : 1,
             entryDate: entryDate.toDate(),
             dueDate: dueDateTemp.toDate(),
@@ -303,6 +312,28 @@ export default function CaseFileNoteAddEditDialog({ mode, selectedCaseFile, sele
                             error={!!errors.description}
                             helperText={errors.description?.message as string | undefined}
                         />
+                    </Grid>                    
+                    <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                        <InputLabel id="demo-simple-select-label">Responsable</InputLabel>
+                        <Select
+                            id="demo-simple-select"
+                            value={selectedResponsible}
+                            label="* Area responsable"
+                            onChange={(e) => setSelectedResponsible(Number(e.target.value))}
+                        >
+                            <MenuItem value={1}>Arael (local)</MenuItem>
+                            <MenuItem value={2}>Proveedor</MenuItem>                            
+                        </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            label="Nombre responsable"                    
+                            fullWidth
+                            type='text'
+                            {...register('taskOwnerName')}                                                  
+                        />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <TextField
@@ -313,7 +344,7 @@ export default function CaseFileNoteAddEditDialog({ mode, selectedCaseFile, sele
                             error={!!errors.months}
                             helperText={errors.months?.message as number | undefined}
                         />
-                    </Grid>                    
+                    </Grid>
                     <Grid item xs={12} sm={6}>
                         <Button
                             component="label"
@@ -342,7 +373,7 @@ export default function CaseFileNoteAddEditDialog({ mode, selectedCaseFile, sele
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button variant="outlined" onClick={() => { onClose(false) }}>
+                <Button variant="text" onClick={() => { onClose(false) }}>
                     Cancelar
                 </Button>
                 <Button variant="contained" type="submit" disableElevation disabled={isSubmitting}>

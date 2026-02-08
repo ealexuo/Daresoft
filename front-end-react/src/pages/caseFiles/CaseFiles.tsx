@@ -38,6 +38,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { tasksService } from '../../services/settings/tasksService';
 import { WorkflowType } from '../../enums/WorkflowType';
 import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
+import CaseFileNoteMarkCompletedDialog from '../../dialogs/CaseFileNoteMarkCompletedDialog';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -164,11 +165,12 @@ export default function CaseFiles() {
             <TableHead>
               <TableRow>
                 <TableCell style={{ minWidth: 10 }}><b>No.</b></TableCell>
-                <TableCell style={{ minWidth: 300 }}><b>Descripción</b></TableCell>
+                <TableCell style={{ minWidth: 150 }}><b>Descripción</b></TableCell>
                 <TableCell style={{ minWidth: 150 }}><b>Revisor</b></TableCell>
+                <TableCell style={{ minWidth: 150 }}><b>Responsable</b></TableCell>
                 <TableCell style={{ minWidth: 150 }}><b>Fecha de ingreso</b></TableCell>
                 <TableCell style={{ minWidth: 150 }}><b>Fecha límite</b></TableCell>
-                <TableCell><b>Completada</b></TableCell>
+                <TableCell><b>Finalizada</b></TableCell>
                 <TableCell style={{ minWidth: 150 }}><b>Fecha finalización</b></TableCell>
                 <TableCell style={{ minWidth: 200 }}><b>Acciones</b></TableCell>
               </TableRow>
@@ -178,7 +180,11 @@ export default function CaseFiles() {
                 <TableRow hover key={task.id}>
                   <TableCell>{task.priority}</TableCell>                     
                   <TableCell>{task.description}</TableCell>
-                  <TableCell>{task.reviewer}</TableCell>
+                  <TableCell>{task.reviewer}</TableCell>                  
+                  <TableCell>{
+                    (task.assignedToUserId === null ? 'Arael (local)' : 'Proveedor') + (task.taskOwnerName ? ' - ' + task.taskOwnerName : '')
+                  }
+                  </TableCell>
                   <TableCell>
                     <Chip size='small' color='default' label={task.entryDate.toLocaleDateString('en-GB')}/>
                   </TableCell>
@@ -194,7 +200,7 @@ export default function CaseFiles() {
                       </Tooltip>
                     </IconButton>
                     <IconButton onClick={() => handleOpenMarkTaskAsCompletedDialog(task)}>
-                      <Tooltip title="Marcar como completada" arrow placement="top-start">
+                      <Tooltip title="Marcar como finalizada" arrow placement="top-start">
                         <CheckCircleOutlineIcon />
                       </Tooltip>
                     </IconButton>
@@ -216,10 +222,8 @@ export default function CaseFiles() {
         </Box>        
       </>      
       ;  
-      
-      
-
       componentsList.push(component);
+
     });   
 
     return(
@@ -597,6 +601,8 @@ export default function CaseFiles() {
     const pathContent = '/workflows/' + workflow.workflowId + '/entry-documents/';
     const documentTemp = documents.find(d => d.caseFileId === workflow.caseFileId && d.path.includes(pathContent));
 
+    console.log('View Document', documentTemp);
+
     if(! documentTemp) return;
 
     const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
@@ -634,37 +640,12 @@ export default function CaseFiles() {
   }
 
   const handleCloseMarkTaskAsCompletedDialogFromAction = async (actionResult: boolean = false) => {
+
     if(actionResult) { 
+      fetchCaseFiles(currentPage, rowsPerPage, searchText);
+    }
+    setOpenMarkTaskAsCompletedDialog(false);
 
-      setLoading(true);
-
-      try {
-
-        if(selectedTask) {
-
-          selectedTask.isCompleted = true;
-          selectedTask.completedDate = new Date();
-          selectedTask.documents = []; 
-          
-          const response = await tasksService.edit(selectedTask); 
-
-          if (response.statusText === "OK") {
-            setLoading(false);
-            fetchCaseFiles(currentPage, rowsPerPage, searchText);
-            enqueueSnackbar('Tarea completada.', { variant: "success" });
-          } else {
-            enqueueSnackbar('Ocurrió un error al completar la tarea.', { variant: "error" });
-          }
-        }
-        
-      } catch (error: any) {
-        enqueueSnackbar('Ocurrió un error al eliminar el expediente. Detalles: ' + error.message, { variant: "error" });
-      }
-      finally {
-        setLoading(false);
-        setOpenMarkTaskAsCompletedDialog(false);
-      }
-    }    
   }
 
   // CaseFile Delete Alert dialog
@@ -896,10 +877,9 @@ export default function CaseFiles() {
         onClose={handleCloseMarkTaskAsCompletedDialog}
         maxWidth={"sm"}
       >
-        <AlertDialog
-          color = {'primary'}
-          title = {'Completar tarea'}
-          message = {'Marcar la tarea como completada ?'}
+        <CaseFileNoteMarkCompletedDialog
+          selectedCaseFile = {selectedCaseFile}
+          selectedTask = {selectedTask}
           onClose = {handleCloseMarkTaskAsCompletedDialogFromAction}
         />
       </Dialog>
