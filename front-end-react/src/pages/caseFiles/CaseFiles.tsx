@@ -39,6 +39,7 @@ import { tasksService } from '../../services/settings/tasksService';
 import { WorkflowType } from '../../enums/WorkflowType';
 import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
 import CaseFileNoteMarkCompletedDialog from '../../dialogs/CaseFileNoteMarkCompletedDialog';
+import ArticleIcon from '@mui/icons-material/Article';
 
 const columnsInit: TableColumnType[] = [
   {
@@ -138,6 +139,22 @@ export default function CaseFiles() {
 
   const [openDeleteTaskDialog, setOpenDeleteTaskDialog] = useState<boolean>(false);
 
+  const generateCompletionDocumentContent = (task: Task) => {
+    if(!task || !task.isCompleted || !task.documents || task.documents.length === 0) {
+      return (<></>);
+    }
+    const completionDocument = task.documents.find(d => d.path.includes('/completion-document/'));
+    if(!completionDocument) {
+      return (<></>);
+    }
+    return (
+      <IconButton onClick={() => handleOpenViewTaskCompletionDocumentDialog(task)}>
+        <Tooltip title="Ver documento de finalización" arrow placement="top-start">
+          <ArticleIcon />
+        </Tooltip>
+      </IconButton>
+    );
+  }
 
   const generateCollapsableContent = (tasks: Task[]) => {
 
@@ -155,72 +172,132 @@ export default function CaseFiles() {
 
       let tasksTemp = tasks.filter(t => t.workflowId === workflowId);
       
-      let component =       
-      <>
-        <Box key={workflowId} sx={{ margin: 3, width: '100%' }} >
-          <Alert severity="info" icon={<DescriptionOutlinedIcon fontSize="inherit" />}>
-            {'Notas de Reparo - ' + (tasksTemp[0] ? tasksTemp[0].workflowCode : '')}
-          </Alert>
-          <Table size="small" aria-label="purchases">
-            <TableHead>
-              <TableRow>
-                <TableCell style={{ minWidth: 10 }}><b>No.</b></TableCell>
-                <TableCell style={{ minWidth: 150 }}><b>Descripción</b></TableCell>
-                <TableCell style={{ minWidth: 150 }}><b>Revisor</b></TableCell>
-                <TableCell style={{ minWidth: 150 }}><b>Responsable</b></TableCell>
-                <TableCell style={{ minWidth: 150 }}><b>Fecha de ingreso</b></TableCell>
-                <TableCell style={{ minWidth: 150 }}><b>Fecha límite</b></TableCell>
-                <TableCell><b>Finalizada</b></TableCell>
-                <TableCell style={{ minWidth: 150 }}><b>Fecha finalización</b></TableCell>
-                <TableCell style={{ minWidth: 200 }}><b>Acciones</b></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tasksTemp.map((task) => (
-                <TableRow hover key={task.id}>
-                  <TableCell>{task.priority}</TableCell>                     
-                  <TableCell>{task.description}</TableCell>
-                  <TableCell>{task.reviewer}</TableCell>                  
-                  <TableCell>{
-                    (task.assignedToUserId === null ? 'Arael (local)' : 'Proveedor') + (task.taskOwnerName ? ' - ' + task.taskOwnerName : '')
-                  }
+      let component = (
+        <>
+          <Box key={workflowId} sx={{ margin: 3, width: "100%" }}>
+            <Alert
+              severity="info"
+              icon={<DescriptionOutlinedIcon fontSize="inherit" />}
+            >
+              {"Notas de Reparo - " +
+                (tasksTemp[0] ? tasksTemp[0].workflowCode : "")}
+            </Alert>
+            <Table size="small" aria-label="purchases">
+              <TableHead>
+                <TableRow>
+                  <TableCell style={{ minWidth: 10 }}>
+                    <b>No.</b>
+                  </TableCell>
+                  <TableCell style={{ minWidth: 150 }}>
+                    <b>Descripción</b>
+                  </TableCell>
+                  <TableCell style={{ minWidth: 150 }}>
+                    <b>Revisor</b>
+                  </TableCell>
+                  <TableCell style={{ minWidth: 150 }}>
+                    <b>Responsable</b>
+                  </TableCell>
+                  <TableCell style={{ minWidth: 150 }}>
+                    <b>Fecha de ingreso</b>
+                  </TableCell>
+                  <TableCell style={{ minWidth: 150 }}>
+                    <b>Fecha límite</b>
                   </TableCell>
                   <TableCell>
-                    <Chip size='small' color='default' label={task.entryDate.toLocaleDateString('en-GB')}/>
+                    <b>Finalizada</b>
                   </TableCell>
-                  <TableCell>{generateTasksDueDateContent(task.dueDate)}</TableCell>
-                  <TableCell><Checkbox checked={task.isCompleted} disabled={true} /></TableCell>
-                  <TableCell>
-                    {task.completedDate ?  <Chip size='small' color='default' label={task.completedDate.toLocaleDateString('en-GB')}/> : ''}
+                  <TableCell style={{ minWidth: 150 }}>
+                    <b>Fecha finalización</b>
                   </TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => handleOpenViewTaskDocumentDialog(task)}>
-                      <Tooltip title="Ver documento" arrow placement="top-start">
-                        <ArticleOutlinedIcon />
-                      </Tooltip>
-                    </IconButton>
-                    <IconButton onClick={() => handleOpenMarkTaskAsCompletedDialog(task)}>
-                      <Tooltip title="Marcar como finalizada" arrow placement="top-start">
-                        <CheckCircleOutlineIcon />
-                      </Tooltip>
-                    </IconButton>
-                    <IconButton onClick={() => handleOpenCaseFileNoteEditDialog(task)}>
-                      <Tooltip title="Editar" arrow placement="top-start">
-                        <EditIcon />
-                      </Tooltip>
-                    </IconButton>
-                    <IconButton onClick={() => handleOpenDeleteTaskDialog(task)}>
-                      <Tooltip title="Eliminar" arrow placement="top-start">
-                        <DeleteIcon />
-                      </Tooltip>
-                    </IconButton>                                    
+                  <TableCell style={{ minWidth: 200 }} align="center">
+                    <b>Acciones</b>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Box>        
-      </>      
+              </TableHead>
+              <TableBody>
+                {tasksTemp.map((task) => (
+                  <TableRow hover key={task.id}>
+                    <TableCell>{task.priority}</TableCell>
+                    <TableCell>{task.description}</TableCell>
+                    <TableCell>{task.reviewer}</TableCell>
+                    <TableCell>
+                      {(task.assignedToUserId === null
+                        ? "Arael (local)"
+                        : "Proveedor") +
+                        (task.taskOwnerName ? " - " + task.taskOwnerName : "")}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        color="default"
+                        label={task.entryDate.toLocaleDateString("en-GB")}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {generateTasksDueDateContent(task.dueDate)}
+                    </TableCell>
+                    <TableCell>
+                      <Checkbox checked={task.isCompleted} disabled={true} />
+                    </TableCell>
+                    <TableCell>
+                      {task.completedDate ? (
+                        <Chip
+                          size="small"
+                          color="default"
+                          label={task.completedDate.toLocaleDateString("en-GB")}
+                        />
+                      ) : (
+                        ""
+                      )}
+                    </TableCell>
+                    <TableCell align="right">
+                      {generateCompletionDocumentContent(task)}
+                      <IconButton
+                        onClick={() => handleOpenViewTaskDocumentDialog(task)}
+                      >
+                        <Tooltip
+                          title="Ver documento"
+                          arrow
+                          placement="top-start"
+                        >
+                          <ArticleOutlinedIcon />
+                        </Tooltip>
+                      </IconButton>
+                      <IconButton
+                        onClick={() =>
+                          handleOpenMarkTaskAsCompletedDialog(task)
+                        }
+                      >
+                        <Tooltip
+                          title="Marcar como finalizada"
+                          arrow
+                          placement="top-start"
+                        >
+                          <CheckCircleOutlineIcon />
+                        </Tooltip>
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleOpenCaseFileNoteEditDialog(task)}
+                      >
+                        <Tooltip title="Editar" arrow placement="top-start">
+                          <EditIcon />
+                        </Tooltip>
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleOpenDeleteTaskDialog(task)}
+                      >
+                        <Tooltip title="Eliminar" arrow placement="top-start">
+                          <DeleteIcon />
+                        </Tooltip>
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        </>
+      );      
       ;  
       componentsList.push(component);
 
@@ -618,12 +695,26 @@ export default function CaseFiles() {
     if(! documentTemp) return;
     
     const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
-    
-    console.log('View Task Document', response);
 
     setDocumentURL(response.data);    
     setOpenViewDocumentDialog(true);
   }
+
+  const handleOpenViewTaskCompletionDocumentDialog = async (task: Task) => {
+        
+    const documentTemp = task.documents && 
+                        task.documents.length > 0 && 
+                        task.documents.find(d => d.path.includes('/completion-document/')) ? 
+                        task.documents.find(d => d.path.includes('/completion-document/')) : null;
+
+    if(!documentTemp) return;
+    
+    const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
+
+    setDocumentURL(response.data);    
+    setOpenViewDocumentDialog(true);
+  }
+
 
   const handleCloseViewDocumentDialog = () => {    
     setOpenViewDocumentDialog(false);
