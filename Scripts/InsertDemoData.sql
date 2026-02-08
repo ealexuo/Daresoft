@@ -206,11 +206,7 @@ INSERT INTO ContactType (Name) VALUES
 /* Insert sample contacts */
 INSERT INTO Contact (Salutation, Name, MiddleName, LastName, OtherName, Title, HomeAddressLine1, HomeAddressLine2, HomeCity, HomeState, HomePostalCode, CountryId, WorkAddressLine1, WorkAddressLine2, WorkCity, WorkState, WorkPostalCode, WorkCountry, WorkEmail, HomeEmail, HomePhone, WorkPhone, WorkPhoneExt, MobilePhone, CompanyId, ContactTypeId, Notes, PreferredAddress, CompanyName, Website, PrimaryContactId, IsSupplier, IsDeleted, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
 VALUES 
-('Mr.', 'John', 'Michael', 'Smith', '', 'Manager', '123 Oak Street', 'Apt 4B', 'New York', 'NY', '10001', 1, '456 Business Ave', 'Suite 200', 'New York', 'NY', '10002', 'USA', 'john.smith@company.com', 'john@home.com', '555-1234', '555-5678', '101', '555-9999', NULL, 1, 'Senior manager', 1, 'ABC Corporation', 'www.abc.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('Ms.', 'Sarah', 'Elizabeth', 'Johnson', '', 'Director', '789 Pine Road', '', 'Boston', 'MA', '02101', 1, '321 Corporate Blvd', 'Floor 5', 'Boston', 'MA', '02102', 'USA', 'sarah.johnson@company.com', 'sarah@home.com', '617-2222', '617-3333', '205', '617-4444', NULL, 1, 'Department director', 1, 'XYZ Solutions', 'www.xyz.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('Dr.', 'Robert', 'James', 'Williams', '', 'Consultant', '321 Elm Avenue', 'Unit 10', 'Chicago', 'IL', '60601', 1, '654 Industrial Way', 'Building A', 'Chicago', 'IL', '60602', 'USA', 'robert.williams@company.com', 'robert@home.com', '312-5555', '312-6666', '310', '312-7777', NULL, 2, 'External consultant', 2, 'Tech Innovations', 'www.tech.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('Mrs.', 'Jennifer', 'Anne', 'Brown', '', 'Analyst', '555 Maple Lane', '', 'Seattle', 'WA', '98101', 1, '987 Tech Park', 'Suite 300', 'Seattle', 'WA', '98102', 'USA', 'jennifer.brown@company.com', 'jennifer@home.com', '206-8888', '206-9999', '415', '206-1111', NULL, 1, 'Data analyst', 1, 'Data Systems Inc', 'www.datasys.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('Mr.', 'David', 'Christopher', 'Lee', '', 'Supervisor', '777 Cedar Court', 'Apt 201', 'Denver', 'CO', '80201', 1, '147 Business Park', 'Tower 2', 'Denver', 'CO', '80202', 'USA', 'david.lee@company.com', 'david@home.com', '303-2222', '303-3333', '520', '303-4444', NULL, 1, 'Team supervisor', 1, 'Global Services', 'www.global.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1);
+('', 'Admin', '', 'Admin', '', 'Administrator', '123 Oak Street', 'Apt 4B', 'New York', 'NY', '10001', 1, '456 Business Ave', 'Suite 200', 'New York', 'NY', '10002', 'USA', 'administrator@daresoft.com', 'john@home.com', '555-1234', '555-5678', '101', '555-9999', NULL, 1, 'Administrator', 1, 'Daresoft', 'www.abc.com', NULL, 0, 0, GETDATE(), GETDATE(), 1, 1);
 
 -- suppliers
 /* Insert sample contacts */
@@ -229,17 +225,12 @@ VALUES
 ('', 'Ratnatris', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
 ('', 'JDS', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
 ('', 'PHARMA FOCUS', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1);
-
+UPDATE Contact SET CompanyName = Name WHERE IsSupplier = 1;
 
 /* Insert corresponding user profiles */
 INSERT INTO UserProfile (UserName, PasswordHash, ContactId, Color, ProfilePicture, ProfilePictureContentType, RoleId, IsActive, IsPasswordChangeRequired, IsDeleted, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
 VALUES 
-('eurizar', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 1, '#0078D4', NULL, NULL, 1, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('sjohnson', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 2, '#107C10', NULL, NULL, 2, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('rwilliams', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 3, '#DA3B01', NULL, NULL, 2, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('jbrown', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 4, '#EF6950', NULL, NULL, 2, 1, 0, 0, GETDATE(), GETDATE(), 1, 1),
-('dlee', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 5, '#6B69D6', NULL, NULL, 2, 1, 0, 0, GETDATE(), GETDATE(), 1, 1);
-
+('eurizar', 'AQAAAAEAACcQAAAAEO+AN0SKTiMQwoUnw6WX+P/KvjDmW+xdmg6cTX/+c4Phb/bKG+JmdiUQIu9vJooBzA==', 1, '#0078D4', NULL, NULL, 1, 1, 0, 0, GETDATE(), GETDATE(), 1, 1);
 
 INSERT INTO Workflow (Name, Code, Description, IsActive, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
 VALUES
@@ -254,56 +245,56 @@ VALUES
 ('Aprobado', 'Aprobado'),
 ('Rechazado', 'Rechazado');
 
-INSERT INTO CaseFileWorkflow (CaseFileId, WorkflowId, WorkFlowStatusId, StartDate, EndDate, ExternalIdentifier, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
-VALUES 
-(3, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(4, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(5, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(6, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(7, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(8, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(9, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(10, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(11, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(12, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(13, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(14, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(15, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(16, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(17, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(18, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(19, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(20, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(21, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(22, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(3, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(4, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(5, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(6, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(7, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(8, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(9, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(10, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(11, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(12, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(13, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(14, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(15, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(16, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(17, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(18, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(19, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(20, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(21, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
-(22, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1);
+--INSERT INTO CaseFileWorkflow (CaseFileId, WorkflowId, WorkFlowStatusId, StartDate, EndDate, ExternalIdentifier, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
+--VALUES 
+--(3, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(4, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(5, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(6, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(7, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(8, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(9, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(10, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(11, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(12, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(13, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(14, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(15, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(16, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(17, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(18, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(19, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(20, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(21, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(22, 1, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(3, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(4, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(5, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(6, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(7, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(8, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(9, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(10, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(11, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(12, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(13, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(14, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(15, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(16, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(17, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(18, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(19, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(20, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(21, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1),
+--(22, 2, 1, GETDATE(), NULL, 'ADFSDFSD|12456', GETDATE(), GETDATE(), 1, 1);
 
 
-INSERT INTO Task (CaseFileId, WorkFlowId, Name, Description, AssignedToUserId, Priority, DueDate, IsCompleted, CompletedDate, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
-VALUES
-(3, 1, 'Reparo 3-1', 'Nota de reparo expediente 3 y worklfow 1', 1, 1, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
-(3, 1, 'Reparo 3-1', 'Nota de reparo expediente 3 y worklfow 1', 1, 2, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
-(3, 1, 'Reparo 3-1', 'Nota de reparo expediente 3 y worklfow 1', 1, 3, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
-(4, 1, 'Reparo 4-1', 'Nota de reparo expediente 4 y worklfow 1', 1, 1, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
-(4, 2, 'Reparo 4-2', 'Nota de reparo expediente 4 y worklfow 2', 1, 2, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
-(5, 2, 'Reparo 5-2', 'Nota de reparo expediente 5 y worklfow 2', 1, 1, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1);
+--INSERT INTO Task (CaseFileId, WorkFlowId, Name, Description, AssignedToUserId, Priority, DueDate, IsCompleted, CompletedDate, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
+--VALUES
+--(3, 1, 'Reparo 3-1', 'Nota de reparo expediente 3 y worklfow 1', 1, 1, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
+--(3, 1, 'Reparo 3-1', 'Nota de reparo expediente 3 y worklfow 1', 1, 2, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
+--(3, 1, 'Reparo 3-1', 'Nota de reparo expediente 3 y worklfow 1', 1, 3, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
+--(4, 1, 'Reparo 4-1', 'Nota de reparo expediente 4 y worklfow 1', 1, 1, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
+--(4, 2, 'Reparo 4-2', 'Nota de reparo expediente 4 y worklfow 2', 1, 2, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1),
+--(5, 2, 'Reparo 5-2', 'Nota de reparo expediente 5 y worklfow 2', 1, 1, GETDATE(), 0, NULL, GETDATE(), GETDATE(), 1, 1);
 
