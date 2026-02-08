@@ -230,6 +230,7 @@ VALUES
 ('', 'JDS', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1),
 ('', 'PHARMA FOCUS', '', '', '', '', '', '', '', '', '', 1, '', '', '', '', '', '', '', '', '', '', '', '', NULL, 1, 'Proveedor', 1, '', '', NULL, 1, 0, GETDATE(), GETDATE(), 1, 1);
 
+UPDATE Contact set CompanyName = Name where IsSupplier = 1
 
 /* Insert corresponding user profiles */
 INSERT INTO UserProfile (UserName, PasswordHash, ContactId, Color, ProfilePicture, ProfilePictureContentType, RoleId, IsActive, IsPasswordChangeRequired, IsDeleted, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
@@ -243,8 +244,7 @@ VALUES
 
 INSERT INTO Workflow (Name, Code, Description, IsActive, CreatedDate, LastModifiedDate, CreatedByUserId, UpdatedByUserId)
 VALUES
-('Ministerio de Salud', 'MOH', 'Ministerio de Salud', 1, GETDATE(), GETDATE(), 1, 1),
-('Laboratorio Nacional de Salud', 'LNS', 'Laboratorio Nacional de Salud', 1, GETDATE(), GETDATE(), 1, 1);
+('Proceso Farmaceuticos', 'PF', 'Proceso Farmaceuticos', 1, GETDATE(), GETDATE(), 1, 1);
 
 
 INSERT INTO WorkflowStatus (Name, Description)

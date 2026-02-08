@@ -21,9 +21,9 @@ export const documentsService = {
   // edit: async (caseFile: CaseFile): Promise<any> => {
   //   return await axiosService.put(BASE_PATH, caseFile);
   // },
-  getReadUrl: async (documentId: number): Promise<any> => {
-    return await axiosService.get(BASE_PATH + 'read-url/' + documentId);
-  },
+  getReadUrl: async (path: string): Promise<any> => {
+    return await axiosService.get(BASE_PATH + 'read-url/' + path);
+  },  
   getUploadUrl: async (documentId: number): Promise<any> => {
     return await axiosService.get(BASE_PATH + 'upload-url/' + documentId);
   },

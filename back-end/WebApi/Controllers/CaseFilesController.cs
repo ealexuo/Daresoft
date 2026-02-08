@@ -48,7 +48,7 @@ namespace WebApi.Controllers
                 List<int> caseFileIds = caseFilesList.Select(cf => cf.Id).ToList();
                 List<TaskModel> tasksList = await _tasksService.GetByCaseFileIdsAsync(caseFileIds);
                 List<DocumentModel> documentsList = await _documentsService.GetByCaseFileIdsAsync(caseFileIds);
-                List<CaseFileWorkflowModel> workflowsList = await _workflowsService.GetByCaseFileIdsAsync(caseFileIds);
+                //List<CaseFileWorkflowModel> workflowsList = await _workflowsService.GetByCaseFileIdsAsync(caseFileIds);
 
                 foreach (var caseFile in caseFilesList)
                 {   

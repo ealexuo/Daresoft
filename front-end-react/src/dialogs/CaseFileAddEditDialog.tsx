@@ -281,7 +281,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             isDeleted: false,
             workflow: null,
             workflows: [],
-            templateValues: templateValues,
+            workflowTemplateValues: templateValues,
             tasks: [],
             documents: [],            
             totalCount: 0

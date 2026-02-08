@@ -231,7 +231,7 @@ export default function CaseFiles() {
 
   }
   
-  const generateWorkflowListContent = (workflows: CaseFileWorkflow[], documents: Document[]) => {
+  const generateEntryDocumentsListContent = (workflows: CaseFileWorkflow[], documents: Document[]) => {
     return (<Stack direction="row" spacing={1}>{
         workflows.map(w => (
         <Chip 
@@ -240,7 +240,7 @@ export default function CaseFiles() {
           size='small'
           //sx={{ borderColor: w.workflowColor, color: w.workflowColor }}          
           variant='outlined'
-          onClick={() => handleOpenViewDocumentDialog(w, documents)}
+          onClick={() => handleOpenViewDocumentDialog('')}
           icon={          
             documents.find(d => d.caseFileId === w.caseFileId && d.path.includes('/entry-documents/')) ?
               <ArticleOutlinedIcon /> : <></>
@@ -248,6 +248,8 @@ export default function CaseFiles() {
         />) 
       )}</Stack>);    
   }
+  
+
 
   const generateTasksCountContent = (tasks: Task[]) => {
 
@@ -592,31 +594,38 @@ export default function CaseFiles() {
   }
 
   // Document viewer dialog - CaseFile Entry Document
-  const handleOpenViewDocumentDialog = async (workflow: CaseFileWorkflow, documents: Document[]) => {
+  // const handleOpenViewDocumentDialog = async (workflow: CaseFileWorkflow, documents: Document[]) => {
 
-    const pathContent = '/workflows/' + workflow.workflowId + '/entry-documents/';
-    const documentTemp = documents.find(d => d.caseFileId === workflow.caseFileId && d.path.includes(pathContent));
+  //   const pathContent = '/workflows/' + workflow.workflowId + '/entry-documents/';
+  //   const documentTemp = documents.find(d => d.caseFileId === workflow.caseFileId && d.path.includes(pathContent));
 
-    if(! documentTemp) return;
+  //   if(! documentTemp) return;
 
-    const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
+  //   const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
+  //   setDocumentURL(response.data);
+  //   setDocumentTitle('Documento: ' + documentTemp.name);
+  //   setOpenViewDocumentDialog(true);
+  // }
+  const handleOpenViewDocumentDialog = async (path: string) => {
+    
+    const response = await documentsService.getReadUrl(path ? path: '');
     setDocumentURL(response.data);
-    setDocumentTitle('Documento: ' + documentTemp.name);
+    setDocumentTitle('Documento: ' + path.split('/').pop());
     setOpenViewDocumentDialog(true);
   }
 
   // Document viewer dialog - Task Document
   const handleOpenViewTaskDocumentDialog = async (task: Task) => {
         
-    const documentTemp = task.documents && task.documents.length > 0 ? task.documents[0] : null;
-    if(! documentTemp) return;
+    // const documentTemp = task.documents && task.documents.length > 0 ? task.documents[0] : null;
+    // if(! documentTemp) return;
     
-    const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
+    // const response = await documentsService.getReadUrl(documentTemp ? documentTemp.id: 0);
     
-    console.log('View Task Document', response);
+    // console.log('View Task Document', response);
 
-    setDocumentURL(response.data);    
-    setOpenViewDocumentDialog(true);
+    // setDocumentURL(response.data);    
+    // setOpenViewDocumentDialog(true);
   }
 
   const handleCloseViewDocumentDialog = () => {    

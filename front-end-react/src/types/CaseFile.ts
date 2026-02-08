@@ -17,7 +17,7 @@ export type CaseFile = {
     isActive: boolean;
     isDeleted: boolean;
     workflow: CaseFileWorkflow | null;
-    templateValues: any[]; // TODO: Define a proper type for template values
+    workflowTemplateValues: any[]; // TODO: Define a proper type for template values
     workflows: CaseFileWorkflow[]; // TODO: This seems redundant with the 'workflow' property. Consider refactoring.
     tasks: Task[];
     documents: Document[];
