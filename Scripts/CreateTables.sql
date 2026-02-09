@@ -178,7 +178,8 @@ CREATE TABLE dbo.CaseFileWorkflow
 	CreatedDate DATETIME NOT NULL,
 	LastModifiedDate DATETIME NOT NULL,	
 	CreatedByUserId INT NOT NULL,
-	UpdatedByUserId INT NOT NULL
+	UpdatedByUserId INT NOT NULL,
+	Notes NVARCHAR(MAX) NULL
 
     CONSTRAINT FK_CaseFileWorkflow_CaseFile
         FOREIGN KEY (CaseFileId) REFERENCES dbo.CaseFile(Id),
@@ -193,25 +194,25 @@ CREATE TABLE dbo.CaseFileWorkflow
 );
 
 /* CaseFile Workflow History */
---CREATE TABLE dbo.CaseFileWorkflowHistory
---(
---    Id INT IDENTITY(1,1) PRIMARY KEY,
---    CaseFileWorkflowId INT NOT NULL,    
---	WorkFlowStatusId INT NOT NULL,
---    StartDate DATETIME NOT NULL,
---    EndDate DATETIME NULL,
---	Notes NVARCHAR(MAX),
---	CreatedDate DATETIME NOT NULL,
---	LastModifiedDate DATETIME NOT NULL,	
---	CreatedByUserId INT NOT NULL,
---	UpdatedByUserId INT NOT NULL
+CREATE TABLE dbo.CaseFileWorkflowHistory
+(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    CaseFileWorkflowId INT NOT NULL,    
+	WorkFlowStatusId INT NOT NULL,
+    StartDate DATETIME NOT NULL,
+    EndDate DATETIME NULL,
+	Notes NVARCHAR(MAX),
+	CreatedDate DATETIME NOT NULL,
+	LastModifiedDate DATETIME NOT NULL,	
+	CreatedByUserId INT NOT NULL,
+	UpdatedByUserId INT NOT NULL
 
---	CONSTRAINT FK_CaseFileWorkflowHistory_CaseFileWorkflow
---        FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id),
+	CONSTRAINT FK_CaseFileWorkflowHistory_CaseFileWorkflow
+        FOREIGN KEY (CaseFileWorkflowId) REFERENCES dbo.CaseFileWorkflow(Id),
 
---	CONSTRAINT FK_CaseFileWorkflow_WorkflowStatus
---        FOREIGN KEY (WorkflowStatusId) REFERENCES dbo.WorkflowStatus(Id)
---);
+	CONSTRAINT FK_CaseFileWorkflowHistory_WorkflowStatus
+        FOREIGN KEY (WorkflowStatusId) REFERENCES dbo.WorkflowStatus(Id)
+);
 
 
 --/* CaseFile Progress */
