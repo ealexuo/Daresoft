@@ -91,6 +91,8 @@ namespace WebApi
                 });
             });
 
+            services.AddHealthChecks();
+
             services.AddControllers();
 
             // JWT --------------------------------------------------------------------
@@ -143,6 +145,7 @@ namespace WebApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
             });
 
         }
