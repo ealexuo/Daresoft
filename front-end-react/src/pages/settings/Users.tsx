@@ -112,7 +112,7 @@ export default function Users() {
       const rowsTemp: any[] = [];
       const response = await usersService.getAll(offset + 1, fetch, searchText);
 
-      if(response.statusText === 'OK') {
+      if(response.status === 200) {
         if(response.data.totalCount){
           setTotalRows(response.data.totalCount);
         }
@@ -206,7 +206,7 @@ export default function Users() {
       try {
         const response = await usersService.delete(selectedUser.id); 
 
-        if (response.statusText === "OK") {
+        if (response.status === 200) {
           setLoading(false);
           fetchUsers(currentPage, rowsPerPage, searchText);
           enqueueSnackbar('Usuario eliminado.', { variant: "success" });

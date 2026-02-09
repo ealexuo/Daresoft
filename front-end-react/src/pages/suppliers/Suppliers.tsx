@@ -110,9 +110,9 @@ export default function Suppliers() {
       setLoading(true);
       
       const rowsTemp: any[] = [];
-      const response = await contactsService.getAll(offset + 1, fetch, searchText);
+      const response = await contactsService.getAll(offset + 1, fetch, searchText, true); // Pass 'true' to filter only suppliers
 
-      if(response.statusText === 'OK') {
+      if(response.status === 200) {
         if(response.data.totalCount){
           setTotalRows(response.data.totalCount);
         }
@@ -208,7 +208,7 @@ export default function Suppliers() {
       try {
         const response = await contactsService.delete(selectedSupplier.id); 
 
-        if (response.statusText === "OK") {
+        if (response.status === 200) {
           setLoading(false);
           fetchSuppliers(currentPage, rowsPerPage, searchText);
           enqueueSnackbar('Proveedor eliminado.', { variant: "success" });

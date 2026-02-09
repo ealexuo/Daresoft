@@ -48,7 +48,7 @@ export default function FieldTypeSelect({ onSelectedFieldTypeChange }: Props) {
       try {
         const response = await templateService.getAllFieldTypes();
 
-        if (response.statusText === "OK") {
+        if (response.status === 200) {
           setFieldTypesList(response.data);
         } else {
           enqueueSnackbar("Error al obtener los tipos de campo.", {

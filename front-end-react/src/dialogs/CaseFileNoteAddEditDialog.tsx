@@ -130,7 +130,7 @@ export default function CaseFileNoteAddEditDialog({ mode, selectedCaseFile, sele
         try {            
             const taskResponse = await tasksService.add(taskToSave);
 
-            if(taskResponse.statusText === "OK" && document){
+            if(taskResponse.status === 200 && document){
                 
                 // upload documents
                 taskResponse.data.documents.forEach(async (d: Document) => {
@@ -200,7 +200,7 @@ export default function CaseFileNoteAddEditDialog({ mode, selectedCaseFile, sele
         try {            
             const taskResponse = await tasksService.edit(taskToSave);
 
-            if(taskResponse.statusText === "OK" && document){
+            if(taskResponse.status === 200 && document){
                 
                 // upload documents
                 taskResponse.data.documents.forEach(async (d: Document) => {

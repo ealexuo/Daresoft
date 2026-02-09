@@ -228,7 +228,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             if (mode === "add") {
                 const caseFileResponse = await caseFilesService.add(caseFileToSave);
 
-                if(caseFileResponse.statusText === 'OK') {
+                if(caseFileResponse.status === 200) {
                     
                     // upload documents
                     caseFileResponse.data.documents.forEach(async (d: Document) => {
@@ -257,7 +257,7 @@ export default function CaseFileAddEditDialog({ mode, selectedCaseFile, supplier
             } else {
                 const caseFileResponse = await caseFilesService.edit(caseFileToSave);
                 
-                if(caseFileResponse.statusText === 'OK') {
+                if(caseFileResponse.status === 200) {
                     
                     // upload documents
                     caseFileResponse.data.documents.forEach(async (d: Document) => {

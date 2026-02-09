@@ -85,7 +85,7 @@ export default function CaseFileNoteMarkCompletedDialog({ selectedCaseFile, sele
                                 
                 const response = await tasksService.edit(selectedTask); 
 
-                if (response.statusText === "OK") {
+                if (response.status === 200) {
 
                     if(document){
                         // upload documents

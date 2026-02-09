@@ -461,7 +461,7 @@ export default function CaseFiles() {
       const rowsTemp: any[] = [];
       const response = await caseFilesService.getAll(offset + 1, fetch, searchText);
 
-      if(response.statusText === 'OK') {
+      if(response.status === 200) {
         if(response.data.totalCount){
           setTotalRows(response.data.totalCount);
         }
@@ -523,7 +523,7 @@ export default function CaseFiles() {
 
           const response = await contactsService.getAll(offset, fetch, searchText, isSupplier);
 
-          if(response.statusText === 'OK') {               
+          if(response.status === 200) {               
               setSupliersList(
                   response.data.contactsList.map((s: Contact) => {
                       return { 
@@ -553,7 +553,7 @@ export default function CaseFiles() {
 
           const response = await workflowsService.getAll(offset, fetch, searchText);
 
-          if(response.statusText === 'OK') {               
+          if(response.status === 200) {               
               setWorkflowsList(response.data);
               setLoading(false);
           }
@@ -764,7 +764,7 @@ export default function CaseFiles() {
       if(actionResult && selectedCaseFile) {
         const response = await caseFilesService.delete(selectedCaseFile.id); 
 
-        if (response.statusText === "OK") {
+        if (response.status === 200) {
           setLoading(false);
           fetchCaseFiles(currentPage, rowsPerPage, searchText);
           enqueueSnackbar('Expediente eliminado.', { variant: "success" });
@@ -801,7 +801,7 @@ export default function CaseFiles() {
 
         const result = await tasksService.delete(selectedTask.id);
 
-        if(result.statusText === 'OK'){
+        if(result.status === 200){
           enqueueSnackbar('Nota eliminada.', { variant: 'success' });
           fetchCaseFiles(currentPage, rowsPerPage, searchText);
         }
