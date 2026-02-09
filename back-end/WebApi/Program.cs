@@ -21,6 +21,7 @@ namespace WebApi
 
               new WebHostBuilder()
                   .UseKestrel()
+                  .UseUrls("http://0.0.0.0:8080")
                   .UseContentRoot(Directory.GetCurrentDirectory())
                   .ConfigureAppConfiguration((hostingContext, config) =>
                   {
