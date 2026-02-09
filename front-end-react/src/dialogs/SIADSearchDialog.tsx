@@ -22,8 +22,8 @@ export default function SIADSearchDialog({ onClose, selectedCaseFile }: DialogPr
     let LNSKEY;
     
     if(selectedCaseFile && selectedCaseFile.workflows){       
-        const workflowMOH = selectedCaseFile.workflows ? selectedCaseFile.workflows.find(w => w.workflowId === 2) : undefined;
-        const workflowLNS = selectedCaseFile.workflows ? selectedCaseFile.workflows.find(w => w.workflowId === 1) : undefined;
+        const workflowMOH = selectedCaseFile.workflows ? selectedCaseFile.workflows.find(w => w.workflowId === 1) : undefined;
+        const workflowLNS = selectedCaseFile.workflows ? selectedCaseFile.workflows.find(w => w.workflowId === 2) : undefined;
 
         const MOHExternalIdentifier = workflowMOH ? workflowMOH.externalIdentifier : undefined;
         const LNSExternalIdentifier = workflowLNS ? workflowLNS.externalIdentifier : undefined;
