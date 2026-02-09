@@ -13,7 +13,7 @@ namespace Daresoft.Integrations.Documents
 
         public MicrosoftAzure()
         {
-            string connectionString = Environment.GetEnvironmentVariable("AzureBlobStorageConnectionString", EnvironmentVariableTarget.Machine);
+            string connectionString = Environment.GetEnvironmentVariable("AzureBlobStorageConnectionString");
             _blobServiceClient = new BlobServiceClient(connectionString);
         }
 
