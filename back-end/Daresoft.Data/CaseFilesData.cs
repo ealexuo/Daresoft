@@ -135,13 +135,15 @@ namespace Daresoft.Data
             {
                 string hardDeleteDocumentSql = @"DELETE Document WHERE CaseFileId = @CaseFileId";
                 string hardDeleteTaskSql = @"DELETE Task WHERE CaseFileId = @CaseFileId";
-                string hardDeleteCaseFileWorkflowSql = @"DELETE CaseFileWorkflow WHERE CaseFileId = @CaseFileId";
+                string hardDeleteCaseFileWorkflowHistorySql = @"DELETE CaseFileWorkflowHistory WHERE CaseFileWorkflowId IN (SELECT Id FROM CaseFileWorkflow WHERE CaseFileId = @CaseFileId)";
+                string hardDeleteCaseFileWorkflowSql = @"DELETE CaseFileWorkflow WHERE CaseFileId = @CaseFileId";                
                 string hardDeleteCaseFileSql = @"DELETE CaseFile WHERE Id = @CaseFileId";
 
                 using (var trx = connection.BeginTransaction())
                 {
                     result = await connection.ExecuteAsync(hardDeleteDocumentSql, new { CaseFileId = caseFileId }, trx);
                     result = await connection.ExecuteAsync(hardDeleteTaskSql, new { CaseFileId = caseFileId }, trx);
+                    result = await connection.ExecuteAsync(hardDeleteCaseFileWorkflowHistorySql, new { CaseFileId = caseFileId }, trx);
                     result = await connection.ExecuteAsync(hardDeleteCaseFileWorkflowSql, new { CaseFileId = caseFileId }, trx);
                     result = await connection.ExecuteAsync(hardDeleteCaseFileSql, new { CaseFileId = caseFileId }, trx);
                     trx.Commit();
