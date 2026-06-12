@@ -17,20 +17,22 @@ namespace WebApi
             BuildWebHost(args).Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
+        public static IWebHost BuildWebHost(string[] args)
+        {
+            var port = Environment.GetEnvironmentVariable("PORT");
 
-              new WebHostBuilder()
+            var builder = new WebHostBuilder()
                   .UseKestrel()
-                  .UseUrls("http://0.0.0.0:8080")
+                  .UseIISIntegration()
                   .UseContentRoot(Directory.GetCurrentDirectory())
                   .ConfigureAppConfiguration((hostingContext, config) =>
                   {
                       var env = hostingContext.HostingEnvironment;
 
-                    // Busca el folder específico de configuración
+                    // Busca el folder especï¿½fico de configuraciï¿½n
                     var appConfigFolder = Path.Combine(env.ContentRootPath, "appconfig");
 
-                    //carga el archivo de configuración específico
+                    //carga el archivo de configuraciï¿½n especï¿½fico
                     config.AddJsonFile(Path.Combine(appConfigFolder, "appsettings.json"), optional: true)
                           .AddJsonFile(Path.Combine(appConfigFolder, $"appsettings.{env.EnvironmentName}.json"), optional: true);
 
@@ -48,7 +50,12 @@ namespace WebApi
                   {
                       opts.ValidateScopes = ctx.HostingEnvironment.IsDevelopment();
                   })
-                  .UseStartup<Startup>()
-                  .Build();
+                  .UseStartup<Startup>();
+
+            if (!string.IsNullOrEmpty(port))
+                builder.UseUrls($"http://*:{port}");
+
+            return builder.Build();
+        }
     }
 }

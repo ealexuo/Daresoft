@@ -17,7 +17,6 @@ using WebApi.Models;
 using Qfile.Core.Servicios;
 using Qfile.Core.Datos;
 using Qfile.Datos;
-using Exceptionless;
 using Daresoft.Core.Services;
 using Daresoft.Core.Data;
 using Daresoft.Data;
@@ -79,13 +78,15 @@ namespace WebApi
             services.Configure<ApplicationSettingsModel>(Configuration.GetSection("ApplicationSettings"));
 
             // Cors -------------------------------------------------------------------
+            var allowedOrigins = (Configuration["ApplicationSettings:Client_URLs"] ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
             services.AddCors(options =>
             {
                 options.AddPolicy(MyAllowSpecificOrigins,
                 builder =>
                 {
-                    builder.WithOrigins(Configuration["ApplicationSettings:Client_URL"], "http://localhost:3000")
-                            .AllowAnyOrigin()
+                    builder.WithOrigins(allowedOrigins)
                             .AllowAnyMethod()
                             .AllowAnyHeader();
                 });
