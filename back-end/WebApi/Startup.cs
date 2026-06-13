@@ -92,7 +92,8 @@ namespace WebApi
                 });
             });
 
-            services.AddHealthChecks();
+            services.AddHealthChecks()
+                .AddSqlServer(Configuration.GetConnectionString("SQLConnection"));
 
             services.AddControllers();
 
