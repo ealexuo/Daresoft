@@ -219,6 +219,25 @@ Compress-Archive -Path ./publish/* -DestinationPath ./publish.zip -Force
 az webapp deployment source config-zip --resource-group RG_Daresoft --name daresoft --src ./publish.zip
 ```
 
+### Keeping the Database Alive
+
+The Azure SQL database uses the **Serverless** tier which auto-pauses after 1 hour of inactivity. The `/health` endpoint runs a SQL query (`SELECT 1`) on every call, so pinging it regularly prevents the database from pausing.
+
+**UptimeRobot** (uptimerobot.com) is configured to ping the health endpoint every 5 minutes. To set it up on a new environment:
+
+1. Log in to [uptimerobot.com](https://uptimerobot.com)
+2. Click **Add New Monitor**
+3. Set:
+   - **Monitor Type:** HTTP(s)
+   - **Friendly Name:** Daresoft API
+   - **URL:** `https://<your-app>.azurewebsites.net/health`
+   - **Monitoring Interval:** 5 minutes
+4. Click **Create Monitor**
+
+This also sends an email alert if the endpoint goes down.
+
+---
+
 ### Verifying the Deployment
 
 ```
@@ -322,7 +341,7 @@ If config files live in a custom folder (e.g. `appconfig/`) instead of the proje
 
 > Use `Update` not `Include` — the SDK already includes content files by default and `Include` will cause a duplicate items build error.
 
-### 5. CORS — `Startup.cs`
+### 5. CORS — `Startup.cs` + Azure Portal
 
 - Do not combine `WithOrigins(...)` and `AllowAnyOrigin()` — this is contradictory and a security issue
 - Drive allowed origins from config so they can be changed per environment without code changes:
@@ -341,6 +360,8 @@ services.AddCors(options =>
     });
 });
 ```
+
+**Important — also add the frontend URL in the Azure portal:** Go to **App Service → API → CORS** and add the frontend origin (e.g. `https://yourapp.z13.web.core.windows.net`). Azure's platform-level CORS handles preflight requests before they reach the app and is the reliable layer for production. The code-level CORS above handles local development. Both are needed.
 
 ### 6. Packages That Make Outbound Network Calls on Startup
 
